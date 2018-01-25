@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_admin_mode"
+        android:title="Admin mode" />
+    <item
+        android:id="@+id/action_user_mode"
+        android:title="User mode" />
+    <item
+        android:id="@+id/action_logout"
+        android:title="Logout" />
+</menu>
