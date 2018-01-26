@@ -16,7 +16,12 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.beans.User
-import ticket.checker.extras.Constants
+import ticket.checker.extras.Constants.SESSION_USER_CREATED_DATE
+import ticket.checker.extras.Constants.SESSION_USER_ID
+import ticket.checker.extras.Constants.SESSION_USER_NAME
+import ticket.checker.extras.Constants.SESSION_USER_ROLE
+import ticket.checker.extras.Constants.SESSION_USER_SOLD_TICKETS
+import ticket.checker.extras.Constants.SESSION_USER_VALIDATED_TICKETS
 import ticket.checker.service.ServiceManager
 
 class ActivityLogin : AppCompatActivity() {
@@ -118,10 +123,12 @@ class ActivityLogin : AppCompatActivity() {
         val intent = Intent(this, ActivityMenu::class.java)
 
         val bundle = Bundle()
-        bundle.putLong(Constants.SESSION_USER_ID,user.id)
-        bundle.putString(Constants.SESSION_USER_NAME,user.name)
-        bundle.putString(Constants.SESSION_USER_ROLE,user.role)
-        bundle.putLong(Constants.SESSION_USER_CREATED_DATE,user.createdDate.time)
+        bundle.putLong(SESSION_USER_ID,user.id)
+        bundle.putString(SESSION_USER_NAME,user.name)
+        bundle.putString(SESSION_USER_ROLE,user.role)
+        bundle.putLong(SESSION_USER_CREATED_DATE,user.createdDate.time)
+        bundle.putInt(SESSION_USER_SOLD_TICKETS,user.soldTicketsNo)
+        bundle.putInt(SESSION_USER_VALIDATED_TICKETS,user.validatedTicketsNo)
 
         intent.putExtras(bundle)
         startActivity(intent)
@@ -140,5 +147,4 @@ class ActivityLogin : AppCompatActivity() {
         etUsername.setText(lastEtUser)
         etPassword.setText(lastEtPass)
     }
-
 }

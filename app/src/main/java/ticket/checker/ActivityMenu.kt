@@ -10,9 +10,13 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import kotlinx.android.synthetic.main.activity_menu.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import ticket.checker.beans.User
 import ticket.checker.extras.Constants.CURRENT_TOOLBAR_IMG
 import ticket.checker.extras.Constants.DATE_FORMAT
 import ticket.checker.extras.Constants.PRETENDED_USER_ROLE
@@ -22,10 +26,12 @@ import ticket.checker.extras.Constants.SESSION_USER_CREATED_DATE
 import ticket.checker.extras.Constants.SESSION_USER_ID
 import ticket.checker.extras.Constants.SESSION_USER_NAME
 import ticket.checker.extras.Constants.SESSION_USER_ROLE
+import ticket.checker.extras.Constants.SESSION_USER_SOLD_TICKETS
+import ticket.checker.extras.Constants.SESSION_USER_VALIDATED_TICKETS
 import ticket.checker.service.ServiceManager
 import java.util.*
 
-class ActivityMenu : AppCompatActivity() {
+class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 
     private val actionScan by lazy {
         findViewById<CardView>(R.id.scan)
@@ -59,6 +65,30 @@ class ActivityMenu : AppCompatActivity() {
             }
         }
     }
+    private val updateUserInfoCallback : Callback<User> = object : Callback<User> {
+        override fun onResponse(call: Call<User>?, response: Response<User>) {
+            if(response.isSuccessful) {
+                val user = response.body()
+                userId = user?.id
+                userName = user?.name
+                userCreatedDate = user?.createdDate
+                userRole = user?.role
+                userTicketsSold = user?.soldTicketsNo
+                userTicketsValidated = user?.validatedTicketsNo
+                updateProfileInfo()
+            }
+            else {
+                when(response.code()) {
+                    401,403 -> {
+                        //TODO
+                    }
+                }
+            }
+        }
+        override fun onFailure(call: Call<User>?, t: Throwable?) {
+            Toast.makeText(this@ActivityMenu,"Connection to server has been lost!", Toast.LENGTH_LONG).show()
+        }
+    }
     private val tvName by lazy {
         findViewById<TextView>(R.id.name)
     }
@@ -77,6 +107,15 @@ class ActivityMenu : AppCompatActivity() {
     private val tvValidatedTickets by lazy {
         findViewById<TextView>(R.id.validatedTickets)
     }
+    private val cvScan by lazy {
+        findViewById<CardView>(R.id.scan)
+    }
+    private val cvStatistics by lazy {
+        findViewById<CardView>(R.id.statistics)
+    }
+    private val cvAdmin by lazy {
+        findViewById<CardView>(R.id.admin)
+    }
 
     var menuIsShown = false
 
@@ -84,6 +123,8 @@ class ActivityMenu : AppCompatActivity() {
     private var userName : String? = null
     private var userRole : String? = null
     private var userCreatedDate : Date? = null
+    private var userTicketsSold : Int? = null
+    private var userTicketsValidated : Int? = null
 
     private var pretendedUserRole: String? = null
     private var toolbarImg : Int? = null
@@ -97,13 +138,21 @@ class ActivityMenu : AppCompatActivity() {
         toolbarImg = savedInstanceState?.getInt(CURRENT_TOOLBAR_IMG) ?: randomToolbarImg()
         val userCreatedDateMillis = intent.getLongExtra(SESSION_USER_CREATED_DATE,0L)
         userCreatedDateMillis?.let { userCreatedDate = Date(userCreatedDateMillis) }
+        userTicketsSold = savedInstanceState?.getInt(SESSION_USER_SOLD_TICKETS) ?: intent.getIntExtra(SESSION_USER_SOLD_TICKETS,0)
+        userTicketsValidated = savedInstanceState?.getInt(SESSION_USER_VALIDATED_TICKETS) ?: intent.getIntExtra(SESSION_USER_VALIDATED_TICKETS,0)
 
         setContentView(R.layout.activity_menu)
         loadCollapsingToolbarImg()
         setSupportActionBar(toolbar)
         appBarLayout.addOnOffsetChangedListener(appBarOffsetChangeListener)
+        cvAdmin.setOnClickListener(this)
+        cvScan.setOnClickListener(this)
+        cvStatistics.setOnClickListener(this)
         switchViews()
         updateProfileInfo()
+
+        val call : Call<User> = ServiceManager.getUserService().getUser()
+        call.enqueue(updateUserInfoCallback)
     }
 
     private fun randomToolbarImg() : Int {
@@ -158,6 +207,14 @@ class ActivityMenu : AppCompatActivity() {
         return true
     }
 
+    override fun onClick(v: View) {
+        when(v.id) {
+            R.id.admin -> Toast.makeText(this@ActivityMenu,"Clicked Admin area!",Toast.LENGTH_LONG).show()
+            R.id.scan -> Toast.makeText(this@ActivityMenu,"Clicked scanner!",Toast.LENGTH_LONG).show()
+            R.id.statistics -> Toast.makeText(this@ActivityMenu,"Clicked statistics!",Toast.LENGTH_LONG).show()
+        }
+    }
+
     private fun switchViews() {
         when(pretendedUserRole) {
             ROLE_ADMIN -> {
@@ -178,8 +235,8 @@ class ActivityMenu : AppCompatActivity() {
         tvCreated.text = DATE_FORMAT.format(userCreatedDate)
         tvHighestRole.text = userRole?.removePrefix("ROLE_")
         tvCurrentRole.text = pretendedUserRole?.removePrefix("ROLE_")
-        tvCreatedTickets.text = "0" //TODO
-        tvValidatedTickets.text = "0" //TODO
+        tvCreatedTickets.text = userTicketsSold.toString()
+        tvValidatedTickets.text = userTicketsValidated.toString()
     }
 
     private fun logout() {
@@ -195,6 +252,8 @@ class ActivityMenu : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         outState?.putString(PRETENDED_USER_ROLE, pretendedUserRole)
         outState?.putInt(CURRENT_TOOLBAR_IMG, toolbarImg as Int)
+        outState?.putInt(SESSION_USER_SOLD_TICKETS, userTicketsSold as Int)
+        outState?.putInt(SESSION_USER_VALIDATED_TICKETS, userTicketsValidated as Int)
     }
 
 }

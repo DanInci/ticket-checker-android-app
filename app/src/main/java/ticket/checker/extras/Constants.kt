@@ -15,6 +15,8 @@ object Constants {
     const val SESSION_USER_NAME = "userName"
     const val SESSION_USER_ROLE = "userRole"
     const val SESSION_USER_CREATED_DATE = "userCreatedDate"
+    const val SESSION_USER_SOLD_TICKETS = "userSoldTickets"
+    const val SESSION_USER_VALIDATED_TICKETS = "userValidatedTickets"
 
     const val PRETENDED_USER_ROLE = "pretendedUserRole"
     const val CURRENT_TOOLBAR_IMG = "currentToolbarImg"
