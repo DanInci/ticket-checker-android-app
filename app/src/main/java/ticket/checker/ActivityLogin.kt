@@ -1,7 +1,5 @@
 package ticket.checker
 
-import android.app.AlertDialog
-import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -9,20 +7,21 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.beans.User
+import ticket.checker.dialogs.DialogInfo
+import ticket.checker.dialogs.DialogType
 import ticket.checker.extras.Constants.SESSION_USER_CREATED_DATE
 import ticket.checker.extras.Constants.SESSION_USER_ID
 import ticket.checker.extras.Constants.SESSION_USER_NAME
 import ticket.checker.extras.Constants.SESSION_USER_ROLE
 import ticket.checker.extras.Constants.SESSION_USER_SOLD_TICKETS
 import ticket.checker.extras.Constants.SESSION_USER_VALIDATED_TICKETS
-import ticket.checker.service.ServiceManager
+import ticket.checker.services.ServiceManager
 
 class ActivityLogin : AppCompatActivity() {
 
@@ -35,51 +34,49 @@ class ActivityLogin : AppCompatActivity() {
 
     private val loginHandler : View.OnClickListener = View.OnClickListener {
         if(validate(etUsername,etPassword)) {
-            dialog.setMessage("Retrieving user data ... ")
-            dialog.show()
+            loggingInDialog.show(supportFragmentManager,"DIALOG_LOGGING_IN")
             doLogin(etUsername.text.toString(), etPassword.text.toString())
         }
     }
+
+    private val loggingInDialog : DialogInfo by lazy {
+        DialogInfo.newInstance("Logging in","Retrieving user info...",DialogType.LOADING)
+    }
+
     private val loginCallback : Callback<User> = object : Callback<User> {
         override fun onResponse(call: Call<User>?, response: Response<User>) {
-            dialog.let { dialog.dismiss() }
+            loggingInDialog.let { loggingInDialog.dismiss() }
             if(response.isSuccessful) {
                 login(response.body() as User)
             }
             else {
-                val alertDialog : AlertDialog.Builder = AlertDialog.Builder(this@ActivityLogin)
-                        .setCancelable(true)
-                        .setTitle("Login failed")
+                ServiceManager.invalidateSession()
                 when(response.code()) {
                     401,403 -> {
-                        alertDialog.setMessage("Username or password was incorrect!")
-                        alertDialog.show()
+                        val loginFailedDialog = DialogInfo.newInstance("Login failed","The username or password you entered was incorrect!",DialogType.ERROR)
+                        loginFailedDialog.show(supportFragmentManager,"DIALOG_LOGIN_FAILED")
                     }
                     in 500..600 -> {
-                        alertDialog.setMessage("Server error!")
-                        alertDialog.show()
+                        val loginFailedDialog = DialogInfo.newInstance("Login failed","There was a server error!",DialogType.ERROR)
+                        loginFailedDialog.show(supportFragmentManager,"DIALOG_LOGIN_FAILED")
                     }
                 }
             }
         }
         override fun onFailure(call: Call<User>?, t: Throwable?) {
-            dialog?.let { dialog.dismiss() }
-            val alertDialog : AlertDialog.Builder = AlertDialog.Builder(this@ActivityLogin)
-                    .setCancelable(false)
-                    .setTitle("Login failed")
-                    .setMessage("Error connecting to the server!")
-            alertDialog.show()
+            val loginFailedDialog = DialogInfo.newInstance("Login failed","There was an error connection to the server!", DialogType.ERROR)
+            loginFailedDialog.show(supportFragmentManager,"DIALOG_LOGIN_FAILED")
         }
-    }
-
-    private val dialog : ProgressDialog by lazy {
-        ProgressDialog(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         loadBgnImage()
+    }
+
+    override fun onStart() {
+        super.onStart()
         initialize()
     }
 
@@ -119,7 +116,6 @@ class ActivityLogin : AppCompatActivity() {
     }
 
     private fun login(user : User) {
-        Toast.makeText(this@ActivityLogin,"Login was sucessfull!\n" + user,Toast.LENGTH_LONG).show()
         val intent = Intent(this, ActivityMenu::class.java)
 
         val bundle = Bundle()

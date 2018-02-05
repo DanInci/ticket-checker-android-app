@@ -1,4 +1,4 @@
-package ticket.checker.service
+package ticket.checker.services
 
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

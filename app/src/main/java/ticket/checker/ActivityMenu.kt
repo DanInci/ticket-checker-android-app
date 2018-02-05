@@ -1,5 +1,6 @@
 package ticket.checker
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.AppBarLayout
 import android.support.v7.app.AppCompatActivity
@@ -28,7 +29,7 @@ import ticket.checker.extras.Constants.SESSION_USER_NAME
 import ticket.checker.extras.Constants.SESSION_USER_ROLE
 import ticket.checker.extras.Constants.SESSION_USER_SOLD_TICKETS
 import ticket.checker.extras.Constants.SESSION_USER_VALIDATED_TICKETS
-import ticket.checker.service.ServiceManager
+import ticket.checker.services.ServiceManager
 import java.util.*
 
 class ActivityMenu : AppCompatActivity(), View.OnClickListener {
@@ -137,7 +138,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         pretendedUserRole = savedInstanceState?.getString(PRETENDED_USER_ROLE) ?: userRole
         toolbarImg = savedInstanceState?.getInt(CURRENT_TOOLBAR_IMG) ?: randomToolbarImg()
         val userCreatedDateMillis = intent.getLongExtra(SESSION_USER_CREATED_DATE,0L)
-        userCreatedDateMillis?.let { userCreatedDate = Date(userCreatedDateMillis) }
+        userCreatedDateMillis.let { userCreatedDate = Date(userCreatedDateMillis) }
         userTicketsSold = savedInstanceState?.getInt(SESSION_USER_SOLD_TICKETS) ?: intent.getIntExtra(SESSION_USER_SOLD_TICKETS,0)
         userTicketsValidated = savedInstanceState?.getInt(SESSION_USER_VALIDATED_TICKETS) ?: intent.getIntExtra(SESSION_USER_VALIDATED_TICKETS,0)
 
@@ -148,9 +149,12 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         cvAdmin.setOnClickListener(this)
         cvScan.setOnClickListener(this)
         cvStatistics.setOnClickListener(this)
+    }
+
+    override fun onStart() {
+        super.onStart()
         switchViews()
         updateProfileInfo()
-
         val call : Call<User> = ServiceManager.getUserService().getUser()
         call.enqueue(updateUserInfoCallback)
     }
@@ -210,7 +214,11 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View) {
         when(v.id) {
             R.id.admin -> Toast.makeText(this@ActivityMenu,"Clicked Admin area!",Toast.LENGTH_LONG).show()
-            R.id.scan -> Toast.makeText(this@ActivityMenu,"Clicked scanner!",Toast.LENGTH_LONG).show()
+            R.id.scan -> {
+                val intent = Intent(this, ActivityScan::class.java)
+                intent.putExtra(PRETENDED_USER_ROLE, pretendedUserRole)
+                startActivity(intent)
+            }
             R.id.statistics -> Toast.makeText(this@ActivityMenu,"Clicked statistics!",Toast.LENGTH_LONG).show()
         }
     }

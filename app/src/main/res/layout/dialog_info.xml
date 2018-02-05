@@ -1,0 +1,136 @@
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context="ticket.checker.dialogs.DialogInfo"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/bg_dialog_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_dialog_title"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Logging in"
+                android:textColor="@android:color/white"
+                android:textSize="30sp"
+                android:layout_centerVertical="true"/>
+
+            <ImageButton
+                android:id="@+id/btnClose"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@null"
+                app:srcCompat="@drawable/ic_clear_white"
+                android:scaleType="fitCenter"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="100">
+
+                    <ProgressBar
+                        android:id="@+id/loadingSpinner"
+                        android:layout_width="0dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="15"
+                        android:layout_gravity="center_vertical"/>
+
+                    <ImageView
+                        android:id="@+id/ivDialogIcon"
+                        android:layout_width="0dp"
+                        android:layout_height="50dp"
+                        app:srcCompat="@drawable/ic_error"
+                        android:layout_weight="15"
+                        android:layout_gravity="center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/tvDescription"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Retrieving user info..."
+                        android:textColor="@android:color/darker_gray"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="18sp"
+                        android:paddingStart="3dp"
+                        android:paddingEnd="3dp"
+                        android:layout_weight="85"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/yesNoButtons"
+                    android:layout_width="230dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnYes"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:layout_weight="50"
+                        android:background="@drawable/btn_yes_style"
+                        android:text="Yes"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_yes_text_color"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnNo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="50"
+                        android:background="@drawable/btn_no_style"
+                        android:text="No"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_no_text_color"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnToLogin"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/btn_style"
+                    android:text="Take me to login"
+                    android:textAllCaps="false"
+                    android:textColor="@drawable/btn_text_color"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </RelativeLayout>
+</LinearLayout>

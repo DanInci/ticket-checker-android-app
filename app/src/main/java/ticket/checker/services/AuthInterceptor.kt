@@ -1,4 +1,4 @@
-package ticket.checker.service
+package ticket.checker.services
 
 import okhttp3.Credentials
 import okhttp3.Interceptor

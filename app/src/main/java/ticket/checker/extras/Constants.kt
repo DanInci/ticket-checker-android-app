@@ -20,4 +20,6 @@ object Constants {
 
     const val PRETENDED_USER_ROLE = "pretendedUserRole"
     const val CURRENT_TOOLBAR_IMG = "currentToolbarImg"
+
+    const val SCANNED_TICKET_NUMBER = "scannedTicketNumber"
 }
