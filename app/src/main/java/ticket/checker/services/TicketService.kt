@@ -10,11 +10,17 @@ import ticket.checker.beans.Ticket
 interface TicketService {
 
     @GET("/tickets")
-    fun validateTicket(@Query("validate") ticketId : String) : Call<Void>
+    fun getTickets(@Query("validated") isValidated : Boolean?, @Query("page") page : Int?, @Query("size") size : Int?) : Call<List<Ticket>>
+
+    @GET("/tickets/{ticketId}")
+    fun getTicketById(@Path("ticketId") ticketId : String) : Call<Ticket>
 
     @POST("/tickets")
     fun createTicket(@Body ticket : Ticket) : Call<Void>
 
+    @POST("/tickets/{ticketId}")
+    fun validateTicket(@Header("validate") validate : Boolean, @Path("ticketId") ticketId : String) : Call<Void>
+
     @DELETE("/tickets/{ticketId}")
-    fun deleteTicket(@Path("ticketId") ticketId : String) : Call<Void>
+    fun deleteTicketById(@Path("ticketId") ticketId : String) : Call<Void>
 }

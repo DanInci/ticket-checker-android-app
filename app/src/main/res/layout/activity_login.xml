@@ -26,7 +26,7 @@
             <ImageView
                 android:id="@+id/imgLogo"
                 android:layout_width="100dp"
-                android:layout_height="100dp" />
+                android:layout_height="100dp"/>
 
             <EditText
                 android:background="@drawable/et_style"
@@ -37,10 +37,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textVisiblePassword"
-                android:hint="USERNAME"
+                android:hint="@string/hintUsername"
                 android:drawableLeft="@drawable/ic_person_outline"
                 android:drawablePadding="15dp"
-                android:textColorHint="@android:color/darker_gray"
+                android:textColorHint="@color/hintTextColorOnPrimary"
                 android:layout_marginBottom="10dp"
                 android:maxLength="100"/>
 
@@ -52,10 +52,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:hint="PASSWORD"
+                android:hint="@string/hintPassword"
                 android:drawableLeft="@drawable/ic_lock_outline"
                 android:drawablePadding="15dp"
-                android:textColorHint="@android:color/darker_gray"
+                android:textColorHint="@color/hintTextColorOnPrimary"
                 android:layout_marginBottom="20dp"
                 android:maxLength="100"/>
 

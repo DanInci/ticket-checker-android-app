@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_ticket_add"
+        android:icon="@drawable/ic_add"
+        android:title="Add"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_ticket_all"
+        android:checkable="true"
+        android:title="All" />
+    <item
+        android:id="@+id/action_ticket_validated"
+        android:checkable="true"
+        android:title="Validated" />
+    <item
+        android:id="@+id/action_ticket_not_validated"
+        android:checkable="true"
+        android:title="Not Validated" />
+</menu>

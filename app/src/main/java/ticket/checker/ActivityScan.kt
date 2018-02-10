@@ -6,6 +6,7 @@ import android.os.*
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.DisplayMetrics
+import android.util.SparseArray
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.google.android.gms.vision.CameraSource
@@ -13,7 +14,7 @@ import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
 import ticket.checker.dialogs.DialogScan
-import ticket.checker.extras.Constants.PRETENDED_USER_ROLE
+import ticket.checker.extras.Util.PRETENDED_USER_ROLE
 import ticket.checker.listeners.IScanDialogListener
 import java.io.IOException
 
@@ -28,12 +29,13 @@ class ActivityScan : AppCompatActivity() {
     private val barcodeProcessor = object : Detector.Processor<Barcode> {
         override fun release() { }
         override fun receiveDetections(detections: Detector.Detections<Barcode>) {
-            var qrCodes = detections.detectedItems
+            val qrCodes : SparseArray<Barcode> = detections.detectedItems
             if(qrCodes.size() != 0) {
                 Handler(Looper.getMainLooper()).post { stopBarcodeDetection() }
                 val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                 vibrator.vibrate(300)
-                val dialogScan = DialogScan.newInstance(qrCodes.get(0).displayValue, pretendedUserRole)
+                val code = qrCodes.get(qrCodes.keyAt(0))
+                val dialogScan = DialogScan.newInstance(code.rawValue, pretendedUserRole)
                 dialogScan.setDialogListenr(scanDialogListener)
                 dialogScan.show(supportFragmentManager,"DIALOG_SCAN")
             }
@@ -52,6 +54,7 @@ class ActivityScan : AppCompatActivity() {
         CameraSource.Builder(this,barcodeDetector)
                 .setRequestedPreviewSize(displayMetrics.widthPixels,displayMetrics.heightPixels)
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
+                .setAutoFocusEnabled(true)
                 .setRequestedFps(20.0f)
                 .build()
     }

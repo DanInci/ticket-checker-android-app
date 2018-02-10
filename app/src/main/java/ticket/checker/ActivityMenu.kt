@@ -18,17 +18,17 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.beans.User
-import ticket.checker.extras.Constants.CURRENT_TOOLBAR_IMG
-import ticket.checker.extras.Constants.DATE_FORMAT
-import ticket.checker.extras.Constants.PRETENDED_USER_ROLE
-import ticket.checker.extras.Constants.ROLE_ADMIN
-import ticket.checker.extras.Constants.ROLE_USER
-import ticket.checker.extras.Constants.SESSION_USER_CREATED_DATE
-import ticket.checker.extras.Constants.SESSION_USER_ID
-import ticket.checker.extras.Constants.SESSION_USER_NAME
-import ticket.checker.extras.Constants.SESSION_USER_ROLE
-import ticket.checker.extras.Constants.SESSION_USER_SOLD_TICKETS
-import ticket.checker.extras.Constants.SESSION_USER_VALIDATED_TICKETS
+import ticket.checker.extras.Util.CURRENT_TOOLBAR_IMG
+import ticket.checker.extras.Util.DATE_FORMAT
+import ticket.checker.extras.Util.PRETENDED_USER_ROLE
+import ticket.checker.extras.Util.ROLE_ADMIN
+import ticket.checker.extras.Util.ROLE_USER
+import ticket.checker.extras.Util.SESSION_USER_CREATED_DATE
+import ticket.checker.extras.Util.SESSION_USER_ID
+import ticket.checker.extras.Util.SESSION_USER_NAME
+import ticket.checker.extras.Util.SESSION_USER_ROLE
+import ticket.checker.extras.Util.SESSION_USER_SOLD_TICKETS
+import ticket.checker.extras.Util.SESSION_USER_VALIDATED_TICKETS
 import ticket.checker.services.ServiceManager
 import java.util.*
 
@@ -129,6 +129,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 
     private var pretendedUserRole: String? = null
     private var toolbarImg : Int? = null
+    private var currentMenuItemId = -1;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -141,6 +142,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         userCreatedDateMillis.let { userCreatedDate = Date(userCreatedDateMillis) }
         userTicketsSold = savedInstanceState?.getInt(SESSION_USER_SOLD_TICKETS) ?: intent.getIntExtra(SESSION_USER_SOLD_TICKETS,0)
         userTicketsValidated = savedInstanceState?.getInt(SESSION_USER_VALIDATED_TICKETS) ?: intent.getIntExtra(SESSION_USER_VALIDATED_TICKETS,0)
+        currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM_ID) ?: R.id.action_admin_mode
 
         setContentView(R.layout.activity_menu)
         loadCollapsingToolbarImg()
@@ -191,29 +193,40 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
                 menu.getItem(i).isVisible=true
             }
         }
+        checkMenuItem(currentMenuItemId)
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when(item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        var validSelection = true
+        when(item.itemId) {
             R.id.action_admin_mode -> {
                 pretendedUserRole = ROLE_ADMIN
                 switchViews()
                 updateProfileInfo()
+                currentMenuItemId = R.id.action_admin_mode
             }
             R.id.action_user_mode -> {
                 pretendedUserRole = ROLE_USER
                 switchViews()
-                updateProfileInfo()}
+                updateProfileInfo()
+                currentMenuItemId = R.id.action_user_mode
+            }
             R.id.action_logout -> logout()
-            else -> { return false }
+            else -> { validSelection = false }
         }
-        return true
+        if(validSelection) {
+            checkMenuItem(item.itemId)
+        }
+        return validSelection
     }
 
     override fun onClick(v: View) {
         when(v.id) {
-            R.id.admin -> Toast.makeText(this@ActivityMenu,"Clicked Admin area!",Toast.LENGTH_LONG).show()
+            R.id.admin ->{
+                val intent = Intent(this, ActivityAdmin::class.java)
+                startActivity(intent)
+            }
             R.id.scan -> {
                 val intent = Intent(this, ActivityScan::class.java)
                 intent.putExtra(PRETENDED_USER_ROLE, pretendedUserRole)
@@ -247,6 +260,15 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         tvValidatedTickets.text = userTicketsValidated.toString()
     }
 
+    private fun checkMenuItem(menuItemId : Int) {
+        val menu = toolbar.menu
+        if(menuItemId != R.id.action_logout) {
+            (0 until (menu.size() -1))
+                    .map{ menu.getItem(it) }
+                    .forEach{it.isChecked = it.itemId == menuItemId }
+        }
+    }
+
     private fun logout() {
         ServiceManager.invalidateSession()
         finish()
@@ -256,12 +278,17 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         //DO nothing
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState?.putString(PRETENDED_USER_ROLE, pretendedUserRole)
-        outState?.putInt(CURRENT_TOOLBAR_IMG, toolbarImg as Int)
-        outState?.putInt(SESSION_USER_SOLD_TICKETS, userTicketsSold as Int)
-        outState?.putInt(SESSION_USER_VALIDATED_TICKETS, userTicketsValidated as Int)
+        outState.putString(PRETENDED_USER_ROLE, pretendedUserRole)
+        outState.putInt(CURRENT_TOOLBAR_IMG, toolbarImg as Int)
+        outState.putInt(SESSION_USER_SOLD_TICKETS, userTicketsSold as Int)
+        outState.putInt(SESSION_USER_VALIDATED_TICKETS, userTicketsValidated as Int)
+        outState.putInt(CURRENT_MENU_ITEM_ID, currentMenuItemId)
+    }
+
+    companion object {
+        private const val CURRENT_MENU_ITEM_ID = "currentMenuItemId";
     }
 
 }

@@ -14,9 +14,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.R
 import ticket.checker.beans.Ticket
-import ticket.checker.extras.Constants.PRETENDED_USER_ROLE
-import ticket.checker.extras.Constants.ROLE_ADMIN
-import ticket.checker.extras.Constants.SCANNED_TICKET_NUMBER
+import ticket.checker.extras.Util.ROLE_ADMIN
 import ticket.checker.listeners.IScanDialogListener
 import ticket.checker.services.ServiceManager
 
@@ -61,13 +59,11 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                         authDialog.show(fragmentManager,"DIALOG_AUTH")
                     }
                     400 -> {
-                        when(call.request().method()) {
-                            "GET" -> {
-                                errorResult("This ticket was already validated!")
-                            }
-                            "POST" -> {
-                                errorResult("This ticket already exists!")
-                            }
+                        if(call.request().header("validate").isNullOrEmpty()){
+                            errorResult("This ticket already exists!")
+                        }
+                        else {
+                            errorResult("This ticket was already validated!")
                         }
                     }
                     500 -> {
@@ -118,9 +114,6 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         btnDelete = view?.findViewById(R.id.btnDelete)
         btnDelete?.setOnClickListener(this)
 
-        ticketNumber = arguments.getString(SCANNED_TICKET_NUMBER)
-        pretendedUserRole = arguments.getString(PRETENDED_USER_ROLE)
-
         tvTicketNumber?.text = ticketNumber
         switchViews()
     }
@@ -133,7 +126,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
             }
             R.id.btnValidate -> {
                 showLoading()
-                val call = ServiceManager.getTicketService().validateTicket(ticketNumber as String)
+                val call = ServiceManager.getTicketService().validateTicket(true, ticketNumber as String)
                 call.enqueue(transactionCallback)
             }
             R.id.btnAdd -> {
@@ -145,7 +138,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
             }
             R.id.btnDelete -> {
                 showLoading()
-                val call = ServiceManager.getTicketService().deleteTicket(ticketNumber as String)
+                val call = ServiceManager.getTicketService().deleteTicketById(ticketNumber as String)
                 call.enqueue(transactionCallback)
             }
         }

@@ -15,18 +15,7 @@ object ServiceManager {
 
     private var userService: UserService? = null
     private var ticketService: TicketService? = null
-
-//    fun <S> createService(serviceClass : Class<S>, username : String, password : String) : S {
-//        if(username != "" && password != "") {
-//            val interceptor = AuthInterceptor(username,password)
-//            if(!httpClient.interceptors().contains(interceptor)) {
-//                httpClient.addInterceptor(interceptor)
-//                builder.client(httpClient.build())
-//                retrofit = builder.build()
-//            }
-//        }
-//        return retrofit.create(serviceClass)
-//    }
+    private var numbersService: NumbersService? = null
 
     fun createSession(username : String, password : String) {
         val interceptor = AuthInterceptor(username,password)
@@ -48,6 +37,13 @@ object ServiceManager {
             ticketService = retrofit.create(TicketService::class.java)
         }
         return ticketService as TicketService
+    }
+
+    fun getNumbersService() : NumbersService {
+        if(numbersService == null) {
+            numbersService = retrofit.create(NumbersService::class.java)
+        }
+        return numbersService as NumbersService
     }
 
     fun invalidateSession() {

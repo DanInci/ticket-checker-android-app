@@ -1,11 +1,12 @@
 package ticket.checker.extras
 
 import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Created by Dani on 25.01.2018.
  */
-object Constants {
+object Util {
     val DATE_FORMAT = SimpleDateFormat("dd MMM yyyy")
 
     const val ROLE_USER = "ROLE_USER"
@@ -21,5 +22,24 @@ object Constants {
     const val PRETENDED_USER_ROLE = "pretendedUserRole"
     const val CURRENT_TOOLBAR_IMG = "currentToolbarImg"
 
-    const val SCANNED_TICKET_NUMBER = "scannedTicketNumber"
+    fun formatDate(date : Date) : String {
+        val then = date.time
+        val now = Date().time
+        val diff = now - then
+
+        return when(diff) {
+            in 0..3599999 -> {
+                "Validated " + diff/60000 + " minutes ago"
+            }
+            in 3600000..86399999 -> {
+                "Validated " + diff/3600000 + " hours ago"
+            }
+            in 86400000..604799999 -> {
+                "Validated " + diff/86400000 + " days ago"
+            }
+            else -> {
+                "Validated " + "at " + DATE_FORMAT.format(date)
+            }
+        }
+    }
 }

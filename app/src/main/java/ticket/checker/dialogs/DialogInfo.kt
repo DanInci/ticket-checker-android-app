@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.*
 import ticket.checker.R
+import ticket.checker.services.ServiceManager
 
 
 class DialogInfo : DialogFragment(), View.OnClickListener {
@@ -36,6 +37,9 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
             title = arguments.getString(DIALOG_TITLE)
             desc = arguments.getString(DIALOG_MSG)
             dialogType = DialogType.valueOf(arguments.getString(DIALOG_TYPE))
+            if(dialogType == DialogType.AUTH_ERROR) {
+                ServiceManager.invalidateSession()
+            }
         }
     }
 

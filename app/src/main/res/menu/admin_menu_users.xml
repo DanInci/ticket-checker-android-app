@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_users_add"
+        android:icon="@drawable/ic_add"
+        android:title="Add"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_users_all"
+        android:checkable="true"
+        android:title="All" />
+    <item
+        android:id="@+id/action_admins"
+        android:checkable="true"
+        android:title="Admins" />
+    <item
+        android:id="@+id/action_users"
+        android:checkable="true"
+        android:title="Users" />
+</menu>

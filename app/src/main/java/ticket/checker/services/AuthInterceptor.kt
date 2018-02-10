@@ -7,8 +7,8 @@ import okhttp3.Response
 /**
  * Created by Dani on 25.01.2018.
  */
-class AuthInterceptor(val user : String, val password : String) : Interceptor {
-    private val credentials : String = Credentials.basic(user,password)
+class AuthInterceptor(user : String, password : String) : Interceptor {
+    private val credentials : String = Credentials.basic(user, password)
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()

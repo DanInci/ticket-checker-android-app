@@ -15,12 +15,12 @@ import retrofit2.Response
 import ticket.checker.beans.User
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
-import ticket.checker.extras.Constants.SESSION_USER_CREATED_DATE
-import ticket.checker.extras.Constants.SESSION_USER_ID
-import ticket.checker.extras.Constants.SESSION_USER_NAME
-import ticket.checker.extras.Constants.SESSION_USER_ROLE
-import ticket.checker.extras.Constants.SESSION_USER_SOLD_TICKETS
-import ticket.checker.extras.Constants.SESSION_USER_VALIDATED_TICKETS
+import ticket.checker.extras.Util.SESSION_USER_CREATED_DATE
+import ticket.checker.extras.Util.SESSION_USER_ID
+import ticket.checker.extras.Util.SESSION_USER_NAME
+import ticket.checker.extras.Util.SESSION_USER_ROLE
+import ticket.checker.extras.Util.SESSION_USER_SOLD_TICKETS
+import ticket.checker.extras.Util.SESSION_USER_VALIDATED_TICKETS
 import ticket.checker.services.ServiceManager
 
 class ActivityLogin : AppCompatActivity() {
@@ -64,7 +64,7 @@ class ActivityLogin : AppCompatActivity() {
             }
         }
         override fun onFailure(call: Call<User>?, t: Throwable?) {
-            val loginFailedDialog = DialogInfo.newInstance("Login failed","There was an error connection to the server!", DialogType.ERROR)
+            val loginFailedDialog = DialogInfo.newInstance("Login failed","There was an error connecting to the server!", DialogType.ERROR)
             loginFailedDialog.show(supportFragmentManager,"DIALOG_LOGIN_FAILED")
         }
     }
