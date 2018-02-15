@@ -1,5 +1,6 @@
 package ticket.checker
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
@@ -7,11 +8,11 @@ import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_admin.*
-import ticket.checker.admin.AAdminFragment
+import ticket.checker.admin.tickets.DialogAddTicket
 import ticket.checker.admin.tickets.TicketsFragment
+import ticket.checker.admin.users.DialogAddUser
 import ticket.checker.admin.users.UsersFragment
-import ticket.checker.beans.Ticket
-import ticket.checker.beans.User
+import ticket.checker.extras.Util.POSITION
 
 class ActivityAdmin : AppCompatActivity() {
 
@@ -21,8 +22,8 @@ class ActivityAdmin : AppCompatActivity() {
     private var currentUsersMenuItemId = -1
     private var usersFilter = LIST_ALL
 
-    private var ticketsFragment : AAdminFragment<Ticket, Array<Int>>? = null
-    private var usersFragment : AAdminFragment<User,Int>? = null
+    private var ticketsFragment : TicketsFragment? = null
+    private var usersFragment : UsersFragment? = null
 
     private val toolbar : Toolbar by lazy {
         findViewById<Toolbar>(R.id.toolbar)
@@ -57,10 +58,14 @@ class ActivityAdmin : AppCompatActivity() {
         if(validSelection) {
             when (itemId) {
                 R.id.action_ticket_add -> {
-
+                    val dialogAddTicket = DialogAddTicket()
+                    dialogAddTicket.actionListener = ticketsFragment
+                    dialogAddTicket.show(supportFragmentManager, "DIALOG_ADD")
                 }
                 R.id.action_users_add -> {
-
+                    val dialogAddUser = DialogAddUser()
+                    dialogAddUser.actionListener = usersFragment
+                    dialogAddUser.show(supportFragmentManager, "DIALOG_ADD")
                 }
                 R.id.action_ticket_all -> {
                     ticketsFilter = LIST_ALL
@@ -119,6 +124,30 @@ class ActivityAdmin : AppCompatActivity() {
             }
         }
         return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == CHANGES_TO_ADAPTER_ITEM) {
+            val position = data?.getIntExtra(POSITION, -1)
+            if (position != null && position != -1) {
+                when (resultCode) {
+                    ITEM_REMOVED -> {
+                        when (currentFragmentId) {
+                            R.id.navigation_tickets -> {
+                                ticketsFragment?.onRemove(position)
+                            }
+                            R.id.navigation_users -> {
+                                usersFragment?.onRemove(position)
+                            }
+                        }
+                    }
+                    TICKET_CHANGE_VALIDATION -> {
+                        ticketsFragment?.onChangeValidation(position)
+                    }
+                }
+            }
+        }
     }
 
     private fun switchFragment(fragmentId : Int) {
@@ -185,6 +214,9 @@ class ActivityAdmin : AppCompatActivity() {
         private const val CURRENT_USERS_MENU_ITEM_ID = "currentUsersMenuItemId"
         private const val USERS_FILTER = "usersFilter"
 
+        const val CHANGES_TO_ADAPTER_ITEM = 0
+        const val ITEM_REMOVED = 0
+        const val TICKET_CHANGE_VALIDATION = 1
         const val LIST_ALL = "all"
         const val LIST_VALIDATED = "validated"
         const val LIST_NOT_VALIDATED = "notValidated"

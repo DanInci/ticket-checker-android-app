@@ -18,17 +18,17 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.beans.User
-import ticket.checker.extras.Util.CURRENT_TOOLBAR_IMG
+import ticket.checker.dialogs.DialogInfo
+import ticket.checker.dialogs.DialogType
 import ticket.checker.extras.Util.DATE_FORMAT
-import ticket.checker.extras.Util.PRETENDED_USER_ROLE
 import ticket.checker.extras.Util.ROLE_ADMIN
 import ticket.checker.extras.Util.ROLE_USER
-import ticket.checker.extras.Util.SESSION_USER_CREATED_DATE
-import ticket.checker.extras.Util.SESSION_USER_ID
-import ticket.checker.extras.Util.SESSION_USER_NAME
-import ticket.checker.extras.Util.SESSION_USER_ROLE
-import ticket.checker.extras.Util.SESSION_USER_SOLD_TICKETS
-import ticket.checker.extras.Util.SESSION_USER_VALIDATED_TICKETS
+import ticket.checker.extras.Util.userCreatedDate
+import ticket.checker.extras.Util.userId
+import ticket.checker.extras.Util.userName
+import ticket.checker.extras.Util.userRole
+import ticket.checker.extras.Util.userSoldTicketsNo
+import ticket.checker.extras.Util.userValidatedTicketsNo
 import ticket.checker.services.ServiceManager
 import java.util.*
 
@@ -74,20 +74,23 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
                 userName = user?.name
                 userCreatedDate = user?.createdDate
                 userRole = user?.role
-                userTicketsSold = user?.soldTicketsNo
-                userTicketsValidated = user?.validatedTicketsNo
+                userSoldTicketsNo = user?.soldTicketsNo
+                userValidatedTicketsNo = user?.validatedTicketsNo
                 updateProfileInfo()
             }
             else {
                 when(response.code()) {
-                    401,403 -> {
-                        //TODO
+                    401, 403 -> {
+                        val dialogAuthError = DialogInfo.newInstance("Session expired", "You need to provide your authentication once again!", DialogType.AUTH_ERROR)
+                        dialogAuthError.isCancelable = false
+                        dialogAuthError.show(supportFragmentManager, "DIALOG_ERROR")
                     }
                 }
             }
         }
         override fun onFailure(call: Call<User>?, t: Throwable?) {
-            Toast.makeText(this@ActivityMenu,"Connection to server has been lost!", Toast.LENGTH_LONG).show()
+            val dialogConnectionError = DialogInfo.newInstance("Connection error", "There was an error connecting to the server!", DialogType.ERROR)
+            dialogConnectionError.show(supportFragmentManager, "DIALOG_ERROR")
         }
     }
     private val tvName by lazy {
@@ -120,28 +123,14 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 
     var menuIsShown = false
 
-    private var userId : Long? = null
-    private var userName : String? = null
-    private var userRole : String? = null
-    private var userCreatedDate : Date? = null
-    private var userTicketsSold : Int? = null
-    private var userTicketsValidated : Int? = null
-
     private var pretendedUserRole: String? = null
     private var toolbarImg : Int? = null
-    private var currentMenuItemId = -1;
+    private var currentMenuItemId = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        userId = intent.getLongExtra(SESSION_USER_ID,0L)
-        userName = intent.getStringExtra(SESSION_USER_NAME)
-        userRole = intent.getStringExtra(SESSION_USER_ROLE)
         pretendedUserRole = savedInstanceState?.getString(PRETENDED_USER_ROLE) ?: userRole
         toolbarImg = savedInstanceState?.getInt(CURRENT_TOOLBAR_IMG) ?: randomToolbarImg()
-        val userCreatedDateMillis = intent.getLongExtra(SESSION_USER_CREATED_DATE,0L)
-        userCreatedDateMillis.let { userCreatedDate = Date(userCreatedDateMillis) }
-        userTicketsSold = savedInstanceState?.getInt(SESSION_USER_SOLD_TICKETS) ?: intent.getIntExtra(SESSION_USER_SOLD_TICKETS,0)
-        userTicketsValidated = savedInstanceState?.getInt(SESSION_USER_VALIDATED_TICKETS) ?: intent.getIntExtra(SESSION_USER_VALIDATED_TICKETS,0)
         currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM_ID) ?: R.id.action_admin_mode
 
         setContentView(R.layout.activity_menu)
@@ -256,8 +245,8 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         tvCreated.text = DATE_FORMAT.format(userCreatedDate)
         tvHighestRole.text = userRole?.removePrefix("ROLE_")
         tvCurrentRole.text = pretendedUserRole?.removePrefix("ROLE_")
-        tvCreatedTickets.text = userTicketsSold.toString()
-        tvValidatedTickets.text = userTicketsValidated.toString()
+        tvCreatedTickets.text = userSoldTicketsNo.toString()
+        tvValidatedTickets.text = userValidatedTicketsNo.toString()
     }
 
     private fun checkMenuItem(menuItemId : Int) {
@@ -282,13 +271,13 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         super.onSaveInstanceState(outState)
         outState.putString(PRETENDED_USER_ROLE, pretendedUserRole)
         outState.putInt(CURRENT_TOOLBAR_IMG, toolbarImg as Int)
-        outState.putInt(SESSION_USER_SOLD_TICKETS, userTicketsSold as Int)
-        outState.putInt(SESSION_USER_VALIDATED_TICKETS, userTicketsValidated as Int)
         outState.putInt(CURRENT_MENU_ITEM_ID, currentMenuItemId)
     }
 
     companion object {
-        private const val CURRENT_MENU_ITEM_ID = "currentMenuItemId";
+        const val PRETENDED_USER_ROLE = "pretendedUserRole"
+        private const val CURRENT_TOOLBAR_IMG = "currentToolbarImg"
+        private const val CURRENT_MENU_ITEM_ID = "currentMenuItemId"
     }
 
 }

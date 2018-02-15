@@ -13,7 +13,11 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.R
+import ticket.checker.beans.ErrorResponse
 import ticket.checker.beans.Ticket
+import ticket.checker.extras.Util
+import ticket.checker.extras.Util.ERROR_TICKET_EXISTS
+import ticket.checker.extras.Util.ERROR_TICKET_VALIDATION
 import ticket.checker.extras.Util.ROLE_ADMIN
 import ticket.checker.listeners.IScanDialogListener
 import ticket.checker.services.ServiceManager
@@ -22,6 +26,7 @@ import ticket.checker.services.ServiceManager
  * Created by Dani on 31.01.2018.
  */
 class DialogScan : DialogFragment(), View.OnClickListener {
+    var scanDialogListener : IScanDialogListener? = null
 
     private var ticketNumber : String? = null
     private var pretendedUserRole: String? = null
@@ -36,8 +41,6 @@ class DialogScan : DialogFragment(), View.OnClickListener {
     private var btnValidate : Button? = null
     private var btnDelete : Button? = null
 
-    private var scanDialogListener : IScanDialogListener? = null
-
     private val transactionCallback : Callback<Void> = object : Callback<Void> {
         override fun onResponse(call: Call<Void>, response: Response<Void>) {
             if(response.isSuccessful) {
@@ -45,37 +48,26 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                 scanDialogListener?.dismiss()
             }
             else {
-                when(response.code()) {
-                    404 -> {
-                        errorResult("A ticket with this id was not found!")
-                    }
-                    403 -> {
-                        errorResult("You don't have permissions to do this!")
-                    }
-                    401 -> {
-                        dismiss()
-                        val authDialog = DialogInfo.newInstance("Session expired","You need to provide your authentication once again!", DialogType.AUTH_ERROR)
-                        authDialog.isCancelable=false
-                        authDialog.show(fragmentManager,"DIALOG_AUTH")
-                    }
-                    400 -> {
-                        if(call.request().header("validate").isNullOrEmpty()){
-                            errorResult("This ticket already exists!")
-                        }
-                        else {
-                            errorResult("This ticket was already validated!")
-                        }
-                    }
-                    500 -> {
-                        errorResult("There was a server error!")
-                    }
-                    else -> {
-                        errorResult("Unexpected server response!")
-                    }
-                }
+                val error = Util.convertError(response.errorBody())
+                onErrorResponse(response.code(), error)
             }
         }
-        override fun onFailure(call: Call<Void>?, t: Throwable?) {
+        override fun onFailure(call: Call<Void>, t: Throwable) {
+            errorResult("Error connecting to the server!")
+        }
+    }
+    private val creationCallback: Callback<Ticket> = object : Callback<Ticket> {
+        override fun onResponse(call: Call<Ticket>, response: Response<Ticket>) {
+            if(response.isSuccessful) {
+                dismiss()
+                scanDialogListener?.dismiss()
+            }
+            else {
+                val error = Util.convertError(response.errorBody())
+                onErrorResponse(response.code(), error)
+            }
+        }
+        override fun onFailure(call: Call<Ticket>?, t: Throwable?) {
             errorResult("Error connecting to the server!")
         }
     }
@@ -92,7 +84,6 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         val view = inflater?.inflate(R.layout.dialog_scan,container,false)
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog?.window?.requestFeature(Window.FEATURE_NO_TITLE)
-        dialog?.setCancelable(false)
         dialog?.setCanceledOnTouchOutside(false)
         return view
     }
@@ -134,7 +125,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                 val soldTo = etSoldTo?.text?.toString() ?: ""
                 val ticket = Ticket(ticketNumber as String, soldTo)
                 val call = ServiceManager.getTicketService().createTicket(ticket)
-                call.enqueue(transactionCallback)
+                call.enqueue(creationCallback)
             }
             R.id.btnDelete -> {
                 showLoading()
@@ -142,10 +133,6 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                 call.enqueue(transactionCallback)
             }
         }
-    }
-
-    fun setDialogListenr(dialogListener: IScanDialogListener) {
-        scanDialogListener = dialogListener
     }
 
     private fun switchViews() {
@@ -170,6 +157,42 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         btnDelete?.visibility = View.GONE
         btnClose?.visibility = View.GONE
         loadingSpinner?.visibility = View.VISIBLE
+    }
+
+    private fun onErrorResponse(code : Int, error : ErrorResponse) {
+        when(code) {
+            404 -> {
+                errorResult("A ticket with this id was not found!")
+            }
+            403 -> {
+                errorResult("You don't have permissions to do this!")
+            }
+            401 -> {
+                dismiss()
+                val authDialog = DialogInfo.newInstance("Session expired","You need to provide your authentication once again!", DialogType.AUTH_ERROR)
+                authDialog.isCancelable=false
+                authDialog.show(fragmentManager,"DIALOG_AUTH")
+            }
+            400 -> {
+                when(error.message) {
+                    ERROR_TICKET_EXISTS -> {
+                        errorResult("This ticket id already exists!")
+                    }
+                    ERROR_TICKET_VALIDATION -> {
+                        errorResult("This ticket has already been validated!")
+                    }
+                    else -> {
+                        errorResult("Unexpected ticket id format!")
+                    }
+                }
+            }
+            500 -> {
+                errorResult("There was a server error!")
+            }
+            else -> {
+                errorResult("Unexpected server response!")
+            }
+        }
     }
 
     private fun errorResult(errorMsg : String) {

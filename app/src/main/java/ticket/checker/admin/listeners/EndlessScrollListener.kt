@@ -1,4 +1,4 @@
-package ticket.checker.admin
+package ticket.checker.admin.listeners
 
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView

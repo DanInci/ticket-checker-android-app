@@ -10,6 +10,7 @@
     <color name="colorSecondaryDark">#c67100</color>
     <color name="colorSecondaryLight">#ffd149</color>
 
+    <color name="white">#FFF</color>
     <color name="backgroundGrey">#eeeef0</color>
     <color name="lightGrey">#d2d2d2</color>
     <color name="darkerGrey">#ababad</color>

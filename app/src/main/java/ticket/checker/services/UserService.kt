@@ -26,7 +26,7 @@ interface UserService {
     fun getValidatedTicketsByUserId(@Path("userId") userId: Long) : Call<List<Ticket>>
 
     @POST("/users")
-    fun createUser(@Body user: User) : Call<Void>
+    fun createUser(@Body user: User) : Call<User>
 
     @DELETE("/users/{userId}")
     fun deleteUserById(@Path("userId") userId: Long) : Call<Void>

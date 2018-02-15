@@ -2,6 +2,7 @@ package ticket.checker.admin
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -13,21 +14,27 @@ import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.ActivityAdmin.Companion.LIST_ALL
 import ticket.checker.R
+import ticket.checker.admin.listeners.ActionListener
+import ticket.checker.admin.listeners.EndlessScrollListener
+import ticket.checker.admin.listeners.FilterChangeListener
+import ticket.checker.admin.listeners.RecyclerItemClickListener
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
 
 /**
  * Created by Dani on 09.02.2018.
  */
-abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener {
-    private var filter : String = LIST_ALL
+abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ActionListener<T>, RecyclerItemClickListener.OnItemClickListener {
+    protected var filter : String = "NOT_INITIALISED"
+    abstract val loadLimit : Int
     private var firstLoad = true
 
+    private var refreshLayout : SwipeRefreshLayout? = null
     private var loadingSpinner: ProgressBar? = null
     private var recyclerView: RecyclerView? = null
-    private var layoutManager : LinearLayoutManager? = null
+    protected var layoutManager : LinearLayoutManager? = null
 
-    private val itemsAdapter: AItemsAdapter<T,Y> by lazy {
+    protected val itemsAdapter: AItemsAdapter<T,Y> by lazy {
         setupItemsAdapter()
     }
     private var scrollListener : EndlessScrollListener? = null
@@ -53,6 +60,7 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener {
             }
             if (response.isSuccessful) {
                 val items: List<T> = response.body() as List<T>
+                itemsAdapter.setLoading(false)
                 itemsAdapter.updateItemsList(items)
             } else {
                 onErrorResponse(response.code())
@@ -65,26 +73,32 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (arguments != null) {
-            filter = arguments.getString(FILTER)
+        if (filter == "NOT_INITIALISED") {
+            filter = arguments.getString(FILTER) ?: LIST_ALL
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = inflater?.inflate(R.layout.fragment_recycle_view, container, false)
+        refreshLayout = view?.findViewById(R.id.refreshLayout)
+        refreshLayout?.setOnRefreshListener { onRefresh()  }
+        refreshLayout?.setColorSchemeColors(resources.getColor(R.color.colorPrimary),resources.getColor(R.color.noRed))
         loadingSpinner = view?.findViewById(R.id.rvLoadingSpinner)
         recyclerView = view?.findViewById(R.id.rvItems)
-
-        layoutManager = LinearLayoutManager(activity.applicationContext)
+        layoutManager = LinearLayoutManager(activity)
         scrollListener = object : EndlessScrollListener(layoutManager as LinearLayoutManager) {
             override fun onLoadMore(page: Int, totalItemsCount: Int, recyclerView: RecyclerView) {
-                loadItems(page, filter)
+                if((totalItemsCount-2) % loadLimit == 0) {
+                    itemsAdapter.setLoading(true)
+                    loadItems(page, filter)
+                }
             }
         }
         recyclerView?.layoutManager = layoutManager
         recyclerView?.adapter = itemsAdapter
         recyclerView?.addOnScrollListener(scrollListener)
+        recyclerView?.addOnItemTouchListener(RecyclerItemClickListener(activity, recyclerView!!, this))
 
         if(firstLoad) {
             reloadAll()
@@ -95,6 +109,13 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener {
             scrollListener?.loading = arguments.getBoolean(LOAD_LOADING)
         }
         return view
+    }
+
+    private fun onRefresh() {
+        refreshLayout?.isRefreshing = false
+        itemsAdapter.resetItemsList()
+        scrollListener?.resetState()
+        reloadAll()
     }
 
     override fun onFilterChange(newFilter: String) {
@@ -121,12 +142,24 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener {
         firstLoad = true
         loadingSpinner?.visibility = View.VISIBLE
         scrollListener?.enabled = false
+        refreshLayout?.isEnabled = false
     }
 
     private fun onFirstLoad() {
         firstLoad = false
         loadingSpinner?.visibility = View.GONE
         scrollListener?.enabled = true
+        refreshLayout?.isEnabled = true
+    }
+
+    override fun onItemClick(view: View, position: Int) {
+        itemsAdapter.launchInfoActivity(view, position)
+    }
+
+    override fun onLongItemClick(view: View?, position: Int) { }
+
+    override fun onRemove(removedItemPosition: Int) {
+        itemsAdapter.itemRemoved(removedItemPosition)
     }
 
     private fun onErrorResponse(errorCode: Int) {
@@ -137,7 +170,7 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener {
         var dialog: DialogInfo? = null
         when (errorCode) {
             -1 -> {
-                dialog = DialogInfo.newInstance("Connection error", "There was an error connection to the server!", DialogType.ERROR)
+                dialog = DialogInfo.newInstance("Connection error", "There was an error connecting to the server!", DialogType.ERROR)
             }
             401 -> {
                 dialog = DialogInfo.newInstance("Session expired", "You need to provide your authentication once again!", DialogType.AUTH_ERROR)

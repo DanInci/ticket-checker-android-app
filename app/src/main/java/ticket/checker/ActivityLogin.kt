@@ -15,19 +15,15 @@ import retrofit2.Response
 import ticket.checker.beans.User
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
-import ticket.checker.extras.Util.SESSION_USER_CREATED_DATE
-import ticket.checker.extras.Util.SESSION_USER_ID
-import ticket.checker.extras.Util.SESSION_USER_NAME
-import ticket.checker.extras.Util.SESSION_USER_ROLE
-import ticket.checker.extras.Util.SESSION_USER_SOLD_TICKETS
-import ticket.checker.extras.Util.SESSION_USER_VALIDATED_TICKETS
+import ticket.checker.extras.Util.userCreatedDate
+import ticket.checker.extras.Util.userId
+import ticket.checker.extras.Util.userName
+import ticket.checker.extras.Util.userRole
+import ticket.checker.extras.Util.userSoldTicketsNo
+import ticket.checker.extras.Util.userValidatedTicketsNo
 import ticket.checker.services.ServiceManager
 
 class ActivityLogin : AppCompatActivity() {
-
-    private val USER_TEXT = "userEtText"
-    private val PASS_TEXT = "passEtText"
-
     private val etUsername : EditText by lazy { findViewById<EditText>(R.id.etUsername)}
     private val etPassword : EditText by lazy { findViewById<EditText>(R.id.etPassword)}
     private val btnLogin : Button by lazy { findViewById<Button>(R.id.btnLogin)}
@@ -45,7 +41,7 @@ class ActivityLogin : AppCompatActivity() {
 
     private val loginCallback : Callback<User> = object : Callback<User> {
         override fun onResponse(call: Call<User>?, response: Response<User>) {
-            loggingInDialog.let { loggingInDialog.dismiss() }
+            loggingInDialog.dismiss()
             if(response.isSuccessful) {
                 login(response.body() as User)
             }
@@ -64,6 +60,7 @@ class ActivityLogin : AppCompatActivity() {
             }
         }
         override fun onFailure(call: Call<User>?, t: Throwable?) {
+            loggingInDialog.dismiss()
             val loginFailedDialog = DialogInfo.newInstance("Login failed","There was an error connecting to the server!", DialogType.ERROR)
             loginFailedDialog.show(supportFragmentManager,"DIALOG_LOGIN_FAILED")
         }
@@ -110,23 +107,19 @@ class ActivityLogin : AppCompatActivity() {
     }
 
     private fun doLogin(username: String, password: String) {
-        ServiceManager.createSession(username,password)
+        ServiceManager.createSession(username, password)
         val call : Call<User> = ServiceManager.getUserService().getUser()
         call.enqueue(loginCallback)
     }
 
     private fun login(user : User) {
         val intent = Intent(this, ActivityMenu::class.java)
-
-        val bundle = Bundle()
-        bundle.putLong(SESSION_USER_ID,user.id)
-        bundle.putString(SESSION_USER_NAME,user.name)
-        bundle.putString(SESSION_USER_ROLE,user.role)
-        bundle.putLong(SESSION_USER_CREATED_DATE,user.createdDate.time)
-        bundle.putInt(SESSION_USER_SOLD_TICKETS,user.soldTicketsNo)
-        bundle.putInt(SESSION_USER_VALIDATED_TICKETS,user.validatedTicketsNo)
-
-        intent.putExtras(bundle)
+        userId = user.id
+        userName = user.name
+        userRole = user.role
+        userCreatedDate = user.createdDate
+        userSoldTicketsNo = user.soldTicketsNo
+        userValidatedTicketsNo = user.validatedTicketsNo
         startActivity(intent)
     }
 
@@ -142,5 +135,10 @@ class ActivityLogin : AppCompatActivity() {
         val lastEtPass = savedInstanceState?.getString(PASS_TEXT)
         etUsername.setText(lastEtUser)
         etPassword.setText(lastEtPass)
+    }
+
+    companion object {
+        private const val USER_TEXT = "userEtText"
+        private const val PASS_TEXT = "passEtText"
     }
 }

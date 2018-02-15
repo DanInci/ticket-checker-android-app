@@ -8,6 +8,7 @@
     android:background="@drawable/bg_dialog_content">
 
         <RelativeLayout
+            android:id="@+id/dialogHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_dialog_title"
@@ -21,12 +22,13 @@
                 android:id="@+id/tvTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Logging in"
+                android:text="Logging \In"
                 android:textColor="@android:color/white"
                 android:textSize="25sp"
                 android:layout_centerVertical="true"/>
 
             <ImageButton
+                android:visibility="gone"
                 android:id="@+id/btnClose"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
@@ -129,7 +131,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:background="@drawable/btn_style"
-                    android:text="Take me to login"
+                    android:text="Take Me to Login"
                     android:textAllCaps="false"
                     android:textColor="@drawable/btn_text_color"
                     android:textSize="18sp"

@@ -13,8 +13,8 @@ import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
+import ticket.checker.ActivityMenu.Companion.PRETENDED_USER_ROLE
 import ticket.checker.dialogs.DialogScan
-import ticket.checker.extras.Util.PRETENDED_USER_ROLE
 import ticket.checker.listeners.IScanDialogListener
 import java.io.IOException
 
@@ -36,7 +36,7 @@ class ActivityScan : AppCompatActivity() {
                 vibrator.vibrate(300)
                 val code = qrCodes.get(qrCodes.keyAt(0))
                 val dialogScan = DialogScan.newInstance(code.rawValue, pretendedUserRole)
-                dialogScan.setDialogListenr(scanDialogListener)
+                dialogScan.scanDialogListener = scanDialogListener
                 dialogScan.show(supportFragmentManager,"DIALOG_SCAN")
             }
         }

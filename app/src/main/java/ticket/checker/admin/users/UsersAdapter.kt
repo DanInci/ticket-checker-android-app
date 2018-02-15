@@ -21,8 +21,7 @@ import java.util.*
 /**
  * Created by Dani on 09.02.2018.
  */
-class UsersAdapter(context : Context) : AItemsAdapter<User, Int>() {
-    private val inflater = LayoutInflater.from(context)
+class UsersAdapter(context : Context) : AItemsAdapter<User, Int>(context) {
 
     override fun inflateItemHolder(parent: ViewGroup): RecyclerView.ViewHolder {
         val view =  inflater.inflate(R.layout.user_row, parent, false)
@@ -40,6 +39,22 @@ class UsersAdapter(context : Context) : AItemsAdapter<User, Int>() {
 
     override fun updateHeaderInfo(holder: RecyclerView.ViewHolder, filter: String, itemStats: Int?) {
         (holder as HeaderHolder).updateUsersHeaderInfo(filter, itemStats)
+    }
+
+    override fun launchInfoActivity(view: View, position : Int) {
+
+    }
+
+    override fun itemAdded(addedItem: User) {
+        var newItemStats = itemStats?: 0
+        items.add(0,addedItem)
+        notifyItemInserted(1)
+        newItemStats++
+        updateHeaderInfo(filter, newItemStats)
+    }
+
+    override fun itemRemoved(position: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     private class UserHolder(itemView : View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
@@ -83,6 +98,13 @@ class UsersAdapter(context : Context) : AItemsAdapter<User, Int>() {
         }
     }
 
+    override fun getItemId(position: Int): Long {
+        return when(position) {
+            0, items.size + 1 -> RecyclerView.NO_ID
+            else -> items[position-1].id!!
+        }
+    }
+
     private class HeaderHolder(itemView : View) : RecyclerView.ViewHolder(itemView) {
         private val tvUsersNumbers : TextView = itemView.findViewById(R.id.tvUsersNumbers)
 
@@ -92,7 +114,6 @@ class UsersAdapter(context : Context) : AItemsAdapter<User, Int>() {
             }
             else {
                 tvUsersNumbers.visibility = View.VISIBLE
-                val are = if (totalUsers == 1) "is" else "are"
                 var users = ""
                 when(filter) {
                     LIST_ALL -> {
@@ -105,7 +126,7 @@ class UsersAdapter(context : Context) : AItemsAdapter<User, Int>() {
                         users = if (totalUsers == 1)  "user" else "users"
                     }
                 }
-                tvUsersNumbers.text = "There $are a total of $totalUsers $users"
+                tvUsersNumbers.text = "There is a total of $totalUsers $users"
             }
         }
     }

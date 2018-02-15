@@ -1,11 +1,14 @@
 package ticket.checker.admin.tickets
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import ticket.checker.ActivityAdmin
+import ticket.checker.ActivityAdmin.Companion.CHANGES_TO_ADAPTER_ITEM
 import ticket.checker.ActivityAdmin.Companion.LIST_ALL
 import ticket.checker.ActivityAdmin.Companion.LIST_NOT_VALIDATED
 import ticket.checker.ActivityAdmin.Companion.LIST_VALIDATED
@@ -14,13 +17,15 @@ import ticket.checker.admin.AItemsAdapter
 import ticket.checker.beans.Ticket
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.DATE_FORMAT
+import ticket.checker.extras.Util.POSITION
+import ticket.checker.extras.Util.TICKET_NUMBER
+import ticket.checker.extras.Util.TICKET_STATUS
 import java.util.*
 
 /**
  * Created by Dani on 08.02.2018.
  */
-class TicketsAdapter(context: Context) : AItemsAdapter<Ticket,Array<Int>>() {
-    private val inflater = LayoutInflater.from(context)
+class TicketsAdapter(val context: Context) : AItemsAdapter<Ticket,Array<Int>>(context) {
 
     override fun inflateItemHolder(parent: ViewGroup): RecyclerView.ViewHolder {
         val view =  inflater.inflate(R.layout.ticket_row, parent, false)
@@ -40,16 +45,62 @@ class TicketsAdapter(context: Context) : AItemsAdapter<Ticket,Array<Int>>() {
         (holder as HeaderHolder).updateTicketHeaderInfo(filter, itemStats)
     }
 
-    private class TicketHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    override fun launchInfoActivity(view: View, position : Int) {
+        val activity = context as Activity
+        val intent  = Intent(activity, ActivityTicketDetails::class.java)
+        val ticketId = view.findViewById<TextView>(R.id.tvTicketId).text.removePrefix("#")
+        val isValidated = view.findViewById<TextView>(R.id.tvValidated).visibility == View.VISIBLE
+        intent.putExtra(TICKET_NUMBER, ticketId)
+        intent.putExtra(POSITION, position)
+        intent.putExtra(TICKET_STATUS, isValidated)
+        activity.startActivityForResult(intent, CHANGES_TO_ADAPTER_ITEM)
+        activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+    }
+
+    override fun itemAdded(addedItem: Ticket) {
+        val newItemStats = itemStats?: arrayOf(0,0)
+        newItemStats[0]++
+        items.add(0, addedItem)
+        notifyItemInserted(1)
+        updateHeaderInfo(filter, newItemStats)
+    }
+
+    override fun itemRemoved(position: Int) {
+        if(isItemPosition(position)) {
+            val newItemStats = itemStats ?: arrayOf(0, 0)
+            newItemStats[0]--
+            if (items[position - 1].validatedAt != null) {
+                newItemStats[1]--
+            }
+            items.removeAt(position - 1)
+            notifyItemRemoved(position)
+            updateHeaderInfo(filter, newItemStats)
+        }
+    }
+
+    fun ticketChangeValidation(position : Int) {
+        if(isItemPosition(position)) {
+            val ticket = items[position-1]
+            val newItemStats = itemStats ?: arrayOf(0,0)
+            if(ticket.validatedAt == null) {
+                newItemStats[1]++
+                ticket.validatedAt = Date()
+            }
+            else {
+                newItemStats[1]--
+                ticket.validatedAt = null
+            }
+            notifyItemChanged(position)
+            updateHeaderInfo(filter, newItemStats)
+        }
+    }
+
+    private class TicketHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         private val leftBar = itemView.findViewById<View>(R.id.leftBar)
         private val tvTicketId = itemView.findViewById<TextView>(R.id.tvTicketId)
         private val tvSoldAtText = itemView.findViewById<TextView>(R.id.tvSoldAtText)
         private val tvTicketSoldAt = itemView.findViewById<TextView>(R.id.tvTicketSoldAt)
         private val tvValidated = itemView.findViewById<TextView>(R.id.tvValidated)
-
-        init {
-            itemView.setOnClickListener(this)
-        }
 
         fun updateTicketHolderInfo(ticket: Ticket) {
             setTicketId(ticket.ticketId)
@@ -82,8 +133,6 @@ class TicketsAdapter(context: Context) : AItemsAdapter<Ticket,Array<Int>>() {
                 tvTicketSoldAt.text = DATE_FORMAT.format(soldAt)
             }
         }
-
-        override fun onClick(v: View?) {}
     }
 
     private class HeaderHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -98,9 +147,8 @@ class TicketsAdapter(context: Context) : AItemsAdapter<Ticket,Array<Int>>() {
             else {
                 tvTotalTickets.visibility = View.VISIBLE
                 val totalTickets = ticketNumbers.getOrElse(0, {0})
-                val are = if (totalTickets == 1) "is" else "are"
                 val tickets = if (totalTickets == 1)  "ticket" else "tickets"
-                tvTotalTickets.text = "There $are a total of $totalTickets $tickets"
+                tvTotalTickets.text = "There is a total of $totalTickets $tickets"
                 when (filter) {
                     LIST_ALL -> {
                         tvValidatedTickets.visibility = View.VISIBLE
