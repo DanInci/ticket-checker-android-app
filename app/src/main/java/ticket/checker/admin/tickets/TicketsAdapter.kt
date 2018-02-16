@@ -48,8 +48,8 @@ class TicketsAdapter(val context: Context) : AItemsAdapter<Ticket,Array<Int>>(co
     override fun launchInfoActivity(view: View, position : Int) {
         val activity = context as Activity
         val intent  = Intent(activity, ActivityTicketDetails::class.java)
-        val ticketId = view.findViewById<TextView>(R.id.tvTicketId).text.removePrefix("#")
-        val isValidated = view.findViewById<TextView>(R.id.tvValidated).visibility == View.VISIBLE
+        val ticketId = items[position-1].ticketId
+        val isValidated = items[position-1].validatedAt != null
         intent.putExtra(TICKET_NUMBER, ticketId)
         intent.putExtra(POSITION, position)
         intent.putExtra(TICKET_STATUS, isValidated)

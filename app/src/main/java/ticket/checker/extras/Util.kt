@@ -1,7 +1,13 @@
 package ticket.checker.extras
 
+import android.support.v4.app.FragmentManager
 import okhttp3.ResponseBody
+import retrofit2.Call
+import retrofit2.Response
+import ticket.checker.AppTicketChecker
 import ticket.checker.beans.ErrorResponse
+import ticket.checker.dialogs.DialogInfo
+import ticket.checker.dialogs.DialogType
 import ticket.checker.services.ServiceManager
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
@@ -11,13 +17,6 @@ import java.util.*
  * Created by Dani on 25.01.2018.
  */
 object Util {
-    var userId : Long? = null
-    var userName : String? = null
-    var userRole : String? = null
-    var userCreatedDate : Date? = null
-    var userSoldTicketsNo : Int? = null
-    var userValidatedTicketsNo  : Int? = null
-
     val DATE_FORMAT = SimpleDateFormat("dd MMM yyyy")
     val DATE_FORMAT_WITH_HOUR = SimpleDateFormat("dd MMM yyyy HH:mm")
 
@@ -30,6 +29,9 @@ object Util {
 
     const val TICKET_NUMBER = "ticketNumber"
     const val TICKET_STATUS = "ticketStatus"
+    const val USER_ID = "userId"
+    const val USER_NAME = "userName"
+    const val USER_ROLE = "userRole"
     const val POSITION = "adapterPosition"
 
     fun formatDate(date : Date) : String {
@@ -58,7 +60,7 @@ object Util {
 
     fun convertError(errorBody : ResponseBody?) : ErrorResponse {
         return try {
-            ServiceManager.errorConverter.convert(errorBody)
+            ServiceManager.errorConverter!!.convert(errorBody)
             }
         catch (e : Exception) {
             ErrorResponse(Date(),"","")
@@ -79,5 +81,36 @@ object Util {
         }
 
         return result.toString()
+    }
+
+    fun <T> treatBasicError(call : Call<T>, response : Response<T>?, fragmentManager : FragmentManager) : Boolean {
+        var hasResponded = false
+        if(response == null) {
+            val dialogConnectionError = DialogInfo.newInstance("Connection error", "There was an error connecting to the server", DialogType.ERROR)
+            dialogConnectionError.show(fragmentManager, "DIALOG_ERROR")
+            hasResponded = true
+        }
+        else {
+            when(response.code()) {
+                401 -> {
+                    AppTicketChecker.clearSession()
+                    val dialogAuthError = DialogInfo.newInstance("Session expired", "You need to provide your authentication once again", DialogType.AUTH_ERROR)
+                    dialogAuthError.isCancelable = false
+                    dialogAuthError.show(fragmentManager, "DIALOG_SESSION_ERROR")
+                    hasResponded = true
+                }
+                403 -> {
+                    val dialogError = DialogInfo.newInstance("Authorization required", "You are not allowed to see this information", DialogType.ERROR)
+                    dialogError.show(fragmentManager, "DIALOG_AUTH_ERROR")
+                    hasResponded = true
+                }
+                500 -> {
+                    val dialogServerError = DialogInfo.newInstance("Server error", "Ooups, there was a server error", DialogType.ERROR)
+                    dialogServerError.show(fragmentManager, "DIALOG_SERVER_ERROR")
+                    hasResponded = true
+                }
+            }
+        }
+        return hasResponded
     }
 }

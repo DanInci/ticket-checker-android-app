@@ -2,12 +2,13 @@
 <ScrollView android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:fillViewport="true">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:fillViewport="true"
+    tools:context=".ActivityLogin">
 
-    <FrameLayout android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/imgBgn"
@@ -16,9 +17,6 @@
 
         <LinearLayout android:layout_width="match_parent"
             android:layout_height="match_parent"
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            tools:context=".ActivityLogin"
             android:padding="20dp"
             android:orientation="vertical"
             android:gravity="center">
@@ -28,6 +26,7 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"/>
 
+
             <EditText
                 android:background="@drawable/et_style"
                 android:padding="10dp"
@@ -35,14 +34,15 @@
                 android:layout_marginTop="30dp"
                 android:id="@+id/etUsername"
                 android:layout_width="match_parent"
+                android:maxWidth="100dp"
                 android:layout_height="wrap_content"
                 android:inputType="textVisiblePassword"
                 android:hint="@string/hintUsername"
                 android:drawableLeft="@drawable/ic_person_outline"
                 android:drawablePadding="15dp"
-                android:textColorHint="@color/hintTextColorOnPrimary"
+                android:textColorHint="@color/transparentGrey"
                 android:layout_marginBottom="10dp"
-                android:maxLength="100"/>
+                android:maxLength="100" />
 
             <EditText
                 android:id="@+id/etPassword"
@@ -50,14 +50,15 @@
                 android:padding="10dp"
                 android:textColor="@color/text_style"
                 android:layout_width="match_parent"
+                android:maxWidth="100dp"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
                 android:hint="@string/hintPassword"
                 android:drawableLeft="@drawable/ic_lock_outline"
                 android:drawablePadding="15dp"
-                android:textColorHint="@color/hintTextColorOnPrimary"
-                android:layout_marginBottom="20dp"
-                android:maxLength="100"/>
+                android:textColorHint="@color/transparentGrey"
+                android:maxLength="100"
+                android:layout_marginBottom="20dp"/>
 
             <Button
                 android:id="@+id/btnLogin"
@@ -67,6 +68,27 @@
                 android:textColor="@drawable/btn_text_color"
                 android:layout_width="150dp"
                 android:layout_height="35dp"/>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp">
+
+                <CheckBox
+                    android:id="@+id/autoLoginCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Auto-Login"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="12sp"
+                    android:buttonTint="@color/autologin_checkbox_style"/>
+            </LinearLayout>
+
+
         </LinearLayout>
     </FrameLayout>
 </ScrollView>

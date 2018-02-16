@@ -2,13 +2,18 @@ package ticket.checker
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.*
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.Vibrator
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.DisplayMetrics
 import android.util.SparseArray
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.View
+import android.widget.ImageView
 import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
@@ -18,13 +23,16 @@ import ticket.checker.dialogs.DialogScan
 import ticket.checker.listeners.IScanDialogListener
 import java.io.IOException
 
-class ActivityScan : AppCompatActivity() {
+class ActivityScan : AppCompatActivity(), View.OnClickListener {
 
     private val cameraPreview : SurfaceView by lazy {
         findViewById<SurfaceView>(R.id.cameraPreview)
     }
     private val barcodeDetector by lazy {
         BarcodeDetector.Builder(this@ActivityScan).setBarcodeFormats(Barcode.QR_CODE).build()
+    }
+    private val btnBack by lazy {
+        findViewById<ImageView>(R.id.btnBack)
     }
     private val barcodeProcessor = object : Detector.Processor<Barcode> {
         override fun release() { }
@@ -55,7 +63,7 @@ class ActivityScan : AppCompatActivity() {
                 .setRequestedPreviewSize(displayMetrics.widthPixels,displayMetrics.heightPixels)
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
                 .setAutoFocusEnabled(true)
-                .setRequestedFps(20.0f)
+                .setRequestedFps(15.0f)
                 .build()
     }
     private val cameraPreviewCallback = object : SurfaceHolder.Callback {
@@ -82,6 +90,7 @@ class ActivityScan : AppCompatActivity() {
         setContentView(R.layout.activity_scan)
         cameraPreview.holder.addCallback(cameraPreviewCallback)
         barcodeDetector.setProcessor(barcodeProcessor)
+        btnBack.setOnClickListener(this)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -91,6 +100,12 @@ class ActivityScan : AppCompatActivity() {
                     startBarcodeDetection(false)
                 }
             }
+        }
+    }
+
+    override fun onClick(v: View) {
+        if(v.id == R.id.btnBack) {
+            finish()
         }
     }
 

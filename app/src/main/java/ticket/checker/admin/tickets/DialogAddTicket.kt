@@ -15,8 +15,7 @@ import retrofit2.Response
 import ticket.checker.R
 import ticket.checker.admin.listeners.ActionListener
 import ticket.checker.beans.Ticket
-import ticket.checker.dialogs.DialogInfo
-import ticket.checker.dialogs.DialogType
+import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
 
 class DialogAddTicket : DialogFragment(), View.OnClickListener {
@@ -45,34 +44,13 @@ class DialogAddTicket : DialogFragment(), View.OnClickListener {
                 etSoldTo?.setText("")
             }
             else {
-                when(response.code()) {
-                    400 -> {
-                        etTicketNumber?.error = "This ticket id already exists!"
-                    }
-                    401 -> {
-                        dismiss()
-                        val authDialog = DialogInfo.newInstance("Session expired","You need to provide your authentication once again!", DialogType.AUTH_ERROR)
-                        authDialog.isCancelable = false
-                        authDialog.show(fragmentManager,"DIALOG_AUTH_ERROR")
-                    }
-                    403 -> {
-                        val permissionDialog = DialogInfo.newInstance("Add failed","You don't have permissions to create tickets!", DialogType.ERROR)
-                        permissionDialog.show(fragmentManager,"DIALOG_FAIL")
-                    }
-                    else -> {
-                        val unknownError =  DialogInfo.newInstance("Add failed","There was an unexpected error!", DialogType.ERROR)
-                        unknownError.show(fragmentManager, "DIALOG_FAIL")
-                    }
-                }
+                onErrorResponse(call, response)
             }
         }
-
-        override fun onFailure(call: Call<Ticket>?, t: Throwable?) {
+        override fun onFailure(call: Call<Ticket>, t: Throwable) {
             loadingSpinner?.visibility = View.GONE
             submitButton?.visibility = View.VISIBLE
-            val dialogConnection = DialogInfo.newInstance("Connection error","There was an error connecting to the server", DialogType.ERROR)
-            dialogConnection.showHeader(false)
-            dialogConnection.show(fragmentManager,"DIALOG_FAIL")
+            onErrorResponse(call, null)
         }
     }
 
@@ -126,6 +104,15 @@ class DialogAddTicket : DialogFragment(), View.OnClickListener {
         val ticket = Ticket(ticketNumber, soldTo)
         val call = ServiceManager.getTicketService().createTicket(ticket)
         call.enqueue(submitCallback)
+    }
+
+    private fun onErrorResponse(call : Call<Ticket>, response : Response<Ticket>?) {
+        val wasHandled = Util.treatBasicError(call, response, fragmentManager)
+        if(!wasHandled) {
+            if(response?.code() == 400) {
+                etTicketNumber?.error = "This ticket id already exists!"
+            }
+        }
     }
 
 }

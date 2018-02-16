@@ -13,6 +13,8 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.*
 import ticket.checker.R
+import ticket.checker.listeners.DialogExitListener
+import ticket.checker.listeners.DialogResponseListener
 import ticket.checker.services.ServiceManager
 
 

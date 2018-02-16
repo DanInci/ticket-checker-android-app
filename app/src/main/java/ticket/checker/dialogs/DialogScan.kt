@@ -1,5 +1,7 @@
 package ticket.checker.dialogs
 
+import android.app.Dialog
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -26,48 +28,31 @@ import ticket.checker.services.ServiceManager
  * Created by Dani on 31.01.2018.
  */
 class DialogScan : DialogFragment(), View.OnClickListener {
-    var scanDialogListener : IScanDialogListener? = null
+    var scanDialogListener: IScanDialogListener? = null
 
-    private var ticketNumber : String? = null
+    private var ticketNumber: String? = null
     private var pretendedUserRole: String? = null
 
-    private var tvTicketNumber : TextView? = null
-    private var loadingSpinner : ProgressBar? = null
-    private var tvDescription : TextView? = null
-    private var btnClose : ImageButton? = null
-    private var addAction : LinearLayout? = null
-    private var etSoldTo : EditText? = null
-    private var btnAdd : Button? = null
-    private var btnValidate : Button? = null
-    private var btnDelete : Button? = null
+    private var tvTicketNumber: TextView? = null
+    private var loadingSpinner: ProgressBar? = null
+    private var tvDescription: TextView? = null
+    private var btnClose: ImageButton? = null
+    private var addAction: LinearLayout? = null
+    private var etSoldTo: EditText? = null
+    private var btnAdd: Button? = null
+    private var btnValidate: Button? = null
+    private var btnDelete: Button? = null
 
-    private val transactionCallback : Callback<Void> = object : Callback<Void> {
-        override fun onResponse(call: Call<Void>, response: Response<Void>) {
-            if(response.isSuccessful) {
+    private val verificationCallback = object <T> : Callback<T> {
+        override fun onResponse(call: Call<T>, response: Response<T>) {
+            if (response.isSuccessful) {
                 dismiss()
-                scanDialogListener?.dismiss()
-            }
-            else {
-                val error = Util.convertError(response.errorBody())
-                onErrorResponse(response.code(), error)
+            } else {
+                onErrorResponse(call, response)
             }
         }
-        override fun onFailure(call: Call<Void>, t: Throwable) {
-            errorResult("Error connecting to the server!")
-        }
-    }
-    private val creationCallback: Callback<Ticket> = object : Callback<Ticket> {
-        override fun onResponse(call: Call<Ticket>, response: Response<Ticket>) {
-            if(response.isSuccessful) {
-                dismiss()
-                scanDialogListener?.dismiss()
-            }
-            else {
-                val error = Util.convertError(response.errorBody())
-                onErrorResponse(response.code(), error)
-            }
-        }
-        override fun onFailure(call: Call<Ticket>?, t: Throwable?) {
+
+        override fun onFailure(call: Call<T>, t: Throwable) {
             errorResult("Error connecting to the server!")
         }
     }
@@ -81,18 +66,23 @@ class DialogScan : DialogFragment(), View.OnClickListener {
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater?.inflate(R.layout.dialog_scan,container,false)
+        val view = inflater?.inflate(R.layout.dialog_scan, container, false)
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog?.window?.requestFeature(Window.FEATURE_NO_TITLE)
         dialog?.setCanceledOnTouchOutside(false)
         return view
     }
 
+    override fun onDismiss(dialog: DialogInterface?) {
+        super.onDismiss(dialog)
+        scanDialogListener?.dismiss()
+    }
+
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         tvTicketNumber = view?.findViewById(R.id.tvTicketNumber)
         loadingSpinner = view?.findViewById(R.id.loadingSpinner)
-        loadingSpinner?.visibility=View.GONE
+        loadingSpinner?.visibility = View.GONE
         tvDescription = view?.findViewById(R.id.tvDescription)
         btnClose = view?.findViewById(R.id.btnClose)
         btnClose?.setOnClickListener(this)
@@ -110,7 +100,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
     }
 
     override fun onClick(v: View?) {
-        when(v?.id) {
+        when (v?.id) {
             R.id.btnClose -> {
                 dismiss()
                 scanDialogListener?.dismiss()
@@ -118,25 +108,25 @@ class DialogScan : DialogFragment(), View.OnClickListener {
             R.id.btnValidate -> {
                 showLoading()
                 val call = ServiceManager.getTicketService().validateTicket(true, ticketNumber as String)
-                call.enqueue(transactionCallback)
+                call.enqueue(verificationCallback as Callback<Void>)
             }
             R.id.btnAdd -> {
                 showLoading()
                 val soldTo = etSoldTo?.text?.toString() ?: ""
                 val ticket = Ticket(ticketNumber as String, soldTo)
                 val call = ServiceManager.getTicketService().createTicket(ticket)
-                call.enqueue(creationCallback)
+                call.enqueue(verificationCallback as Callback<Ticket>)
             }
             R.id.btnDelete -> {
                 showLoading()
                 val call = ServiceManager.getTicketService().deleteTicketById(ticketNumber as String)
-                call.enqueue(transactionCallback)
+                call.enqueue(verificationCallback as Callback<Void>)
             }
         }
     }
 
     private fun switchViews() {
-        when(pretendedUserRole) {
+        when (pretendedUserRole) {
             ROLE_ADMIN -> {
                 btnValidate?.visibility = View.VISIBLE
                 addAction?.visibility = View.VISIBLE
@@ -159,43 +149,35 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         loadingSpinner?.visibility = View.VISIBLE
     }
 
-    private fun onErrorResponse(code : Int, error : ErrorResponse) {
-        when(code) {
-            404 -> {
-                errorResult("A ticket with this id was not found!")
-            }
-            403 -> {
-                errorResult("You don't have permissions to do this!")
-            }
-            401 -> {
-                dismiss()
-                val authDialog = DialogInfo.newInstance("Session expired","You need to provide your authentication once again!", DialogType.AUTH_ERROR)
-                authDialog.isCancelable=false
-                authDialog.show(fragmentManager,"DIALOG_AUTH")
-            }
-            400 -> {
-                when(error.message) {
-                    ERROR_TICKET_EXISTS -> {
-                        errorResult("This ticket id already exists!")
-                    }
-                    ERROR_TICKET_VALIDATION -> {
-                        errorResult("This ticket has already been validated!")
-                    }
-                    else -> {
-                        errorResult("Unexpected ticket id format!")
+    private fun <T> onErrorResponse(call: Call<T>, response: Response<T>?) {
+        val wasHandled = Util.treatBasicError(call, response, fragmentManager)
+        if (!wasHandled) {
+            when (response?.code()) {
+                400 -> {
+                    val error = Util.convertError(response.errorBody())
+                    when (error.message) {
+                        ERROR_TICKET_EXISTS -> {
+                            errorResult("This ticket id already exists!")
+                        }
+                        ERROR_TICKET_VALIDATION -> {
+                            errorResult("This ticket has already been validated!")
+                        }
+                        else -> {
+                            errorResult("Unexpected ticket id format!")
+                        }
                     }
                 }
+                404 -> {
+                    errorResult("A ticket with this id was not found!")
+                }
             }
-            500 -> {
-                errorResult("There was a server error!")
-            }
-            else -> {
-                errorResult("Unexpected server response!")
-            }
+        }
+        else {
+            dismiss()
         }
     }
 
-    private fun errorResult(errorMsg : String) {
+    private fun errorResult(errorMsg: String) {
         btnClose?.visibility = View.VISIBLE
         loadingSpinner?.visibility = View.GONE
         tvDescription?.text = errorMsg

@@ -2,9 +2,9 @@
 <resources>
     <color name="colorPrimary">#00796b</color>
     <color name="colorPrimaryDark">#004c40</color>
-    <color name="colorPrimaryLight">#48a999</color>
+    <color name="colorPrimaryLight">#cce4e1</color>
 
-    <color name="hintTextColorOnPrimary">#9e9e9e</color>
+    <color name="transparentPrimary">#8800796b</color>
 
     <color name="colorSecondary">#ffa000</color>
     <color name="colorSecondaryDark">#c67100</color>
@@ -14,6 +14,8 @@
     <color name="backgroundGrey">#eeeef0</color>
     <color name="lightGrey">#d2d2d2</color>
     <color name="darkerGrey">#ababad</color>
+    <color name="grey">#4D4D4D</color>
+    <color name="transparentGrey">#554D4D4D</color>
     <color name="textBlack">#272a2d</color>
 
     <color name="deepPurple">#7c4dff</color>

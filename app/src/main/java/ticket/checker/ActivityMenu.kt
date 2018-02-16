@@ -10,6 +10,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import com.bumptech.glide.Glide
@@ -17,18 +18,17 @@ import com.bumptech.glide.request.RequestOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import ticket.checker.AppTicketChecker.Companion.userCreatedDate
+import ticket.checker.AppTicketChecker.Companion.userId
+import ticket.checker.AppTicketChecker.Companion.userName
+import ticket.checker.AppTicketChecker.Companion.userRole
+import ticket.checker.AppTicketChecker.Companion.userSoldTicketsNo
+import ticket.checker.AppTicketChecker.Companion.userValidatedTicketsNo
 import ticket.checker.beans.User
-import ticket.checker.dialogs.DialogInfo
-import ticket.checker.dialogs.DialogType
+import ticket.checker.extras.Util
 import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.extras.Util.ROLE_ADMIN
 import ticket.checker.extras.Util.ROLE_USER
-import ticket.checker.extras.Util.userCreatedDate
-import ticket.checker.extras.Util.userId
-import ticket.checker.extras.Util.userName
-import ticket.checker.extras.Util.userRole
-import ticket.checker.extras.Util.userSoldTicketsNo
-import ticket.checker.extras.Util.userValidatedTicketsNo
 import ticket.checker.services.ServiceManager
 import java.util.*
 
@@ -67,7 +67,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         }
     }
     private val updateUserInfoCallback : Callback<User> = object : Callback<User> {
-        override fun onResponse(call: Call<User>?, response: Response<User>) {
+        override fun onResponse(call: Call<User>, response: Response<User>) {
             if(response.isSuccessful) {
                 val user = response.body()
                 userId = user?.id
@@ -76,21 +76,19 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
                 userRole = user?.role
                 userSoldTicketsNo = user?.soldTicketsNo
                 userValidatedTicketsNo = user?.validatedTicketsNo
+                if(!firstLoadHappen) {
+                    pretendedUserRole = user?.role
+                    firstLoadHappen = true
+                    switchViews()
+                }
                 updateProfileInfo()
             }
             else {
-                when(response.code()) {
-                    401, 403 -> {
-                        val dialogAuthError = DialogInfo.newInstance("Session expired", "You need to provide your authentication once again!", DialogType.AUTH_ERROR)
-                        dialogAuthError.isCancelable = false
-                        dialogAuthError.show(supportFragmentManager, "DIALOG_ERROR")
-                    }
-                }
+                Util.treatBasicError(call, response, supportFragmentManager)
             }
         }
-        override fun onFailure(call: Call<User>?, t: Throwable?) {
-            val dialogConnectionError = DialogInfo.newInstance("Connection error", "There was an error connecting to the server!", DialogType.ERROR)
-            dialogConnectionError.show(supportFragmentManager, "DIALOG_ERROR")
+        override fun onFailure(call: Call<User>, t: Throwable?) {
+            Util.treatBasicError(call,null, supportFragmentManager)
         }
     }
     private val tvName by lazy {
@@ -122,6 +120,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     }
 
     var menuIsShown = false
+    var firstLoadHappen = false
 
     private var pretendedUserRole: String? = null
     private var toolbarImg : Int? = null
@@ -129,7 +128,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pretendedUserRole = savedInstanceState?.getString(PRETENDED_USER_ROLE) ?: userRole
+        pretendedUserRole = savedInstanceState?.getString(PRETENDED_USER_ROLE) ?: if(userRole != null) { userRole } else { ROLE_USER }
         toolbarImg = savedInstanceState?.getInt(CURRENT_TOOLBAR_IMG) ?: randomToolbarImg()
         currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM_ID) ?: R.id.action_admin_mode
 
@@ -140,11 +139,14 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         cvAdmin.setOnClickListener(this)
         cvScan.setOnClickListener(this)
         cvStatistics.setOnClickListener(this)
+        if(userId != null) {
+            firstLoadHappen = true
+            switchViews()
+        }
     }
 
     override fun onStart() {
         super.onStart()
-        switchViews()
         updateProfileInfo()
         val call : Call<User> = ServiceManager.getUserService().getUser()
         call.enqueue(updateUserInfoCallback)
@@ -170,7 +172,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         when(userRole) {
             ROLE_ADMIN -> menuInflater.inflate(R.menu.menu_admin, menu)
-            else -> menuInflater.inflate(R.menu.menu_user, menu)
+            ROLE_USER -> menuInflater.inflate(R.menu.menu_user, menu)
         }
         if(!menuIsShown) {
             for(i in 0 until menu.size()) {
@@ -232,7 +234,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
                 actionStatistics.visibility = View.VISIBLE
                 actionAdmin.visibility = View.VISIBLE
             }
-            else -> {
+            ROLE_USER -> {
                 actionScan.visibility = View.VISIBLE
                 actionStatistics.visibility = View.VISIBLE
                 actionAdmin.visibility = View.GONE
@@ -241,12 +243,21 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun updateProfileInfo() {
-        tvName.text = userName
-        tvCreated.text = DATE_FORMAT.format(userCreatedDate)
-        tvHighestRole.text = userRole?.removePrefix("ROLE_")
-        tvCurrentRole.text = pretendedUserRole?.removePrefix("ROLE_")
-        tvCreatedTickets.text = userSoldTicketsNo.toString()
-        tvValidatedTickets.text = userValidatedTicketsNo.toString()
+        if(firstLoadHappen) {
+            findViewById<ProgressBar>(R.id.lsName).visibility = View.GONE
+            findViewById<ProgressBar>(R.id.lsCreated).visibility = View.GONE
+            findViewById<ProgressBar>(R.id.lsHighestRole).visibility = View.GONE
+            findViewById<ProgressBar>(R.id.lsCurrentRole).visibility = View.GONE
+            findViewById<ProgressBar>(R.id.lsCreatedTickets).visibility = View.GONE
+            findViewById<ProgressBar>(R.id.lsValidatedTickets).visibility = View.GONE
+
+            tvName.text = userName
+            tvCreated.text = DATE_FORMAT.format(userCreatedDate)
+            tvHighestRole.text = userRole?.removePrefix("ROLE_")
+            tvCurrentRole.text = pretendedUserRole?.removePrefix("ROLE_")
+            tvCreatedTickets.text = userSoldTicketsNo.toString()
+            tvValidatedTickets.text = userValidatedTicketsNo.toString()
+        }
     }
 
     private fun checkMenuItem(menuItemId : Int) {
@@ -259,7 +270,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun logout() {
-        ServiceManager.invalidateSession()
+        AppTicketChecker.clearSession()
         finish()
     }
 

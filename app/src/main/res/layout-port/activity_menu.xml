@@ -10,7 +10,7 @@
         android:layout_height="190dp"
         android:layout_width="match_parent"
         android:theme="@style/AppTheme.ToolbarStyle">
-        
+
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsingToolbar"
             android:layout_width="match_parent"
@@ -25,7 +25,7 @@
                 android:id="@+id/bg_collapsingToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
-            
+
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
@@ -54,11 +54,13 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:clipToPadding="false"
-                android:layout_marginTop="10dp">
+                android:layout_marginTop="10dp"
+                android:weightSum="100">
 
                 <android.support.v7.widget.CardView
                     android:id="@+id/userDetails"
-                    android:layout_width="340dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="90"
                     android:layout_height="165dp"
                     android:layout_margin="10dp"
                     android:foreground="?android:attr/selectableItemBackground"
@@ -72,12 +74,11 @@
                         android:weightSum="100">
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
+                            android:layout_weight="30"
                             android:layout_height="match_parent"
                             android:orientation="vertical"
-                            android:gravity="center"
-                            android:paddingLeft="20dp"
-                            android:paddingRight="10dp">
+                            android:gravity="center">
 
                             <ImageView
                                 android:layout_width="64dp"
@@ -97,16 +98,17 @@
                             android:layout_height="match_parent"
                             android:layout_width="1dp"
                             android:background="@color/backgroundGrey"
-                            android:layout_margin="10dp"/>
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"/>
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
+                            android:layout_weight="70"
                             android:layout_height="match_parent"
-                            android:layout_weight="100"
                             android:orientation="vertical"
-                            android:gravity="top"
-                            android:paddingTop="20dp"
-                            android:paddingLeft="10dp">
+                            android:gravity="center"
+                            android:paddingStart="15dp"
+                            android:paddingEnd="15dp">
 
                             <RelativeLayout
                                 android:layout_width="match_parent"
@@ -125,10 +127,16 @@
                                     android:layout_height="wrap_content"
                                     android:layout_alignParentEnd="true"
                                     android:layout_alignParentTop="true"
-                                    android:text="Daniel Incicau"
-                                    android:layout_marginRight="20dp"
                                     android:textColor="@color/darkerGrey"
                                     android:textStyle="normal" />
+
+                                <ProgressBar
+                                    android:id="@+id/lsName"
+                                    android:layout_width="19dp"
+                                    android:layout_height="19dp"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_alignParentTop="true"
+                                    android:layout_marginEnd="15dp" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -148,10 +156,16 @@
                                     android:layout_height="wrap_content"
                                     android:layout_alignParentEnd="true"
                                     android:layout_alignParentTop="true"
-                                    android:text="20 Jan 2018"
-                                    android:layout_marginEnd="20dp"
                                     android:textColor="@color/darkerGrey"
                                     android:textStyle="normal" />
+
+                                <ProgressBar
+                                    android:id="@+id/lsCreated"
+                                    android:layout_width="19dp"
+                                    android:layout_height="19dp"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_alignParentTop="true"
+                                    android:layout_marginEnd="15dp" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -171,10 +185,16 @@
                                     android:layout_height="wrap_content"
                                     android:layout_alignParentEnd="true"
                                     android:layout_alignParentTop="true"
-                                    android:text="ADMIN"
-                                    android:layout_marginEnd="20dp"
                                     android:textColor="@color/darkerGrey"
                                     android:textStyle="normal" />
+
+                                <ProgressBar
+                                    android:id="@+id/lsHighestRole"
+                                    android:layout_width="19dp"
+                                    android:layout_height="19dp"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_alignParentTop="true"
+                                    android:layout_marginEnd="15dp" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -194,10 +214,16 @@
                                     android:layout_height="wrap_content"
                                     android:layout_alignParentEnd="true"
                                     android:layout_alignParentTop="true"
-                                    android:text="USER"
-                                    android:layout_marginEnd="20dp"
                                     android:textColor="@color/darkerGrey"
                                     android:textStyle="normal" />
+
+                                <ProgressBar
+                                    android:id="@+id/lsCurrentRole"
+                                    android:layout_width="19dp"
+                                    android:layout_height="19dp"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_alignParentTop="true"
+                                    android:layout_marginEnd="15dp" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -217,10 +243,16 @@
                                     android:layout_height="wrap_content"
                                     android:layout_alignParentEnd="true"
                                     android:layout_alignParentTop="true"
-                                    android:text="20"
-                                    android:layout_marginEnd="20dp"
                                     android:textColor="@color/darkerGrey"
                                     android:textStyle="normal" />
+
+                                <ProgressBar
+                                    android:id="@+id/lsCreatedTickets"
+                                    android:layout_width="19dp"
+                                    android:layout_height="19dp"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_alignParentTop="true"
+                                    android:layout_marginEnd="15dp" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -240,10 +272,16 @@
                                     android:layout_height="wrap_content"
                                     android:layout_alignParentEnd="true"
                                     android:layout_alignParentTop="true"
-                                    android:text="280"
-                                    android:layout_marginEnd="20dp"
                                     android:textColor="@color/darkerGrey"
                                     android:textStyle="normal" />
+
+                                <ProgressBar
+                                    android:id="@+id/lsValidatedTickets"
+                                    android:layout_width="19dp"
+                                    android:layout_height="19dp"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_alignParentTop="true"
+                                    android:layout_marginEnd="15dp" />
                             </RelativeLayout>
                         </LinearLayout>
                     </LinearLayout>
@@ -255,11 +293,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:clipToPadding="false">
+                android:clipToPadding="false"
+                android:weightSum="100">
 
                 <android.support.v7.widget.CardView
                     android:id="@+id/scan"
-                    android:layout_width="160dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="45"
                     android:layout_height="190dp"
                     android:layout_margin="10dp"
                     android:foreground="?android:attr/selectableItemBackground"
@@ -301,7 +341,8 @@
 
                 <android.support.v7.widget.CardView
                     android:id="@+id/statistics"
-                    android:layout_width="160dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="45"
                     android:layout_height="190dp"
                     android:layout_margin="10dp"
                     android:foreground="?android:attr/selectableItemBackground"
@@ -351,11 +392,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:clipToPadding="false">
+                android:clipToPadding="false"
+                android:weightSum="100">
 
                 <android.support.v7.widget.CardView
                     android:id="@+id/admin"
-                    android:layout_width="340dp"
+                    android:visibility="gone"
+                    android:layout_width="0dp"
+                    android:layout_weight="90"
                     android:layout_height="180dp"
                     android:layout_margin="10dp"
                     android:foreground="?android:attr/selectableItemBackground"

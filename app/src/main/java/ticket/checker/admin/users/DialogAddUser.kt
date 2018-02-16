@@ -17,6 +17,7 @@ import ticket.checker.admin.listeners.ActionListener
 import ticket.checker.beans.User
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
+import ticket.checker.extras.Util
 import ticket.checker.extras.Util.ROLE_ADMIN
 import ticket.checker.extras.Util.ROLE_USER
 import ticket.checker.extras.Util.hashString
@@ -49,34 +50,14 @@ class DialogAddUser : DialogFragment(), View.OnClickListener {
                 resetFields()
             }
             else {
-                when(response.code()) {
-                    400 -> {
-                        etUsername?.error = "This username already exists!"
-                    }
-                    401 -> {
-                        dismiss()
-                        val authDialog = DialogInfo.newInstance("Session expired","You need to provide your authentication once again!", DialogType.AUTH_ERROR)
-                        authDialog.isCancelable = false
-                        authDialog.show(fragmentManager,"DIALOG_AUTH_ERROR")
-                    }
-                    403 -> {
-                        val permissionDialog = DialogInfo.newInstance("Add failed","You don't have permissions to add users!", DialogType.ERROR)
-                        permissionDialog.show(fragmentManager,"DIALOG_FAIL")
-                    }
-                    else -> {
-                        val unknownError = DialogInfo.newInstance("Add failed", "There was an unexpected error!", DialogType.ERROR)
-                        unknownError.show(fragmentManager, "DIALOG_FAIL")
-                    }
-                }
+                onErrorResponse(call, response)
             }
         }
 
-        override fun onFailure(call: Call<User>?, t: Throwable?) {
+        override fun onFailure(call: Call<User>, t: Throwable?) {
             loadingSpinner?.visibility = View.GONE
             submitButton?.visibility = View.VISIBLE
-            val dialogConnection = DialogInfo.newInstance("Connection error","There was an error connecting to the server", DialogType.ERROR)
-            dialogConnection.showHeader(false)
-            dialogConnection.show(fragmentManager,"DIALOG_FAIL")
+            onErrorResponse(call, null)
         }
     }
 
@@ -174,5 +155,14 @@ class DialogAddUser : DialogFragment(), View.OnClickListener {
         val user = User(username, encryptedPassword, name , role)
         val call = ServiceManager.getUserService().createUser(user)
         call.enqueue(submitCallback)
+    }
+
+    private fun onErrorResponse(call : Call<User>, response : Response<User>?) {
+        val wasHandled = Util.treatBasicError(call, response, fragmentManager)
+        if(!wasHandled){
+            if(response?.code() == 400) {
+                etUsername?.error = "This username already exists!"
+            }
+        }
     }
 }

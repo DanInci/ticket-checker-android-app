@@ -11,5 +11,4 @@
     <style name="AppTheme.ToolbarStyle" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:actionMenuTextColor">@color/textBlack</item>
     </style>
-
 </resources>

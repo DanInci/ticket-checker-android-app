@@ -1,7 +1,6 @@
 package ticket.checker.admin.tickets
 
 import android.os.Bundle
-import android.view.View
 import ticket.checker.ActivityAdmin.Companion.LIST_ALL
 import ticket.checker.ActivityAdmin.Companion.LIST_NOT_VALIDATED
 import ticket.checker.ActivityAdmin.Companion.LIST_VALIDATED

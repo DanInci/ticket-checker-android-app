@@ -13,7 +13,6 @@
         android:minWidth="260dp">
 
         <ImageButton
-            android:visibility="gone"
             android:id="@+id/btnClose"
             android:layout_width="20dp"
             android:layout_height="20dp"

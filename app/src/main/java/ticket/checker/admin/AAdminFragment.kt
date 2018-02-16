@@ -18,8 +18,7 @@ import ticket.checker.admin.listeners.ActionListener
 import ticket.checker.admin.listeners.EndlessScrollListener
 import ticket.checker.admin.listeners.FilterChangeListener
 import ticket.checker.admin.listeners.RecyclerItemClickListener
-import ticket.checker.dialogs.DialogInfo
-import ticket.checker.dialogs.DialogType
+import ticket.checker.extras.Util
 
 /**
  * Created by Dani on 09.02.2018.
@@ -44,12 +43,11 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ActionLis
             if (response.isSuccessful) {
                 itemsAdapter.updateHeaderInfo(filter, response.body()!!)
             } else {
-                onErrorResponse(response.code())
+                onErrorResponse(call, response)
             }
         }
-
         override fun onFailure(call: Call<Y>, t: Throwable?) {
-            onErrorResponse(-1)
+            onErrorResponse(call, null)
         }
     }
 
@@ -63,11 +61,11 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ActionLis
                 itemsAdapter.setLoading(false)
                 itemsAdapter.updateItemsList(items)
             } else {
-                onErrorResponse(response.code())
+                onErrorResponse(call, response)
             }
         }
-        override fun onFailure(call: Call<List<T>>?, t: Throwable?) {
-            onErrorResponse(-1)
+        override fun onFailure(call: Call<List<T>>, t: Throwable?) {
+            onErrorResponse(call, null)
         }
     }
 
@@ -80,7 +78,7 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ActionLis
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val view = inflater?.inflate(R.layout.fragment_recycle_view, container, false)
+        val view = inflater?.inflate(R.layout.recycle_view, container, false)
         refreshLayout = view?.findViewById(R.id.refreshLayout)
         refreshLayout?.setOnRefreshListener { onRefresh()  }
         refreshLayout?.setColorSchemeColors(resources.getColor(R.color.colorPrimary),resources.getColor(R.color.noRed))
@@ -162,28 +160,12 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ActionLis
         itemsAdapter.itemRemoved(removedItemPosition)
     }
 
-    private fun onErrorResponse(errorCode: Int) {
+    private fun <K> onErrorResponse(call : Call<K>, response : Response<K>?) {
         if (firstLoad) {
             firstLoad = false
             loadingSpinner?.visibility = View.GONE
         }
-        var dialog: DialogInfo? = null
-        when (errorCode) {
-            -1 -> {
-                dialog = DialogInfo.newInstance("Connection error", "There was an error connecting to the server!", DialogType.ERROR)
-            }
-            401 -> {
-                dialog = DialogInfo.newInstance("Session expired", "You need to provide your authentication once again!", DialogType.AUTH_ERROR)
-                dialog.isCancelable = false
-            }
-            403 -> {
-                dialog = DialogInfo.newInstance("Loading failed", "You are not allowed to see ticket information!", DialogType.ERROR)
-            }
-            in 500..600 -> {
-                dialog = DialogInfo.newInstance("Loading failed", "There was an server error while loading more tickets!", DialogType.ERROR)
-            }
-        }
-        dialog?.show(fragmentManager, "DIALOG_TICKETS_RV")
+        Util.treatBasicError(call, response, fragmentManager)
     }
 
     abstract fun setupItemsAdapter() : AItemsAdapter<T,Y>
