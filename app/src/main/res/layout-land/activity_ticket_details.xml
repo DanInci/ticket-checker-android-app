@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    android:background="@color/backgroundGrey"
     tools:context="ticket.checker.admin.tickets.ActivityTicketDetails">
 
     <LinearLayout
@@ -21,7 +22,8 @@
             android:background="@color/colorPrimary"
             android:theme="@style/AppTheme.ToolbarStyle"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:titleTextColor="@android:color/white">
+            app:titleTextColor="@android:color/white"
+            android:gravity="center">
 
             <ImageView
                 android:id="@+id/btnBack"
@@ -35,13 +37,13 @@
             <TextView
                 android:id="@+id/toolbarTitle"
                 android:layout_width="match_parent"
-                android:layout_height="35dp"
+                android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:paddingStart="-48dp"
                 android:text="Ticket #2323"
                 android:textAlignment="center"
                 android:textColor="@color/white"
-                android:textSize="25sp"
+                android:textSize="22sp"
                 android:textStyle="bold" />
         </android.support.v7.widget.Toolbar>
 

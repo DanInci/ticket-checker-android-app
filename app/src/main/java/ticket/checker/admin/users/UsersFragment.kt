@@ -20,7 +20,7 @@ class UsersFragment : AAdminFragment<User, Int>() {
 
     override fun loadHeader(filter: String) {
         val modifiedFilters = if (filter == "all") null else filter
-        val call = ServiceManager.getNumbersService().getUserNumbers(modifiedFilters)
+        val call = ServiceManager.getStatisticsService().getUserNumbers(modifiedFilters)
         call.enqueue(headerCallback)
     }
 

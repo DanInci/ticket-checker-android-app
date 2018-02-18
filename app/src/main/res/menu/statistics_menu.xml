@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_hourly"
+        android:checkable="true"
+        android:title="Hourly Charts" />
+    <item
+        android:id="@+id/action_daily"
+        android:checkable="true"
+        android:title="Daily Charts" />
+    <item
+        android:id="@+id/action_weekly"
+        android:checkable="true"
+        android:title="Weekly Charts" />
+</menu>

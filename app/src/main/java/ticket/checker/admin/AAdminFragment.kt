@@ -81,7 +81,7 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ActionLis
         val view = inflater?.inflate(R.layout.recycle_view, container, false)
         refreshLayout = view?.findViewById(R.id.refreshLayout)
         refreshLayout?.setOnRefreshListener { onRefresh()  }
-        refreshLayout?.setColorSchemeColors(resources.getColor(R.color.colorPrimary),resources.getColor(R.color.noRed))
+        refreshLayout?.setColorSchemeColors(resources.getColor(R.color.colorPrimary))
         loadingSpinner = view?.findViewById(R.id.rvLoadingSpinner)
         recyclerView = view?.findViewById(R.id.rvItems)
         layoutManager = LinearLayoutManager(activity)

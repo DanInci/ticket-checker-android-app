@@ -223,7 +223,10 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
                 intent.putExtra(PRETENDED_USER_ROLE, pretendedUserRole)
                 startActivity(intent)
             }
-            R.id.statistics -> Toast.makeText(this@ActivityMenu,"Clicked statistics!",Toast.LENGTH_LONG).show()
+            R.id.statistics -> {
+                val intent = Intent(this, ActivityStatistics::class.java)
+                startActivity(intent)
+            }
         }
     }
 

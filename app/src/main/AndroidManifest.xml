@@ -14,7 +14,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ActivityLogin" android:windowSoftInputMode="adjustPan">
+        <activity
+            android:name=".ActivityLogin"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,7 +32,8 @@
         <activity
             android:name=".admin.tickets.ActivityTicketDetails"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".admin.users.ActivityUserDetails"></activity>
+        <activity android:name=".admin.users.ActivityUserDetails" />
+        <activity android:name=".ActivityStatistics"></activity>
     </application>
 
 </manifest>

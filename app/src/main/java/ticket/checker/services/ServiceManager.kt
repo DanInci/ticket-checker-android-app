@@ -1,6 +1,5 @@
 package ticket.checker.services
 
-import android.content.Context
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Converter
@@ -21,7 +20,7 @@ object ServiceManager {
 
     private var userService: UserService? = null
     private var ticketService: TicketService? = null
-    private var numbersService: NumbersService? = null
+    private var statisticsService: StatisticsService? = null
 
     val errorConverter: Converter<ResponseBody, ErrorResponse>? by lazy {
         retrofit?.responseBodyConverter<ErrorResponse>(ErrorResponse::class.java, emptyArray())
@@ -53,11 +52,11 @@ object ServiceManager {
         return ticketService as TicketService
     }
 
-    fun getNumbersService(): NumbersService {
-        if (numbersService == null) {
-            numbersService = getRetrofitClient().create(NumbersService::class.java)
+    fun getStatisticsService(): StatisticsService {
+        if (statisticsService == null) {
+            statisticsService = getRetrofitClient().create(StatisticsService::class.java)
         }
-        return numbersService as NumbersService
+        return statisticsService as StatisticsService
     }
 
     fun invalidateSession() {

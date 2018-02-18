@@ -19,7 +19,7 @@ class TicketsFragment : AAdminFragment<Ticket, Array<Int>>() {
     }
 
     override fun loadHeader(filter : String) {
-        val call = ServiceManager.getNumbersService().getFilteredTicketNumbers(filter)
+        val call = ServiceManager.getStatisticsService().getFilteredTicketNumbers(filter)
         call.enqueue(headerCallback)
     }
 

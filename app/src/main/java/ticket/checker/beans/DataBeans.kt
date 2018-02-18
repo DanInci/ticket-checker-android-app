@@ -11,4 +11,5 @@ data class User(var id : Long?,var username : String, var password : String, var
 data class Ticket(val ticketId : String,val soldBy : User?, val soldTo : String, val soldAt : Date?, val validatedBy : User?, var validatedAt : Date?) {
     constructor(ticketId : String, soldTo : String ) : this (ticketId, null, soldTo, null, null, null)
 }
+data class Statistic(val date : Date, val count : Int)
 data class ErrorResponse(val timestamp : Date, val message : String, val details : String)
