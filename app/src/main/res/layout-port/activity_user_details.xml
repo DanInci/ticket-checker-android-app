@@ -269,7 +269,8 @@
                 android:text="Remove"
                 android:textAllCaps="false"
                 android:textColor="@drawable/btn_no_text_color"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:visibility="invisible"/>
 
             <ProgressBar
                 android:id="@+id/loadingSpinner"

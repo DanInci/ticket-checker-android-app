@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,18 +42,18 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
-            title = arguments.getString(DIALOG_TITLE)
-            desc = arguments.getString(DIALOG_MSG)
-            dialogType = DialogType.valueOf(arguments.getString(DIALOG_TYPE))
+            title = arguments?.getString(DIALOG_TITLE)
+            desc = arguments?.getString(DIALOG_MSG)
+            dialogType = DialogType.valueOf(arguments?.getString(DIALOG_TYPE)!!)
             if(dialogType == DialogType.AUTH_ERROR) {
                 ServiceManager.invalidateSession()
             }
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val view = inflater!!.inflate(R.layout.dialog_info, container, false)
+        val view = inflater.inflate(R.layout.dialog_info, container, false)
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog?.window?.requestFeature(Window.FEATURE_NO_TITLE)
         return view
@@ -85,8 +86,8 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
                 dismiss()
             }
             R.id.btnToLogin -> {
-                val i = context.packageManager.getLaunchIntentForPackage(context.packageName)
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                val i = context?.packageManager?.getLaunchIntentForPackage(context?.packageName)
+                i?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 startActivity(i)
             }
             R.id.btnYes -> {
@@ -105,14 +106,14 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
         dialogExitListener?.onItemRemoved()
     }
 
-    fun showHeader(showHeader : Boolean) {
-        if(showHeader) {
-            header?.visibility = View.VISIBLE
-        }
-        else {
-            header?.visibility = View.GONE
-        }
-    }
+//    fun showHeader(showHeader : Boolean) {
+//        if(showHeader) {
+//            header?.visibility = View.VISIBLE
+//        }
+//        else {
+//            header?.visibility = View.GONE
+//        }
+//    }
 
     private fun switchViews() {
         when(dialogType) {
@@ -131,12 +132,12 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
                 yesNoButtons?.visibility = View.GONE
                 btnToLogin?.visibility = View.GONE
                 tvDesc?.textAlignment = View.TEXT_ALIGNMENT_CENTER
-                tvDesc?.setTextColor(resources.getColor(R.color.textBlack))
+                tvDesc?.setTextColor(ContextCompat.getColor(context!!,R.color.textBlack))
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_check_green, context.theme))
+                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_check_green, context?.theme))
                 }
                 else {
-                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_check_green))
+                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_check_green, context?.theme))
                 }
             }
             DialogType.ERROR -> {
@@ -146,7 +147,7 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
                 yesNoButtons?.visibility = View.GONE
                 btnToLogin?.visibility = View.GONE
                 tvDesc?.textAlignment = View.TEXT_ALIGNMENT_CENTER
-                tvDesc?.setTextColor(resources.getColor(R.color.materialYellow))
+                tvDesc?.setTextColor(ContextCompat.getColor(context!!, R.color.materialYellow))
             }
             DialogType.AUTH_ERROR -> {
                 dialog.setCancelable(false)
@@ -155,12 +156,12 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
                 loadingSpinner?.visibility = View.GONE
                 yesNoButtons?.visibility = View.GONE
                 tvDesc?.textAlignment = View.TEXT_ALIGNMENT_CENTER
-                tvDesc?.setTextColor(resources.getColor(R.color.materialYellow))
+                tvDesc?.setTextColor(ContextCompat.getColor(context!!, R.color.materialYellow))
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_no_persons, context.theme))
+                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_no_persons, context?.theme))
                 }
                 else {
-                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_no_persons))
+                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_no_persons, context?.theme))
                 }
             }
             DialogType.YES_NO -> {
@@ -170,10 +171,10 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
                 btnToLogin?.visibility = View.GONE
                 tvDesc?.textAlignment = View.TEXT_ALIGNMENT_CENTER
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_question_mark, context.theme))
+                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_question_mark, context?.theme))
                 }
                 else {
-                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_question_mark))
+                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_question_mark, context?.theme))
                 }
             }
         }

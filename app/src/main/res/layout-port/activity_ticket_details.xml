@@ -110,7 +110,7 @@
                             android:id="@+id/soldToLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Sold to: "
+                            android:text="Name of owner: "
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
@@ -126,6 +126,41 @@
 
                         <ProgressBar
                             android:id="@+id/lsSoldTo"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginEnd="35dp" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/soldToBirthDateRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginStart="20dp">
+
+                        <TextView
+                            android:id="@+id/soldToBirthDateLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Birth Date: "
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/soldToBirthDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentTop="true"
+                            android:textColor="@color/darkerGrey"
+                            android:textSize="20sp"
+                            android:textStyle="normal" />
+
+                        <ProgressBar
+                            android:id="@+id/lsSoldToBirthDate"
                             android:layout_width="28dp"
                             android:layout_height="28dp"
                             android:layout_alignParentEnd="true"
@@ -298,7 +333,8 @@
                 android:text="Invalidate"
                 android:textAllCaps="false"
                 android:textColor="@drawable/btn_text_color"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:visibility="invisible"/>
 
             <Button
                 android:id="@+id/btnRemove"
@@ -314,7 +350,8 @@
                 android:text="Remove"
                 android:textAllCaps="false"
                 android:textColor="@drawable/btn_no_text_color"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:visibility="invisible"/>
 
             <ProgressBar
                 android:id="@+id/loadingSpinner"

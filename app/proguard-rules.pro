@@ -19,3 +19,25 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public class * extends com.bumptech.glide.module.AppGlideModule
+-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+  **[] $VALUES;
+  public *;
+}
+
+-keep class com.squareup.** { *; }
+-keep interface com.squareup.** { *; }
+-dontwarn com.squareup.okhttp.**
+-keep class retrofit.** { *; }
+
+-keepclasseswithmembers class * {
+    @retrofit.http.* <methods>;
+}
+
+-keep interface retrofit.** { *;}
+-keep interface com.squareup.** { *; }
+-dontwarn rx.**
+-dontwarn retrofit.**
+
+-keep class com.github.mikephil.charting.** { *; }

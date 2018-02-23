@@ -31,6 +31,8 @@ import ticket.checker.services.ServiceManager
 
 class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExitListener, DialogResponseListener {
 
+    private var isFirstLoad = true
+
     private var userId: Long = -1
     private var userName: String? = null
     private var userRole: String? = null
@@ -69,6 +71,10 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
                 when(method) {
                     "GET" -> {
                         updateUserInfo(response.body() as User)
+                        if(isFirstLoad) {
+                            isFirstLoad = false
+                            btnRemove.visibility = View.VISIBLE
+                        }
                     }
                     "DELETE" -> {
                         loadingSpinner.visibility = View.GONE

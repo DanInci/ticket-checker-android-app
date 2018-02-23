@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageView
+import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_admin.*
 import ticket.checker.admin.tickets.DialogAddTicket
 import ticket.checker.admin.tickets.TicketsFragment
@@ -25,8 +27,14 @@ class ActivityAdmin : AppCompatActivity() {
     private var ticketsFragment : TicketsFragment? = null
     private var usersFragment : UsersFragment? = null
 
+    private val btnBack : ImageView by lazy {
+        findViewById<ImageView>(R.id.btnBack)
+    }
     private val toolbar : Toolbar by lazy {
         findViewById<Toolbar>(R.id.toolbar)
+    }
+    private val toolbaTitle : TextView by lazy {
+        findViewById<TextView>(R.id.toolbarTitle)
     }
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener {
@@ -38,6 +46,7 @@ class ActivityAdmin : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin)
         setSupportActionBar(toolbar)
+        btnBack.setOnClickListener { finish() }
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
 
         currentFragmentId = savedInstanceState?.getInt(CURRENT_FRAGMENT_ID) ?: -1
@@ -159,12 +168,12 @@ class ActivityAdmin : AppCompatActivity() {
         when(fragmentId) {
             R.id.navigation_users -> {
                 fragmentTransaction.replace(R.id.fragmentHolder, usersFragment).commit()
-                supportActionBar?.title = "Users"
+                toolbaTitle.text= "Users"
                 currentFragmentId = R.id.navigation_users
             }
             else -> { // should be the tickets fragment
                 fragmentTransaction.replace(R.id.fragmentHolder, ticketsFragment).commit()
-                supportActionBar?.title = "Tickets"
+                toolbaTitle.text = "Tickets"
                 currentFragmentId = R.id.navigation_tickets
             }
         }

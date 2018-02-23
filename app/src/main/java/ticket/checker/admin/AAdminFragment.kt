@@ -2,6 +2,7 @@ package ticket.checker.admin
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -72,16 +73,16 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ActionLis
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (filter == "NOT_INITIALISED") {
-            filter = arguments.getString(FILTER) ?: LIST_ALL
+            filter = arguments?.getString(FILTER) ?: LIST_ALL
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val view = inflater?.inflate(R.layout.recycle_view, container, false)
+        val view = inflater.inflate(R.layout.recycle_view, container, false)
         refreshLayout = view?.findViewById(R.id.refreshLayout)
         refreshLayout?.setOnRefreshListener { onRefresh()  }
-        refreshLayout?.setColorSchemeColors(resources.getColor(R.color.colorPrimary))
+        refreshLayout?.setColorSchemeColors(ContextCompat.getColor(context!!, R.color.colorPrimary))
         loadingSpinner = view?.findViewById(R.id.rvLoadingSpinner)
         recyclerView = view?.findViewById(R.id.rvItems)
         layoutManager = LinearLayoutManager(activity)
@@ -96,15 +97,15 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ActionLis
         recyclerView?.layoutManager = layoutManager
         recyclerView?.adapter = itemsAdapter
         recyclerView?.addOnScrollListener(scrollListener)
-        recyclerView?.addOnItemTouchListener(RecyclerItemClickListener(activity, recyclerView!!, this))
+        recyclerView?.addOnItemTouchListener(RecyclerItemClickListener(context!!, recyclerView!!, this))
 
         if(firstLoad) {
             reloadAll()
         }
         else {
-            scrollListener?.currentPage = arguments.getInt(LOAD_CURRENT_PAGE)
-            scrollListener?.previousTotalItemCount = arguments.getInt(LOAD_PREVIOUS_ITEM_COUNT)
-            scrollListener?.loading = arguments.getBoolean(LOAD_LOADING)
+            scrollListener?.currentPage = arguments?.getInt(LOAD_CURRENT_PAGE) ?: 0
+            scrollListener?.previousTotalItemCount = arguments?.getInt(LOAD_PREVIOUS_ITEM_COUNT) ?: 0
+            scrollListener?.loading = arguments?.getBoolean(LOAD_LOADING) ?: false
         }
         return view
     }
@@ -125,9 +126,9 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ActionLis
 
     override fun onDestroy() {
         super.onDestroy()
-        arguments.putInt(LOAD_CURRENT_PAGE, scrollListener?.currentPage ?: 0)
-        arguments.putInt(LOAD_PREVIOUS_ITEM_COUNT, scrollListener?.previousTotalItemCount ?: 0)
-        arguments.putBoolean(LOAD_LOADING, scrollListener?.loading ?: true)
+        arguments?.putInt(LOAD_CURRENT_PAGE, scrollListener?.currentPage ?: 0)
+        arguments?.putInt(LOAD_PREVIOUS_ITEM_COUNT, scrollListener?.previousTotalItemCount ?: 0)
+        arguments?.putBoolean(LOAD_LOADING, scrollListener?.loading ?: true)
     }
 
     private fun reloadAll() {

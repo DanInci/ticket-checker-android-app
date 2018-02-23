@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <SurfaceView
+    <SurfaceView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/cameraPreview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        xmlns:android="http://schemas.android.com/apk/res/android"/>
+        android:layout_height="match_parent" />
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:background="@drawable/barcode_toolbar_style"
         android:theme="@style/AppTheme.ToolbarStyle"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
@@ -24,46 +25,37 @@
             android:id="@+id/btnBack"
             android:layout_width="35dp"
             android:layout_height="35dp"
+            android:background="?selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
-            android:background="?selectableItemBackgroundBorderless"
             app:srcCompat="@drawable/ic_navigate_before" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/toolbarTitle"
             android:layout_width="match_parent"
-            android:layout_height="35dp"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal"
-            android:paddingStart="-40dp">
-
-            <TextView
-                android:id="@+id/toolbarTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:paddingTop="3dp"
-                android:text="Ticket checker"
-                android:drawableRight="@drawable/ic_barcode"
-                android:drawablePadding="5dp"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textAlignment="center"/>
-        </LinearLayout>
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Ticket Scanner"
+            android:paddingStart="-35dp"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold" />
     </android.support.v7.widget.Toolbar>
 
     <View
-        android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/colorPrimaryDark"/>
+        android:layout_below="@id/toolbar"
+        android:background="@color/colorPrimaryDark" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:textSize="18sp"
         android:layout_marginBottom="20dp"
         android:text="Place your camera over the barcode"
+        android:textAlignment="center"
         android:textColor="@color/white"
-        android:textAlignment="center"/>
+        android:textSize="18sp" />
 </RelativeLayout>

@@ -69,6 +69,7 @@ class ActivityLogin : AppCompatActivity() {
             }
         }
         override fun onFailure(call: Call<User>, t: Throwable?) {
+            loggingInDialog.dismiss()
             Util.treatBasicError(call, null, supportFragmentManager)
         }
     }

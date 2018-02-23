@@ -13,7 +13,7 @@ class UsersFragment : AAdminFragment<User, Int>() {
         get() = 20
 
     override fun setupItemsAdapter(): AItemsAdapter<User, Int> {
-        val usersAdapter = UsersAdapter(activity)
+        val usersAdapter = UsersAdapter(context!!)
         usersAdapter.setHasStableIds(true)
         return usersAdapter
     }

@@ -20,13 +20,21 @@
             app:titleTextColor="@android:color/white"
             android:layout_gravity="center">
 
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:background="?selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                app:srcCompat="@drawable/ic_navigate_before" />
+
             <TextView
                 android:id="@+id/toolbarTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
+                android:gravity="center"
                 android:text="Statistics"
-                android:paddingStart="15dp"
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="22sp"

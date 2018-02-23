@@ -82,7 +82,7 @@
                     android:id="@+id/autoLoginCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Auto-Login"
+                    android:text="Keep me signed in"
                     android:textColor="@color/colorPrimary"
                     android:textSize="12sp"
                     android:buttonTint="@color/autologin_checkbox_style"/>

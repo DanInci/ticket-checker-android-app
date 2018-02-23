@@ -5,10 +5,10 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.Toolbar
-import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.github.mikephil.charting.charts.BarChart
@@ -36,11 +36,13 @@ class ActivityStatistics : AppCompatActivity() {
     private val refreshLayout : SwipeRefreshLayout by lazy {
         findViewById<SwipeRefreshLayout>(R.id.refreshLayout)
     }
-
+    private val btnBack : ImageView by lazy {
+        findViewById<ImageView>(R.id.btnBack)
+    }
     private val toolbar: Toolbar by lazy {
         findViewById<Toolbar>(R.id.toolbar)
     }
-    private val toolbaTitle : TextView by lazy {
+    private val toolbarTitle: TextView by lazy {
         findViewById<TextView>(R.id.toolbarTitle)
     }
     private var currentMenuItemId = -1
@@ -94,6 +96,7 @@ class ActivityStatistics : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_statistics)
         setSupportActionBar(toolbar)
+        btnBack.setOnClickListener { finish() }
         currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM) ?: R.id.action_hourly
         currentInterval = savedInstanceState?.getString(CURRENT_INTERVAL) ?: INTERVAL_HOURLY
         refreshLayout.setOnRefreshListener { onRefresh() }
@@ -196,7 +199,7 @@ class ActivityStatistics : AppCompatActivity() {
                 validatedChart.data = data
                 validatedChart.notifyDataSetChanged()
                 validatedChart.invalidate()
-                validatedChart.animateXY(3000,3000)
+                validatedChart.animateY(3000)
                 validatedChart.refreshDrawableState()
             }
             TYPE_SOLD -> {
@@ -208,7 +211,7 @@ class ActivityStatistics : AppCompatActivity() {
                 soldChart.data = data
                 soldChart.notifyDataSetChanged()
                 soldChart.invalidate()
-                soldChart.animateXY(3000,3000)
+                soldChart.animateY(3000)
                 soldChart.refreshDrawableState()
             }
         }
@@ -238,7 +241,7 @@ class ActivityStatistics : AppCompatActivity() {
     }
 
     private fun updateTitle(interval : String) {
-        toolbaTitle.text = "${interval.capitalize()} Statistics"
+        toolbarTitle.text = "${interval.capitalize()} Statistics"
     }
 
     private fun checkMenuItem(menuItemId: Int) {
@@ -275,7 +278,7 @@ class ActivityStatistics : AppCompatActivity() {
                 return SimpleDateFormat("dd").format(startDate) + " - " + DAILY_FORMAT.format(endDate)
             }
             else {
-                return DAILY_FORMAT.format(startDate) + " - " + DAILY_FORMAT.format(endDate)
+                return " " + DAILY_FORMAT.format(startDate) + " - " + DAILY_FORMAT.format(endDate) + " "
             }
 
         }

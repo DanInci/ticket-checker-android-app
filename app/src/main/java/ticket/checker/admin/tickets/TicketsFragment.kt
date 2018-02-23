@@ -15,7 +15,7 @@ class TicketsFragment : AAdminFragment<Ticket, Array<Int>>() {
         get() = 20
 
     override fun setupItemsAdapter(): AItemsAdapter<Ticket, Array<Int>> {
-       return TicketsAdapter(activity)
+       return TicketsAdapter(context!!)
     }
 
     override fun loadHeader(filter : String) {

@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,7 +46,7 @@ class DialogAddUser : DialogFragment(), View.OnClickListener {
             if(response.isSuccessful) {
                 actionListener?.onAdd(response.body() as User)
                 tvResult?.visibility = View.VISIBLE
-                tvResult?.setTextColor(context.resources.getColor(R.color.yesGreen))
+                tvResult?.setTextColor(ContextCompat.getColor(context!!, R.color.yesGreen))
                 tvResult?.text = "You have added the user successfully"
                 resetFields()
             }
@@ -61,8 +62,8 @@ class DialogAddUser : DialogFragment(), View.OnClickListener {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view =  inflater!!.inflate(R.layout.dialog_add_user, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view =  inflater.inflate(R.layout.dialog_add_user, container, false)
         btnClose = view.findViewById(R.id.btnClose)
         btnClose?.setOnClickListener(this)
         tvTitle = view.findViewById(R.id.tvTitle)
@@ -114,6 +115,8 @@ class DialogAddUser : DialogFragment(), View.OnClickListener {
     }
 
     private fun validate() : Boolean {
+        tvResult?.visibility = View.INVISIBLE
+
         val username = etUsername?.text.toString()
         val password = etPassword?.text.toString()
         val repeatPass = etPasswordRepeat?.text.toString()

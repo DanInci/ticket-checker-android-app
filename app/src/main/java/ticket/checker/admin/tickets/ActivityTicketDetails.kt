@@ -22,14 +22,18 @@ import ticket.checker.dialogs.DialogInfo
 import ticket.checker.listeners.DialogResponseListener
 import ticket.checker.dialogs.DialogType
 import ticket.checker.extras.Util
+import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.extras.Util.DATE_FORMAT_WITH_HOUR
 import ticket.checker.extras.Util.POSITION
 import ticket.checker.extras.Util.TICKET_NUMBER
 import ticket.checker.extras.Util.TICKET_STATUS
 import ticket.checker.services.ServiceManager
+import java.text.SimpleDateFormat
 import java.util.*
 
 class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogExitListener, DialogResponseListener {
+
+    private var isFirstLoad = true
 
     private var ticketId: String = ""
     private var ticketPosition: Int = -1
@@ -44,6 +48,9 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
     }
     private val tvSoldTo: TextView by lazy {
         findViewById<TextView>(R.id.soldTo)
+    }
+    private val tvSoldToBirthDate : TextView  by lazy {
+        findViewById<TextView>(R.id.soldToBirthDate)
     }
     private val tvSoldAt: TextView by lazy {
         findViewById<TextView>(R.id.soldAt)
@@ -78,6 +85,11 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
                 when(method) {
                     "GET" -> {
                         updateTicketInfo(response.body() as Ticket)
+                        if(isFirstLoad) {
+                            isFirstLoad = false
+                            btnRemove.visibility = View.VISIBLE
+                            btnValidate.visibility =  View.VISIBLE
+                        }
                     }
                     "POST" -> {
                         isValidated = !isValidated
@@ -198,12 +210,14 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
 
     private fun updateTicketInfo(ticket: Ticket) {
         findViewById<ProgressBar>(R.id.lsSoldTo).visibility = View.INVISIBLE
+        findViewById<ProgressBar>(R.id.lsSoldToBirthDate).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsSoldAt).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsSoldBy).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsValidatedAt).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsValidatedBy).visibility = View.INVISIBLE
 
         tvSoldTo.text = if (ticket.soldTo.isEmpty()) "-" else ticket.soldTo
+        tvSoldToBirthDate.text = if(ticket.soldToBirthdate != null) DATE_FORMAT.format(ticket.soldToBirthdate) else "-"
         tvSoldAt.text = if (ticket.soldAt != null) DATE_FORMAT_WITH_HOUR.format(ticket.soldAt) else "-"
         if (ticket.soldAt != null) {
             if (ticket.soldBy != null) {
@@ -244,4 +258,5 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
             }
         }
     }
+
 }

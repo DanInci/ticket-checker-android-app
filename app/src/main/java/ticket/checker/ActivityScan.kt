@@ -29,7 +29,7 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
         findViewById<SurfaceView>(R.id.cameraPreview)
     }
     private val barcodeDetector by lazy {
-        BarcodeDetector.Builder(this@ActivityScan).setBarcodeFormats(Barcode.QR_CODE).build()
+        BarcodeDetector.Builder(this@ActivityScan).setBarcodeFormats(Barcode.ALL_FORMATS).build()
     }
     private val btnBack by lazy {
         findViewById<ImageView>(R.id.btnBack)
@@ -48,11 +48,10 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
                 dialogScan.show(supportFragmentManager,"DIALOG_SCAN")
             }
         }
-
     }
     private val scanDialogListener = object : IScanDialogListener {
         override fun dismiss() {
-            startBarcodeDetection(false)
+            Handler(Looper.getMainLooper()).post { startBarcodeDetection(false) }
         }
     }
 
@@ -68,7 +67,7 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
     }
     private val cameraPreviewCallback = object : SurfaceHolder.Callback {
         override fun surfaceCreated(holder: SurfaceHolder?) {
-            startBarcodeDetection(true)
+            Handler(Looper.getMainLooper()).post { startBarcodeDetection(true) }
         }
 
         override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {

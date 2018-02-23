@@ -1,6 +1,5 @@
 package ticket.checker.dialogs
 
-import android.app.Dialog
 import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -11,18 +10,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.*
+import kotlinx.android.synthetic.main.dialog_scan.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.R
-import ticket.checker.beans.ErrorResponse
 import ticket.checker.beans.Ticket
+import ticket.checker.extras.BirthDateFormatException
+import ticket.checker.extras.BirthDateIncorrectException
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.ERROR_TICKET_EXISTS
 import ticket.checker.extras.Util.ERROR_TICKET_VALIDATION
 import ticket.checker.extras.Util.ROLE_ADMIN
+import ticket.checker.extras.Util.getBirthdateFromText
 import ticket.checker.listeners.IScanDialogListener
 import ticket.checker.services.ServiceManager
+import java.util.*
 
 /**
  * Created by Dani on 31.01.2018.
@@ -32,6 +35,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
 
     private var ticketNumber: String? = null
     private var pretendedUserRole: String? = null
+    private var birthDate : Date? = null
 
     private var tvTicketNumber: TextView? = null
     private var loadingSpinner: ProgressBar? = null
@@ -39,6 +43,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
     private var btnClose: ImageButton? = null
     private var addAction: LinearLayout? = null
     private var etSoldTo: EditText? = null
+    private var etSoldToBirthdate: EditText? = null
     private var btnAdd: Button? = null
     private var btnValidate: Button? = null
     private var btnDelete: Button? = null
@@ -60,13 +65,14 @@ class DialogScan : DialogFragment(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
-            ticketNumber = arguments.getString(TICKET_NUMBER)
-            pretendedUserRole = arguments.getString(USER_ROLE)
+            ticketNumber = arguments?.getString(TICKET_NUMBER)
+            pretendedUserRole = arguments?.getString(USER_ROLE)
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater?.inflate(R.layout.dialog_scan, container, false)
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.dialog_scan, container, false)
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog?.window?.requestFeature(Window.FEATURE_NO_TITLE)
         dialog?.setCanceledOnTouchOutside(false)
@@ -78,29 +84,30 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         scanDialogListener?.dismiss()
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        tvTicketNumber = view?.findViewById(R.id.tvTicketNumber)
-        loadingSpinner = view?.findViewById(R.id.loadingSpinner)
+        tvTicketNumber = view.findViewById(R.id.tvTicketNumber)
+        loadingSpinner = view.findViewById(R.id.loadingSpinner)
         loadingSpinner?.visibility = View.GONE
-        tvDescription = view?.findViewById(R.id.tvDescription)
-        btnClose = view?.findViewById(R.id.btnClose)
+        tvDescription = view.findViewById(R.id.tvDescription)
+        btnClose = view.findViewById(R.id.btnClose)
         btnClose?.setOnClickListener(this)
-        addAction = view?.findViewById(R.id.addAction)
-        etSoldTo = view?.findViewById(R.id.etSoldTo)
-        btnAdd = view?.findViewById(R.id.btnAdd)
+        addAction = view.findViewById(R.id.addAction)
+        etSoldTo = view.findViewById(R.id.etSoldTo)
+        etSoldToBirthdate = view.findViewById(R.id.etSoldToBirthDate)
+        btnAdd = view.findViewById(R.id.btnAdd)
         btnAdd?.setOnClickListener(this)
-        btnValidate = view?.findViewById(R.id.btnValidate)
+        btnValidate = view.findViewById(R.id.btnValidate)
         btnValidate?.setOnClickListener(this)
-        btnDelete = view?.findViewById(R.id.btnDelete)
+        btnDelete = view.findViewById(R.id.btnDelete)
         btnDelete?.setOnClickListener(this)
 
         tvTicketNumber?.text = ticketNumber
-        switchViews()
+        switchViews(view)
     }
 
-    override fun onClick(v: View?) {
-        when (v?.id) {
+    override fun onClick(v: View) {
+        when (v.id) {
             R.id.btnClose -> {
                 dismiss()
                 scanDialogListener?.dismiss()
@@ -111,11 +118,13 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                 call.enqueue(verificationCallback as Callback<Void>)
             }
             R.id.btnAdd -> {
-                showLoading()
-                val soldTo = etSoldTo?.text?.toString() ?: ""
-                val ticket = Ticket(ticketNumber as String, soldTo)
-                val call = ServiceManager.getTicketService().createTicket(ticket)
-                call.enqueue(verificationCallback as Callback<Ticket>)
+                if(validatedAdd()) {
+                    showLoading()
+                    val soldTo = etSoldTo?.text?.toString() ?: ""
+                    val ticket = Ticket(ticketNumber as String, soldTo, birthDate)
+                    val call = ServiceManager.getTicketService().createTicket(ticket)
+                    call.enqueue(verificationCallback as Callback<Ticket>)
+                }
             }
             R.id.btnDelete -> {
                 showLoading()
@@ -125,26 +134,51 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         }
     }
 
-    private fun switchViews() {
+    private fun switchViews(view : View) {
         when (pretendedUserRole) {
             ROLE_ADMIN -> {
-                btnValidate?.visibility = View.VISIBLE
-                addAction?.visibility = View.VISIBLE
-                btnDelete?.visibility = View.VISIBLE
+                view.findViewById<LinearLayout>(R.id.viewValidateTicket).visibility = View.VISIBLE
+                view.findViewById<LinearLayout>(R.id.viewSellTicket).visibility = View.VISIBLE
+                view.findViewById<LinearLayout>(R.id.viewDeleteTicket).visibility = View.VISIBLE
             }
             else -> {
-                btnValidate?.visibility = View.VISIBLE
-                addAction?.visibility = View.GONE
-                btnDelete?.visibility = View.GONE
+                view.findViewById<LinearLayout>(R.id.viewValidateTicket).visibility = View.VISIBLE
+                view.findViewById<LinearLayout>(R.id.viewSellTicket).visibility = View.GONE
+                view.findViewById<LinearLayout>(R.id.viewDeleteTicket).visibility = View.GONE
             }
         }
     }
 
+    private fun validatedAdd() : Boolean {
+        var isValid = true
+        val birthDateString = etSoldToBirthdate?.text.toString()
+        if(!birthDateString.isEmpty()) {
+            val soldTo = etSoldTo?.text.toString()
+            if(soldTo.isEmpty()) {
+                etSoldTo?.error = "You forgot the name"
+                isValid = false
+            }
+
+            try {
+                birthDate = Util.getBirthdateFromText(birthDateString)
+            }
+            catch(e :  BirthDateIncorrectException) {
+                etSoldToBirthdate?.error = "The birth date cannot be in the future"
+                isValid = false
+            }
+            catch(e : BirthDateFormatException) {
+                etSoldToBirthdate?.error =  "Not valid date format. (dd.mm.yyyy)"
+                isValid = false
+            }
+        }
+        return isValid
+    }
+
     private fun showLoading() {
         tvDescription?.visibility = View.GONE
-        btnValidate?.visibility = View.GONE
-        addAction?.visibility = View.GONE
-        btnDelete?.visibility = View.GONE
+        viewValidateTicket?.visibility = View.GONE
+        viewSellTicket?.visibility = View.GONE
+        viewDeleteTicket?.visibility = View.GONE
         btnClose?.visibility = View.GONE
         loadingSpinner?.visibility = View.VISIBLE
     }
@@ -171,8 +205,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                     errorResult("A ticket with this id was not found!")
                 }
             }
-        }
-        else {
+        } else {
             dismiss()
         }
     }

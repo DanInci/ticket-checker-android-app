@@ -19,6 +19,7 @@ import java.util.*
 object Util {
     val DATE_FORMAT = SimpleDateFormat("dd MMM yyyy")
     val DATE_FORMAT_WITH_HOUR = SimpleDateFormat("dd MMM yyyy HH:mm")
+    val STANDARD_DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd")
 
     const val ROLE_USER = "ROLE_USER"
     const val ROLE_ADMIN = "ROLE_ADMIN"
@@ -58,6 +59,43 @@ object Util {
         }
     }
 
+    fun getBirthdateFromText(birthString : String) : Date {
+        try {
+            val splitBirthString = birthString.split(".")
+            var validFormat = true
+            if (splitBirthString[0].toInt() !in 1..31) {
+                validFormat = false
+            }
+            if (splitBirthString[1].toInt() !in 1..12) {
+                validFormat = false
+            }
+            if (splitBirthString[2].toInt() !in 1000..2100) {
+                validFormat = false
+            }
+
+            if (!validFormat) {
+                throw throw BirthDateFormatException()
+            }
+
+            val calendar = Calendar.getInstance()
+            calendar.set(Calendar.DAY_OF_MONTH, splitBirthString[0].toInt())
+            calendar.set(Calendar.MONTH, splitBirthString[1].toInt() - 1)
+            calendar.set(Calendar.YEAR, splitBirthString[2].toInt())
+            calendar.set(Calendar.HOUR,0)
+            calendar.set(Calendar.MINUTE,0)
+            calendar.set(Calendar.SECOND,0)
+            calendar.set(Calendar.HOUR_OF_DAY,0)
+            if (calendar.after(Date())) {
+                throw BirthDateIncorrectException()
+            } else {
+                return calendar.time
+            }
+        }
+        catch (e : RuntimeException) {
+            throw BirthDateFormatException()
+        }
+    }
+
     fun convertError(errorBody : ResponseBody?) : ErrorResponse {
         return try {
             ServiceManager.errorConverter!!.convert(errorBody)
@@ -83,7 +121,7 @@ object Util {
         return result.toString()
     }
 
-    fun <T> treatBasicError(call : Call<T>, response : Response<T>?, fragmentManager : FragmentManager) : Boolean {
+    fun <T> treatBasicError(call : Call<T>, response : Response<T>?, fragmentManager : FragmentManager?) : Boolean {
         var hasResponded = false
         if(response == null) {
             val dialogConnectionError = DialogInfo.newInstance("Connection error", "There was an error connecting to the server", DialogType.ERROR)
@@ -114,3 +152,5 @@ object Util {
         return hasResponded
     }
 }
+class BirthDateFormatException : Exception()
+class BirthDateIncorrectException : Exception()

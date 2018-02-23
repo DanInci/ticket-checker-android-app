@@ -1,5 +1,6 @@
 package ticket.checker.services
 
+import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Converter
@@ -14,8 +15,10 @@ import ticket.checker.extras.Util.hashString
  */
 object ServiceManager {
     private const val API_BASE_URL = "http://89.42.135.219:8080/"
+    private const val GSON_SERIALIZER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+
     private var httpClient = OkHttpClient.Builder()
-    private var builder = Retrofit.Builder().baseUrl(API_BASE_URL).addConverterFactory(GsonConverterFactory.create())
+    private var builder = Retrofit.Builder().baseUrl(API_BASE_URL).addConverterFactory(GsonConverterFactory.create(GsonBuilder().setDateFormat(GSON_SERIALIZER_DATE_FORMAT).create()))
     private var retrofit: Retrofit? = null
 
     private var userService: UserService? = null
