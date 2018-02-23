@@ -59,6 +59,16 @@ object Util {
         }
     }
 
+    fun isTicketFormatValid(ticketNumber : String?) : Boolean {
+        var isValid = ticketNumber != null
+        if(isValid) {
+            if (ticketNumber!!.contains(" ") || ticketNumber.contains("http://") || ticketNumber.contains("https://")) {
+                isValid = false
+            }
+        }
+        return isValid
+    }
+
     fun getBirthdateFromText(birthString : String) : Date {
         try {
             val splitBirthString = birthString.split(".")

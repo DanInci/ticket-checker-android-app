@@ -36,20 +36,43 @@
                 android:text="#2323232412"
                 android:textAlignment="center"
                 android:textColor="@color/colorPrimaryDark"
-                android:textSize="30sp" />
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="-5dp"/>
+
+            <TextView
+                android:id="@+id/tvOwnerName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimary"
+                android:textSize="20sp"
+                android:textStyle="bold|italic"
+                android:layout_marginBottom="-5dp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/tvOwnerBirthDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimary"
+                android:textSize="20sp"
+                android:textStyle="italic"
+                android:visibility="gone"/>
 
             <ProgressBar
                 android:id="@+id/loadingSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="10dp" />
+                android:layout_marginTop="20dp"/>
 
             <TextView
                 android:id="@+id/tvDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="What would you like to do with this ticket?"
+                android:layout_marginTop="20dp"
+                android:text="What would you like to do with this ticket id ?"
                 android:textAlignment="center"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="20sp" />
@@ -58,6 +81,7 @@
                 android:id="@+id/viewValidateTicket"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:orientation="vertical">
 
                 <Button
@@ -66,7 +90,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:layout_marginTop="10dp"
                     android:background="@drawable/btn_style"
                     android:drawableEnd="@drawable/ic_check_white"
                     android:paddingEnd="10dp"
@@ -80,63 +103,42 @@
                 android:id="@+id/viewSellTicket"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:orientation="vertical">
 
-                <View
+                <EditText
+                    android:id="@+id/etSoldTo"
                     android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:layout_marginBottom="7dp"
-                    android:layout_marginTop="7dp"
-                    android:background="@color/darkerGrey" />
+                    android:layout_height="40dp"
+                    android:background="@drawable/et_dialog_style"
+                    android:hint="NAME"
+                    android:inputType="textVisiblePassword"
+                    android:maxLength="100"
+                    android:textAlignment="center"
+                    android:textColor="@color/text_style"
+                    android:textColorHint="@android:color/darker_gray"
+                    android:textSize="20sp" />
 
-                <LinearLayout
-                    android:id="@+id/addAction"
+                <EditText
+                    android:id="@+id/etSoldToBirthDate"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:orientation="horizontal"
-                    android:weightSum="100">
-
-                    <EditText
-                        android:id="@+id/etSoldTo"
-                        android:layout_width="2dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="3dp"
-                        android:layout_weight="50"
-                        android:background="@drawable/et_dialog_style"
-                        android:hint="Sold To"
-                        android:inputType="textVisiblePassword"
-                        android:maxLength="100"
-                        android:textAlignment="center"
-                        android:textColor="@color/text_style"
-                        android:textColorHint="@android:color/darker_gray"
-                        android:textSize="20sp" />
-
-                    <EditText
-                        android:id="@+id/etSoldToBirthDate"
-                        android:layout_width="2dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="3dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_weight="50"
-                        android:background="@drawable/et_dialog_style"
-                        android:hint="Birth Date"
-                        android:inputType="date"
-                        android:maxLength="100"
-                        android:textAlignment="center"
-                        android:textColor="@color/text_style"
-                        android:textColorHint="@android:color/darker_gray"
-                        android:textSize="20sp" />
-                </LinearLayout>
+                    android:layout_height="40dp"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/et_dialog_style"
+                    android:hint="DATE of BIRTH"
+                    android:inputType="date"
+                    android:maxLength="100"
+                    android:textAlignment="center"
+                    android:textColor="@color/text_style"
+                    android:textColorHint="@android:color/darker_gray"
+                    android:textSize="20sp" />
 
                 <Button
                     android:id="@+id/btnAdd"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
                     android:layout_marginTop="5dp"
                     android:layout_weight="50"
                     android:background="@drawable/btn_style"
@@ -153,14 +155,8 @@
                 android:id="@+id/viewDeleteTicket"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
                 android:orientation="vertical">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:layout_marginBottom="7dp"
-                    android:layout_marginTop="7dp"
-                    android:background="@color/darkerGrey" />
 
                 <Button
                     android:id="@+id/btnDelete"

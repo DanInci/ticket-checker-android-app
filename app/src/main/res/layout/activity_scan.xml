@@ -49,6 +49,12 @@
         android:layout_below="@id/toolbar"
         android:background="@color/colorPrimaryDark" />
 
+    <ImageView
+        android:layout_width="170dp"
+        android:layout_height="150dp"
+        android:src="@drawable/ic_barcode"
+        android:layout_centerInParent="true"/>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -57,5 +63,5 @@
         android:text="Place your camera over the barcode"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="18sp" />
+        android:textSize="18sp"/>
 </RelativeLayout>

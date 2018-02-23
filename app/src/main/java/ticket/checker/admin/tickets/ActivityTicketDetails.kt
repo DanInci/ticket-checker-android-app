@@ -2,6 +2,7 @@ package ticket.checker.admin.tickets
 
 import android.content.Intent
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.View
@@ -195,14 +196,14 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
             tvStatus.text = "VALIDATED"
             btnValidate.text = "Invalidate"
             btnValidate.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_clear_white, 0)
-            tvStatus.setTextColor(resources.getColor(R.color.yesGreen))
+            tvStatus.setTextColor(ContextCompat.getColor(baseContext, R.color.yesGreen))
             tvValidatedAt.text = DATE_FORMAT_WITH_HOUR.format(Date())
             tvValidatedBy.text = userName
         } else {
             tvStatus.text = "NOT VALIDATED"
             btnValidate.text = "Validate"
             btnValidate.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_white, 0)
-            tvStatus.setTextColor(resources.getColor(R.color.darkerGrey))
+            tvStatus.setTextColor(ContextCompat.getColor(baseContext, R.color.darkerGrey))
             tvValidatedAt.text = "-"
             tvValidatedBy.text = "-"
         }

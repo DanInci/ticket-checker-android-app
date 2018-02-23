@@ -28,9 +28,7 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
     private val cameraPreview : SurfaceView by lazy {
         findViewById<SurfaceView>(R.id.cameraPreview)
     }
-    private val barcodeDetector by lazy {
-        BarcodeDetector.Builder(this@ActivityScan).setBarcodeFormats(Barcode.ALL_FORMATS).build()
-    }
+    private var cameraSource : CameraSource? = null
     private val btnBack by lazy {
         findViewById<ImageView>(R.id.btnBack)
     }
@@ -51,29 +49,17 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
     }
     private val scanDialogListener = object : IScanDialogListener {
         override fun dismiss() {
-            Handler(Looper.getMainLooper()).post { startBarcodeDetection(false) }
+           startBarcodeDetection(false)
         }
     }
 
-    private val cameraSource by lazy {
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        CameraSource.Builder(this,barcodeDetector)
-                .setRequestedPreviewSize(displayMetrics.widthPixels,displayMetrics.heightPixels)
-                .setFacing(CameraSource.CAMERA_FACING_BACK)
-                .setAutoFocusEnabled(true)
-                .setRequestedFps(15.0f)
-                .build()
-    }
     private val cameraPreviewCallback = object : SurfaceHolder.Callback {
         override fun surfaceCreated(holder: SurfaceHolder?) {
             Handler(Looper.getMainLooper()).post { startBarcodeDetection(true) }
         }
-
         override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
 
         }
-
         override fun surfaceDestroyed(holder: SurfaceHolder?) {
             stopBarcodeDetection()
         }
@@ -88,7 +74,6 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scan)
         cameraPreview.holder.addCallback(cameraPreviewCallback)
-        barcodeDetector.setProcessor(barcodeProcessor)
         btnBack.setOnClickListener(this)
     }
 
@@ -116,7 +101,8 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
             return
         }
         try {
-            cameraSource.start(cameraPreview.holder)
+            cameraSource = createCameraSource()
+            cameraSource?.start(cameraPreview.holder)
         }
         catch(e : IOException) {
             e.printStackTrace()
@@ -124,6 +110,24 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun stopBarcodeDetection() {
-        cameraSource.stop()
+        cameraSource?.stop()
     }
+
+    private fun createCameraSource() : CameraSource {
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        return CameraSource.Builder(this, createBarcodeDetector())
+                .setRequestedPreviewSize(displayMetrics.widthPixels,displayMetrics.heightPixels)
+                .setFacing(CameraSource.CAMERA_FACING_BACK)
+                .setAutoFocusEnabled(true)
+                .setRequestedFps(15.0f)
+                .build()
+    }
+
+    private fun createBarcodeDetector() : BarcodeDetector {
+        val barcodeDetector =  BarcodeDetector.Builder(this@ActivityScan).setBarcodeFormats(Barcode.ALL_FORMATS).build()
+        barcodeDetector.setProcessor(barcodeProcessor)
+        return barcodeDetector
+    }
+
 }
