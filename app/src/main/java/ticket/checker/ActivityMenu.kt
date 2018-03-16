@@ -1,8 +1,10 @@
 package ticket.checker
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.design.widget.AppBarLayout
+import android.support.design.widget.CollapsingToolbarLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.CardView
 import android.support.v7.widget.Toolbar
@@ -12,9 +14,9 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -30,9 +32,10 @@ import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.extras.Util.ROLE_ADMIN
 import ticket.checker.extras.Util.ROLE_USER
 import ticket.checker.services.ServiceManager
-import java.util.*
 
 class ActivityMenu : AppCompatActivity(), View.OnClickListener {
+
+    private var headerHasLoaded = false
 
     private val actionScan by lazy {
         findViewById<CardView>(R.id.scan)
@@ -42,6 +45,9 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     }
     private val actionAdmin by lazy {
         findViewById<CardView>(R.id.admin)
+    }
+    private val collapsingToolbar by lazy {
+        findViewById<CollapsingToolbarLayout>(R.id.collapsingToolbar)
     }
     private val toolbar by lazy {
         findViewById<Toolbar>(R.id.toolbar)
@@ -53,22 +59,25 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         var scrollRange = -1
 
         override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
-            if(scrollRange == -1) {
+            if (scrollRange == -1) {
                 scrollRange = appBarLayout.totalScrollRange
             }
-            if(scrollRange + verticalOffset == 0) {
+            if (scrollRange + verticalOffset == 0) {
                 menuIsShown = true
+                collapsingToolbar.title = resources.getString(R.string.app_name)
                 invalidateOptionsMenu()
-            }
-            else if(menuIsShown) {
+            } else if (menuIsShown) {
                 menuIsShown = false
+                if (headerHasLoaded) {
+                    collapsingToolbar.title = " "
+                }
                 invalidateOptionsMenu()
             }
         }
     }
-    private val updateUserInfoCallback : Callback<User> = object : Callback<User> {
+    private val updateUserInfoCallback: Callback<User> = object : Callback<User> {
         override fun onResponse(call: Call<User>, response: Response<User>) {
-            if(response.isSuccessful) {
+            if (response.isSuccessful) {
                 val user = response.body()
                 userId = user?.id
                 userName = user?.name
@@ -76,19 +85,19 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
                 userRole = user?.role
                 userSoldTicketsNo = user?.soldTicketsNo
                 userValidatedTicketsNo = user?.validatedTicketsNo
-                if(!firstLoadHappen) {
+                if (!firstLoadHappen) {
                     pretendedUserRole = user?.role
                     firstLoadHappen = true
                     switchViews()
                 }
                 updateProfileInfo()
-            }
-            else {
+            } else {
                 Util.treatBasicError(call, response, supportFragmentManager)
             }
         }
+
         override fun onFailure(call: Call<User>, t: Throwable?) {
-            Util.treatBasicError(call,null, supportFragmentManager)
+            Util.treatBasicError(call, null, supportFragmentManager)
         }
     }
     private val tvName by lazy {
@@ -123,13 +132,15 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     var firstLoadHappen = false
 
     private var pretendedUserRole: String? = null
-    private var toolbarImg : Int? = null
     private var currentMenuItemId = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pretendedUserRole = savedInstanceState?.getString(PRETENDED_USER_ROLE) ?: if(userRole != null) { userRole } else { ROLE_USER }
-        toolbarImg = savedInstanceState?.getInt(CURRENT_TOOLBAR_IMG) ?: randomToolbarImg()
+        pretendedUserRole = savedInstanceState?.getString(PRETENDED_USER_ROLE) ?: if (userRole != null) {
+            userRole
+        } else {
+            ROLE_USER
+        }
         currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM_ID) ?: R.id.action_admin_mode
 
         setContentView(R.layout.activity_menu)
@@ -139,7 +150,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         cvAdmin.setOnClickListener(this)
         cvScan.setOnClickListener(this)
         cvStatistics.setOnClickListener(this)
-        if(userId != null) {
+        if (userId != null) {
             firstLoadHappen = true
             switchViews()
         }
@@ -148,40 +159,37 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     override fun onStart() {
         super.onStart()
         updateProfileInfo()
-        val call : Call<User> = ServiceManager.getUserService().getUser()
+        val call: Call<User> = ServiceManager.getUserService().getUser()
         call.enqueue(updateUserInfoCallback)
     }
 
-    private fun randomToolbarImg() : Int {
-        val destiny = Random().nextInt(3)
-        return when(destiny) {
-            0 -> R.drawable.bg_concert1
-            1 -> R.drawable.bg_concert2
-            else -> R.drawable.bg_concert3
-        }
-    }
-
     private fun loadCollapsingToolbarImg() {
-        val collapsingToolbar = findViewById<ImageView>(R.id.bg_collapsingToolbar)
-        Glide.with(this)
-                .load(toolbarImg)
-                .apply(RequestOptions().centerCrop())
-                .into(collapsingToolbar)
+        val collapsingToolbarBackground = findViewById<ImageView>(R.id.bg_collapsingToolbar)
+        Glide.with(applicationContext)
+                .asBitmap()
+                .load(ServiceManager.API_BASE_URL + "images/header.png")
+                .into(object : SimpleTarget<Bitmap>() {
+                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                        headerHasLoaded=true
+                        collapsingToolbar.title = " "
+                        collapsingToolbarBackground.setImageBitmap(resource)
+                        collapsingToolbarBackground.scaleType = ImageView.ScaleType.CENTER_CROP
+                    }
+                })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        when(userRole) {
+        when (userRole) {
             ROLE_ADMIN -> menuInflater.inflate(R.menu.menu_admin, menu)
             ROLE_USER -> menuInflater.inflate(R.menu.menu_user, menu)
         }
-        if(!menuIsShown) {
-            for(i in 0 until menu.size()) {
-                menu.getItem(i).isVisible=false
+        if (!menuIsShown) {
+            for (i in 0 until menu.size()) {
+                menu.getItem(i).isVisible = false
             }
-        }
-        else {
-            for(i in 0 until menu.size()) {
-                menu.getItem(i).isVisible=true
+        } else {
+            for (i in 0 until menu.size()) {
+                menu.getItem(i).isVisible = true
             }
         }
         checkMenuItem(currentMenuItemId)
@@ -190,7 +198,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         var validSelection = true
-        when(item.itemId) {
+        when (item.itemId) {
             R.id.action_admin_mode -> {
                 pretendedUserRole = ROLE_ADMIN
                 switchViews()
@@ -204,17 +212,19 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
                 currentMenuItemId = R.id.action_user_mode
             }
             R.id.action_logout -> logout()
-            else -> { validSelection = false }
+            else -> {
+                validSelection = false
+            }
         }
-        if(validSelection) {
+        if (validSelection) {
             checkMenuItem(item.itemId)
         }
         return validSelection
     }
 
     override fun onClick(v: View) {
-        when(v.id) {
-            R.id.admin ->{
+        when (v.id) {
+            R.id.admin -> {
                 val intent = Intent(this, ActivityAdmin::class.java)
                 startActivity(intent)
             }
@@ -231,7 +241,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun switchViews() {
-        when(pretendedUserRole) {
+        when (pretendedUserRole) {
             ROLE_ADMIN -> {
                 actionScan.visibility = View.VISIBLE
                 actionStatistics.visibility = View.VISIBLE
@@ -246,7 +256,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun updateProfileInfo() {
-        if(firstLoadHappen) {
+        if (firstLoadHappen) {
             findViewById<ProgressBar>(R.id.lsName).visibility = View.GONE
             findViewById<ProgressBar>(R.id.lsCreated).visibility = View.GONE
             findViewById<ProgressBar>(R.id.lsHighestRole).visibility = View.GONE
@@ -263,12 +273,12 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun checkMenuItem(menuItemId : Int) {
+    private fun checkMenuItem(menuItemId: Int) {
         val menu = toolbar.menu
-        if(menuItemId != R.id.action_logout) {
-            (0 until (menu.size() -1))
-                    .map{ menu.getItem(it) }
-                    .forEach{it.isChecked = it.itemId == menuItemId }
+        if (menuItemId != R.id.action_logout) {
+            (0 until (menu.size() - 1))
+                    .map { menu.getItem(it) }
+                    .forEach { it.isChecked = it.itemId == menuItemId }
         }
     }
 
@@ -284,13 +294,11 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(PRETENDED_USER_ROLE, pretendedUserRole)
-        outState.putInt(CURRENT_TOOLBAR_IMG, toolbarImg as Int)
         outState.putInt(CURRENT_MENU_ITEM_ID, currentMenuItemId)
     }
 
     companion object {
         const val PRETENDED_USER_ROLE = "pretendedUserRole"
-        private const val CURRENT_TOOLBAR_IMG = "currentToolbarImg"
         private const val CURRENT_MENU_ITEM_ID = "currentMenuItemId"
     }
 

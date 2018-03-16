@@ -17,13 +17,13 @@
             android:layout_height="match_parent"
             app:layout_scrollFlags="exitUntilCollapsed|scroll"
             app:expandedTitleGravity="bottom|center"
-            app:contentScrim="?attr/colorPrimary"
-            app:title="@string/app_name">
+            app:contentScrim="?attr/colorPrimary">
 
             <ImageView
                 android:id="@+id/bg_collapsingToolbar"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"/>
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"

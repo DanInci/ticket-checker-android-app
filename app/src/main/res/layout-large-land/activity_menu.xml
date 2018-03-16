@@ -19,7 +19,7 @@
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="exitUntilCollapsed|scroll"
             app:expandedTitleGravity="bottom|center"
-            app:title="@string/app_name">
+            android:scaleType="centerCrop">
 
             <ImageView
                 android:id="@+id/bg_collapsingToolbar"

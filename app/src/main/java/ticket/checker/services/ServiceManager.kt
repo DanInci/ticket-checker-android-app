@@ -14,7 +14,7 @@ import ticket.checker.extras.Util.hashString
  * Created by Dani on 24.01.2018.
  */
 object ServiceManager {
-    private const val API_BASE_URL = "http://89.42.135.219:8080/"
+    const val API_BASE_URL = "http://89.42.135.219:8080/"
     private const val GSON_SERIALIZER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
 
     private var httpClient = OkHttpClient.Builder()

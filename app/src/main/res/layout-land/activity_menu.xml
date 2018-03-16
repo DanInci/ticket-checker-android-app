@@ -18,21 +18,20 @@
             android:layout_height="match_parent"
             app:contentScrim="?attr/colorPrimary"
             app:expandedTitleGravity="bottom|center"
-            app:layout_scrollFlags="exitUntilCollapsed|scroll"
-            app:title="@string/app_name">
+            app:layout_scrollFlags="exitUntilCollapsed|scroll">
 
             <ImageView
                 android:id="@+id/bg_collapsingToolbar"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"/>
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                />
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
