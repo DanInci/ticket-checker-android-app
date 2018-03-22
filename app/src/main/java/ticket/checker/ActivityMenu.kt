@@ -64,7 +64,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
             }
             if (scrollRange + verticalOffset == 0) {
                 menuIsShown = true
-                collapsingToolbar.title = resources.getString(R.string.app_name)
+                collapsingToolbar.title = AppTicketChecker.appName
                 invalidateOptionsMenu()
             } else if (menuIsShown) {
                 menuIsShown = false
@@ -165,9 +165,10 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 
     private fun loadCollapsingToolbarImg() {
         val collapsingToolbarBackground = findViewById<ImageView>(R.id.bg_collapsingToolbar)
+        val baseUrl = if(AppTicketChecker.port != "") "http://${AppTicketChecker.address}:${AppTicketChecker.port}" else "http://${AppTicketChecker.address}"
         Glide.with(applicationContext)
                 .asBitmap()
-                .load(ServiceManager.API_BASE_URL + "images/header.png")
+                .load("$baseUrl/images/header.png")
                 .into(object : SimpleTarget<Bitmap>() {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                         headerHasLoaded=true

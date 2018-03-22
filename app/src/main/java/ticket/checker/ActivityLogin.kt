@@ -7,7 +7,6 @@ import android.view.View
 import android.widget.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.google.android.gms.vision.text.Line
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -18,26 +17,21 @@ import ticket.checker.AppTicketChecker.Companion.userRole
 import ticket.checker.AppTicketChecker.Companion.userSoldTicketsNo
 import ticket.checker.AppTicketChecker.Companion.userValidatedTicketsNo
 import ticket.checker.beans.User
+import ticket.checker.dialogs.DialogConnectionConfig
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
 import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
 
-class ActivityLogin : AppCompatActivity() {
+class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     private var savedUser : String = ""
     private var savedPass : String = ""
 
     private val etUsername : EditText by lazy { findViewById<EditText>(R.id.etUsername)}
     private val etPassword : EditText by lazy { findViewById<EditText>(R.id.etPassword)}
     private val btnLogin : Button by lazy { findViewById<Button>(R.id.btnLogin)}
+    private val btnSettings : ImageButton by lazy { findViewById<ImageButton>(R.id.btnSettings)}
     private val autoLoginCheckBox : CheckBox by lazy { findViewById<CheckBox>(R.id.autoLoginCheckBox)}
-
-    private val loginHandler : View.OnClickListener = View.OnClickListener {
-        if(validate(etUsername,etPassword)) {
-            loggingInDialog.show(supportFragmentManager,"DIALOG_LOGGING_IN")
-            doLogin(etUsername.text.toString(), etPassword.text.toString())
-        }
-    }
 
     private val loggingInDialog : DialogInfo by lazy {
         DialogInfo.newInstance("Logging in","Retrieving user info...",DialogType.LOADING)
@@ -77,8 +71,10 @@ class ActivityLogin : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        if(AppTicketChecker.isLoggedIn) {
-            toMenuActivity()
+        if(AppTicketChecker.address != "") {
+            if(AppTicketChecker.isLoggedIn) {
+                toMenuActivity()
+            }
         }
         loadBgnImage()
     }
@@ -86,6 +82,27 @@ class ActivityLogin : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         initialize()
+    }
+
+    override fun onClick(v: View) {
+        when(v.id) {
+            R.id.btnSettings -> {
+                val connectionConfigureDialog = DialogConnectionConfig.newInstance(AppTicketChecker.address,AppTicketChecker.port)
+                connectionConfigureDialog.show(supportFragmentManager, "DIALOG_CONNECTION_CONFIGURE")
+            }
+            R.id.btnLogin -> {
+                if(validate(etUsername,etPassword)) {
+                    if(AppTicketChecker.address != "") {
+                        loggingInDialog.show(supportFragmentManager, "DIALOG_LOGGING_IN")
+                        doLogin(etUsername.text.toString(), etPassword.text.toString())
+                    }
+                    else {
+                        val connectionConfigureDialog = DialogConnectionConfig.newInstance(AppTicketChecker.address,AppTicketChecker.port)
+                        connectionConfigureDialog.show(supportFragmentManager, "DIALOG_CONNECTION_CONFIGURE")
+                    }
+                }
+            }
+        }
     }
 
     private fun validate(vararg ets : EditText) : Boolean {
@@ -114,7 +131,8 @@ class ActivityLogin : AppCompatActivity() {
         etUsername.requestFocus()
         etPassword.setText("")
         etPassword.error = null
-        btnLogin.setOnClickListener(loginHandler)
+        btnLogin.setOnClickListener(this)
+        btnSettings.setOnClickListener(this)
         autoLoginCheckBox.isChecked = false
     }
 
