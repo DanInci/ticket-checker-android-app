@@ -6,34 +6,31 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ticket.checker.ActivityAdmin.Companion.ITEM_REMOVED
-import ticket.checker.ActivityAdmin.Companion.TICKET_CHANGE_VALIDATION
+import ticket.checker.ActivityControlPanel.Companion.ITEM_REMOVED
+import ticket.checker.ActivityControlPanel.Companion.TICKET_CHANGE_VALIDATION
+import ticket.checker.AppTicketChecker.Companion.loggedInUserName
+import ticket.checker.AppTicketChecker.Companion.pretendedUserType
 import ticket.checker.R
-import ticket.checker.AppTicketChecker.Companion.userName
 import ticket.checker.beans.Ticket
-import ticket.checker.listeners.DialogExitListener
 import ticket.checker.dialogs.DialogInfo
-import ticket.checker.listeners.DialogResponseListener
 import ticket.checker.dialogs.DialogType
+import ticket.checker.extras.UserType
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.extras.Util.DATE_FORMAT_WITH_HOUR
 import ticket.checker.extras.Util.POSITION
 import ticket.checker.extras.Util.TICKET_NUMBER
 import ticket.checker.extras.Util.TICKET_STATUS
+import ticket.checker.listeners.DialogExitListener
+import ticket.checker.listeners.DialogResponseListener
 import ticket.checker.services.ServiceManager
-import java.text.SimpleDateFormat
 import java.util.*
 
 class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogExitListener, DialogResponseListener {
-
     private var isFirstLoad = true
 
     private var ticketId: String = ""
@@ -65,14 +62,17 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
     private val tvValidatedBy: TextView by lazy {
         findViewById<TextView>(R.id.validatedBy)
     }
+    private val btnEdit : ImageButton by lazy {
+        findViewById<ImageButton>(R.id.btnEdit)
+    }
     private val btnValidate: Button by lazy {
         findViewById<Button>(R.id.btnValidate)
     }
     private val btnRemove: Button by lazy {
         findViewById<Button>(R.id.btnRemove)
     }
-    private val btnBack: ImageView by lazy {
-        findViewById<ImageView>(R.id.btnBack)
+    private val btnBack: ImageButton by lazy {
+        findViewById<ImageButton>(R.id.btnBack)
     }
 
     private val loadingSpinner: ProgressBar by lazy {
@@ -88,7 +88,9 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
                         updateTicketInfo(response.body() as Ticket)
                         if(isFirstLoad) {
                             isFirstLoad = false
-                            btnRemove.visibility = View.VISIBLE
+                            if(pretendedUserType==UserType.ADMIN) {
+                                btnRemove.visibility = View.VISIBLE
+                            }
                             btnValidate.visibility =  View.VISIBLE
                         }
                     }
@@ -122,11 +124,20 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
         ticketPosition = intent.getIntExtra(POSITION, -1)
         isValidated = savedInstanceState?.getBoolean(TICKET_STATUS) ?: intent.getBooleanExtra(TICKET_STATUS, false)
         setContentView(R.layout.activity_ticket_details)
-        (findViewById<TextView>(R.id.toolbarTitle) as TextView).text = "Ticket #" + ticketId
+        (findViewById<TextView>(R.id.toolbarTitle) as TextView).text = "#$ticketId"
         setSupportActionBar(toolbar)
+        btnEdit.setOnClickListener(this)
         btnValidate.setOnClickListener(this)
         btnRemove.setOnClickListener(this)
         btnBack.setOnClickListener(this)
+
+        if(pretendedUserType != UserType.ADMIN) {
+            btnEdit.visibility = View.GONE
+            btnRemove.visibility = View.GONE
+        }
+        if(pretendedUserType == UserType.PUBLISHER) {
+           findViewById<LinearLayout>(R.id.buttonsContainer).visibility = View.INVISIBLE
+        }
     }
 
     override fun onStart() {
@@ -159,6 +170,9 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
             R.id.btnBack -> {
                 onBackPressed()
             }
+            R.id.btnEdit -> {
+
+            }
             R.id.btnValidate -> {
                 switchToLoadingView(true)
                 val call = ServiceManager.getTicketService().validateTicket(!isValidated, ticketId)
@@ -182,8 +196,10 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
 
     private fun switchToLoadingView(isLoading: Boolean) {
         loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
-        btnRemove.visibility = if (isLoading) View.GONE else View.VISIBLE
         btnValidate.visibility = if (isLoading) View.GONE else View.VISIBLE
+        if(pretendedUserType == UserType.ADMIN) {
+            btnRemove.visibility = if (isLoading) View.GONE else View.VISIBLE
+        }
     }
 
     override fun onItemRemoved() {
@@ -198,7 +214,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
             btnValidate.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_clear_white, 0)
             tvStatus.setTextColor(ContextCompat.getColor(baseContext, R.color.yesGreen))
             tvValidatedAt.text = DATE_FORMAT_WITH_HOUR.format(Date())
-            tvValidatedBy.text = userName
+            tvValidatedBy.text = loggedInUserName
         } else {
             tvStatus.text = "NOT VALIDATED"
             btnValidate.text = "Validate"

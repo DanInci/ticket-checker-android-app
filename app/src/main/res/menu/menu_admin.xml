@@ -5,6 +5,14 @@
         android:checkable="true"
         android:title="Admin mode" />
     <item
+        android:id="@+id/action_publisher_mode"
+        android:checkable="true"
+        android:title="Publisher mode" />
+    <item
+        android:id="@+id/action_validator_mode"
+        android:checkable="true"
+        android:title="Validator mode" />
+    <item
         android:id="@+id/action_user_mode"
         android:checkable="true"
         android:title="User mode" />

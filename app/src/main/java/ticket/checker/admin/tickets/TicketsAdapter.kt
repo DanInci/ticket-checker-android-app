@@ -7,11 +7,10 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import ticket.checker.ActivityAdmin
-import ticket.checker.ActivityAdmin.Companion.CHANGES_TO_ADAPTER_ITEM
-import ticket.checker.ActivityAdmin.Companion.LIST_ALL
-import ticket.checker.ActivityAdmin.Companion.LIST_NOT_VALIDATED
-import ticket.checker.ActivityAdmin.Companion.LIST_VALIDATED
+import ticket.checker.ActivityControlPanel.Companion.CHANGES_TO_ADAPTER_ITEM
+import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
+import ticket.checker.ActivityControlPanel.Companion.LIST_NOT_VALIDATED
+import ticket.checker.ActivityControlPanel.Companion.LIST_VALIDATED
 import ticket.checker.R
 import ticket.checker.admin.AItemsAdapter
 import ticket.checker.beans.Ticket

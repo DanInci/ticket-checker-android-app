@@ -430,12 +430,12 @@
                     android:orientation="horizontal">
 
                     <android.support.v7.widget.CardView
-                        android:id="@+id/admin"
-                        android:visibility="gone"
+                        android:id="@+id/controlPanel"
+                        android:visibility="visible"
                         android:layout_width="match_parent"
                         android:layout_height="180dp"
                         android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"
+                        android:layout_marginBottom="20dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:foreground="?android:attr/selectableItemBackground">
@@ -451,13 +451,13 @@
                                 android:layout_height="64dp"
                                 android:background="@drawable/circle_background_pink"
                                 android:padding="10dp"
-                                app:srcCompat="@drawable/ic_admin" />
+                                app:srcCompat="@drawable/ic_control_panel" />
 
                             <TextView
+                                android:id="@+id/controlPanelTitle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
-                                android:text="Administrator area"
                                 android:textStyle="bold" />
 
                             <View
@@ -467,11 +467,11 @@
                                 android:background="@color/backgroundGrey" />
 
                             <TextView
+                                android:id="@+id/controlPanelDescription"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
                                 android:padding="5dp"
-                                android:text="Use your administrator priveleges to add, delete tickets or see user information"
                                 android:textColor="@color/darkerGrey"
                                 android:textStyle="italic" />
                         </LinearLayout>

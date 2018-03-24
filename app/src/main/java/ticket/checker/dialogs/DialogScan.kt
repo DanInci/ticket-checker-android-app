@@ -14,16 +14,16 @@ import android.widget.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import ticket.checker.AppTicketChecker.Companion.pretendedUserType
 import ticket.checker.R
 import ticket.checker.beans.Ticket
 import ticket.checker.extras.BirthDateFormatException
 import ticket.checker.extras.BirthDateIncorrectException
+import ticket.checker.extras.UserType
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.extras.Util.ERROR_TICKET_EXISTS
 import ticket.checker.extras.Util.ERROR_TICKET_VALIDATION
-import ticket.checker.extras.Util.ROLE_ADMIN
-import ticket.checker.extras.Util.ROLE_USER
 import ticket.checker.listeners.IScanDialogListener
 import ticket.checker.services.ServiceManager
 import java.util.*
@@ -36,7 +36,6 @@ class DialogScan : DialogFragment(), View.OnClickListener {
 
     private var ticketNumber: String? = null
     private var isTicketValidated : Boolean = false
-    private var pretendedUserRole: String = ROLE_USER
     private var birthDate : Date? = null
 
     private var tvTicketNumber: TextView? = null
@@ -90,7 +89,6 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
             ticketNumber = arguments?.getString(TICKET_NUMBER) ?: "NONE"
-            pretendedUserRole = arguments?.getString(USER_ROLE) ?: ROLE_USER
         }
     }
 
@@ -183,15 +181,19 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         loadingSpinner?.visibility = View.GONE
         tvDescription?.visibility = View.VISIBLE
 
-        when (pretendedUserRole) {
-            ROLE_ADMIN -> {
-                if(ticket != null) {
-                    tvOwnerName?.visibility = if (ticket.soldTo.isEmpty()) View.GONE else View.VISIBLE
-                    tvOwnerBirthDate?.visibility = if(ticket.soldToBirthdate == null) View.GONE else View.VISIBLE
-                    tvOwnerName?.text = if (ticket.soldTo.isEmpty()) "~not specified~" else ticket.soldTo
-                    tvOwnerBirthDate?.text = if(ticket.soldToBirthdate == null) "~not specified~" else DATE_FORMAT.format(ticket.soldToBirthdate)
+        if(ticket != null) {
+            viewSellTicket?.visibility = View.GONE
+            tvOwnerName?.visibility = if (ticket.soldTo.isEmpty()) View.GONE else View.VISIBLE
+            tvOwnerBirthDate?.visibility = if (ticket.soldToBirthdate == null) View.GONE else View.VISIBLE
+            tvOwnerName?.text = if (ticket.soldTo.isEmpty()) "~not specified~" else ticket.soldTo
+            tvOwnerBirthDate?.text = if (ticket.soldToBirthdate == null) "~not specified~" else DATE_FORMAT.format(ticket.soldToBirthdate)
 
+            when(pretendedUserType) {
+                UserType.ADMIN -> {
+                    viewDeleteTicket?.visibility = View.VISIBLE
+                    viewValidateTicket?.visibility = View.VISIBLE
                     if(ticket.validatedAt != null) {
+                        errorResult("This ticket is validated!")
                         btnValidate?.text = "Invalidate Ticket"
                         btnValidate?.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_clear_white, 0)
                         isTicketValidated = true
@@ -201,38 +203,65 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                         btnValidate?.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_white, 0)
                         isTicketValidated = false
                     }
-                    viewValidateTicket?.visibility = View.VISIBLE
-                    viewDeleteTicket?.visibility = View.VISIBLE
                 }
-                else {
-                    tvOwnerName?.visibility = View.GONE
-                    tvOwnerBirthDate?.visibility = View.GONE
-                    viewSellTicket?.visibility = View.VISIBLE
-                }
-            }
-            ROLE_USER -> {
-                if(ticket != null) {
-                    tvOwnerName?.visibility = if (ticket.soldTo.isEmpty()) View.GONE else View.VISIBLE
-                    tvOwnerBirthDate?.visibility = if(ticket.soldToBirthdate == null) View.GONE else View.VISIBLE
-                    tvOwnerName?.text = if (ticket.soldTo.isEmpty()) "~not specified~" else ticket.soldTo
-                    tvOwnerBirthDate?.text = if(ticket.soldToBirthdate == null) "~not specified~" else DATE_FORMAT.format(ticket.soldToBirthdate)
-
+                UserType.PUBLISHER -> {
+                    viewDeleteTicket?.visibility = View.GONE
+                    viewValidateTicket?.visibility = View.GONE
                     if(ticket.validatedAt != null) {
-                        viewValidateTicket?.visibility = View.GONE
-                        errorResult("This ticket has already been validated!")
+                        errorResult("This ticket is validated!")
                     }
                     else {
-                        viewValidateTicket?.visibility = View.VISIBLE
+                        errorResult("This ticket hasn't been validated!")
                     }
                 }
-                else {
-                    tvOwnerName?.visibility = View.GONE
-                    tvOwnerBirthDate?.visibility = View.GONE
+                UserType.VALIDATOR -> {
+                    viewDeleteTicket?.visibility = View.GONE
+                    viewValidateTicket?.visibility = View.VISIBLE
+                    if(ticket.validatedAt != null) {
+                        errorResult("This ticket is validated!")
+                        btnValidate?.text = "Invalidate Ticket"
+                        btnValidate?.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_clear_white, 0)
+                        isTicketValidated = true
+                    }
+                    else {
+                        btnValidate?.text = "Validate Ticket"
+                        btnValidate?.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_white, 0)
+                        isTicketValidated = false
+                    }
+                }
+                UserType.USER -> {
+                    viewDeleteTicket?.visibility = View.GONE
                     viewValidateTicket?.visibility = View.GONE
+                    if(ticket.validatedAt != null) {
+                        errorResult("This ticket is validated!")
+                    }
+                    else {
+                        errorResult("This ticket hasn't been validated!")
+                    }
+                }
+            }
+        }
+        else {
+            tvOwnerName?.visibility = View.GONE
+            tvOwnerBirthDate?.visibility = View.GONE
+            viewValidateTicket?.visibility = View.GONE
+            viewDeleteTicket?.visibility = View.GONE
+
+            when(pretendedUserType) {
+                UserType.ADMIN -> {
+                    viewSellTicket?.visibility = View.VISIBLE
+                }
+                UserType.PUBLISHER -> {
+                    viewSellTicket?.visibility = View.VISIBLE
+                }
+                UserType.VALIDATOR -> {
+                    viewSellTicket?.visibility = View.GONE
                     errorResult("A ticket with this id was not found!")
                 }
-                viewSellTicket?.visibility = View.GONE
-                viewDeleteTicket?.visibility = View.GONE
+                UserType.USER -> {
+                    viewSellTicket?.visibility = View.GONE
+                    errorResult("A ticket with this id was not found!")
+                }
             }
         }
     }
@@ -309,13 +338,11 @@ class DialogScan : DialogFragment(), View.OnClickListener {
 
     companion object {
         private const val TICKET_NUMBER = "ticketNumber"
-        private const val USER_ROLE = "userRole"
 
-        fun newInstance(ticketNumber: String, userRole: String): DialogScan {
+        fun newInstance(ticketNumber: String): DialogScan {
             val fragment = DialogScan()
             val args = Bundle()
             args.putString(TICKET_NUMBER, ticketNumber)
-            args.putString(USER_ROLE, userRole)
             fragment.arguments = args
             return fragment
         }

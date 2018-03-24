@@ -13,7 +13,7 @@ import android.widget.ProgressBar
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ticket.checker.ActivityAdmin.Companion.LIST_ALL
+import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
 import ticket.checker.R
 import ticket.checker.admin.listeners.ActionListener
 import ticket.checker.admin.listeners.EndlessScrollListener

@@ -16,19 +16,22 @@ interface UserService {
     @GET("/users")
     fun getUsers(@Query("role") role : String?, @Query("page") page : Int?, @Query("size") size : Int?) : Call<List<User>>
 
-    @GET("/users/{userId}")
-    fun getUsersById(@Path("userId") userId : Long) : Call<User>
+    @GET("/users/{loggedInUserId}")
+    fun getUsersById(@Path("loggedInUserId") userId : Long) : Call<User>
 
-    @GET("/users/{userId}/sold")
-    fun getSoldTicketsByUserId(@Path("userId") userId: Long) : Call<List<Ticket>>
+    @GET("/users/{loggedInUserId}/sold")
+    fun getSoldTicketsByUserId(@Path("loggedInUserId") userId: Long) : Call<List<Ticket>>
 
-    @GET("/users/{userId}/validated")
-    fun getValidatedTicketsByUserId(@Path("userId") userId: Long) : Call<List<Ticket>>
+    @GET("/users/{loggedInUserId}/validated")
+    fun getValidatedTicketsByUserId(@Path("loggedInUserId") userId: Long) : Call<List<Ticket>>
 
     @POST("/users")
     fun createUser(@Body user: User) : Call<User>
 
-    @DELETE("/users/{userId}")
-    fun deleteUserById(@Path("userId") userId: Long) : Call<Void>
+    @POST("/users/{loggedInUserId}")
+    fun editUser(@Path("loggedInUserId") userId : Long, @Body user: User) : Call<User>
+
+    @DELETE("/users/{loggedInUserId}")
+    fun deleteUserById(@Path("loggedInUserId") userId: Long) : Call<Void>
 
 }

@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
-import ticket.checker.ActivityAdmin.Companion.LIST_ALL
+import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
 import ticket.checker.R
 
 /**

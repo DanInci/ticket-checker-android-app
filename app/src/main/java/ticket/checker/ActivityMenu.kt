@@ -20,32 +20,23 @@ import com.bumptech.glide.request.transition.Transition
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ticket.checker.AppTicketChecker.Companion.userCreatedDate
-import ticket.checker.AppTicketChecker.Companion.userId
-import ticket.checker.AppTicketChecker.Companion.userName
-import ticket.checker.AppTicketChecker.Companion.userRole
-import ticket.checker.AppTicketChecker.Companion.userSoldTicketsNo
-import ticket.checker.AppTicketChecker.Companion.userValidatedTicketsNo
+import ticket.checker.AppTicketChecker.Companion.loggedInUserCreatedDate
+import ticket.checker.AppTicketChecker.Companion.loggedInUserId
+import ticket.checker.AppTicketChecker.Companion.loggedInUserName
+import ticket.checker.AppTicketChecker.Companion.loggedInUserSoldTicketsNo
+import ticket.checker.AppTicketChecker.Companion.loggedInUserType
+import ticket.checker.AppTicketChecker.Companion.loggedInUserValidatedTicketsNo
+import ticket.checker.AppTicketChecker.Companion.pretendedUserType
 import ticket.checker.beans.User
+import ticket.checker.extras.UserType
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.DATE_FORMAT
-import ticket.checker.extras.Util.ROLE_ADMIN
-import ticket.checker.extras.Util.ROLE_USER
 import ticket.checker.services.ServiceManager
 
 class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 
     private var headerHasLoaded = false
 
-    private val actionScan by lazy {
-        findViewById<CardView>(R.id.scan)
-    }
-    private val actionStatistics by lazy {
-        findViewById<CardView>(R.id.statistics)
-    }
-    private val actionAdmin by lazy {
-        findViewById<CardView>(R.id.admin)
-    }
     private val collapsingToolbar by lazy {
         findViewById<CollapsingToolbarLayout>(R.id.collapsingToolbar)
     }
@@ -78,15 +69,16 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     private val updateUserInfoCallback: Callback<User> = object : Callback<User> {
         override fun onResponse(call: Call<User>, response: Response<User>) {
             if (response.isSuccessful) {
-                val user = response.body()
-                userId = user?.id
-                userName = user?.name
-                userCreatedDate = user?.createdDate
-                userRole = user?.role
-                userSoldTicketsNo = user?.soldTicketsNo
-                userValidatedTicketsNo = user?.validatedTicketsNo
+                val user = response.body() as User
+                loggedInUserId = user.id
+                loggedInUserName = user.name
+                loggedInUserCreatedDate = user.createdDate
+                loggedInUserType = user.userType
+                loggedInUserSoldTicketsNo = user.soldTicketsNo
+                loggedInUserValidatedTicketsNo = user.validatedTicketsNo
+
                 if (!firstLoadHappen) {
-                    pretendedUserRole = user?.role
+                    pretendedUserType = user.userType
                     firstLoadHappen = true
                     switchViews()
                 }
@@ -124,33 +116,28 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     private val cvStatistics by lazy {
         findViewById<CardView>(R.id.statistics)
     }
-    private val cvAdmin by lazy {
-        findViewById<CardView>(R.id.admin)
+    private val cvControlPanel by lazy {
+        findViewById<CardView>(R.id.controlPanel)
     }
 
     var menuIsShown = false
     var firstLoadHappen = false
 
-    private var pretendedUserRole: String? = null
     private var currentMenuItemId = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pretendedUserRole = savedInstanceState?.getString(PRETENDED_USER_ROLE) ?: if (userRole != null) {
-            userRole
-        } else {
-            ROLE_USER
-        }
-        currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM_ID) ?: R.id.action_admin_mode
+        currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM_ID) ?: -1
 
         setContentView(R.layout.activity_menu)
         loadCollapsingToolbarImg()
         setSupportActionBar(toolbar)
         appBarLayout.addOnOffsetChangedListener(appBarOffsetChangeListener)
-        cvAdmin.setOnClickListener(this)
+        cvControlPanel.setOnClickListener(this)
         cvScan.setOnClickListener(this)
         cvStatistics.setOnClickListener(this)
-        if (userId != null) {
+
+        if (loggedInUserId != null) {
             firstLoadHappen = true
             switchViews()
         }
@@ -180,9 +167,11 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        when (userRole) {
-            ROLE_ADMIN -> menuInflater.inflate(R.menu.menu_admin, menu)
-            ROLE_USER -> menuInflater.inflate(R.menu.menu_user, menu)
+        when (loggedInUserType) {
+            UserType.ADMIN -> menuInflater.inflate(R.menu.menu_admin, menu)
+            UserType.PUBLISHER -> menuInflater.inflate(R.menu.menu_publisher, menu)
+            UserType.VALIDATOR -> menuInflater.inflate(R.menu.menu_validator, menu)
+            UserType.USER -> menuInflater.inflate(R.menu.menu_user, menu)
         }
         if (!menuIsShown) {
             for (i in 0 until menu.size()) {
@@ -193,7 +182,12 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
                 menu.getItem(i).isVisible = true
             }
         }
-        checkMenuItem(currentMenuItemId)
+        if(currentMenuItemId == -1) {
+            menu.getItem(0).isChecked = true
+        }
+        else {
+            checkMenuItem(currentMenuItemId)
+        }
         return true
     }
 
@@ -201,13 +195,25 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         var validSelection = true
         when (item.itemId) {
             R.id.action_admin_mode -> {
-                pretendedUserRole = ROLE_ADMIN
+                pretendedUserType = UserType.ADMIN
                 switchViews()
                 updateProfileInfo()
                 currentMenuItemId = R.id.action_admin_mode
             }
+            R.id.action_publisher_mode -> {
+                pretendedUserType = UserType.PUBLISHER
+                switchViews()
+                updateProfileInfo()
+                currentMenuItemId = R.id.action_publisher_mode
+            }
+            R.id.action_validator_mode -> {
+                pretendedUserType = UserType.VALIDATOR
+                switchViews()
+                updateProfileInfo()
+                currentMenuItemId = R.id.action_validator_mode
+            }
             R.id.action_user_mode -> {
-                pretendedUserRole = ROLE_USER
+                pretendedUserType = UserType.USER
                 switchViews()
                 updateProfileInfo()
                 currentMenuItemId = R.id.action_user_mode
@@ -225,13 +231,12 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 
     override fun onClick(v: View) {
         when (v.id) {
-            R.id.admin -> {
-                val intent = Intent(this, ActivityAdmin::class.java)
+            R.id.controlPanel -> {
+                val intent = Intent(this, ActivityControlPanel::class.java)
                 startActivity(intent)
             }
             R.id.scan -> {
                 val intent = Intent(this, ActivityScan::class.java)
-                intent.putExtra(PRETENDED_USER_ROLE, pretendedUserRole)
                 startActivity(intent)
             }
             R.id.statistics -> {
@@ -242,16 +247,32 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun switchViews() {
-        when (pretendedUserRole) {
-            ROLE_ADMIN -> {
-                actionScan.visibility = View.VISIBLE
-                actionStatistics.visibility = View.VISIBLE
-                actionAdmin.visibility = View.VISIBLE
+        when (pretendedUserType) {
+            UserType.ADMIN -> {
+                cvScan.visibility = View.VISIBLE
+                cvStatistics.visibility = View.VISIBLE
+                cvControlPanel.visibility = View.VISIBLE
+                findViewById<TextView>(R.id.controlPanelTitle).setText("Administration area")
+                findViewById<TextView>(R.id.controlPanelDescription).setText("Use your administrator priveleges to add, delete tickets or see user information")
             }
-            ROLE_USER -> {
-                actionScan.visibility = View.VISIBLE
-                actionStatistics.visibility = View.VISIBLE
-                actionAdmin.visibility = View.GONE
+            UserType.PUBLISHER -> {
+                cvScan.visibility = View.VISIBLE
+                cvStatistics.visibility = View.VISIBLE
+                cvControlPanel.visibility = View.VISIBLE
+                findViewById<TextView>(R.id.controlPanelTitle).setText("Publisher area")
+                findViewById<TextView>(R.id.controlPanelDescription).setText("Use your publisher priveleges to add tickets or see information about them")
+            }
+            UserType.VALIDATOR -> {
+                cvScan.visibility = View.VISIBLE
+                cvStatistics.visibility = View.VISIBLE
+                cvControlPanel.visibility = View.VISIBLE
+                findViewById<TextView>(R.id.controlPanelTitle).setText("Validator area")
+                findViewById<TextView>(R.id.controlPanelDescription).setText("Use your validator priveleges to validate/invalidate tickets or see information about them")
+            }
+            UserType.USER -> {
+                cvScan.visibility = View.VISIBLE
+                cvStatistics.visibility = View.VISIBLE
+                cvControlPanel.visibility = View.GONE
             }
         }
     }
@@ -265,12 +286,12 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
             findViewById<ProgressBar>(R.id.lsCreatedTickets).visibility = View.GONE
             findViewById<ProgressBar>(R.id.lsValidatedTickets).visibility = View.GONE
 
-            tvName.text = userName
-            tvCreated.text = DATE_FORMAT.format(userCreatedDate)
-            tvHighestRole.text = userRole?.removePrefix("ROLE_")
-            tvCurrentRole.text = pretendedUserRole?.removePrefix("ROLE_")
-            tvCreatedTickets.text = userSoldTicketsNo.toString()
-            tvValidatedTickets.text = userValidatedTicketsNo.toString()
+            tvName.text = loggedInUserName
+            tvCreated.text = DATE_FORMAT.format(loggedInUserCreatedDate)
+            tvHighestRole.text = loggedInUserType.name
+            tvCurrentRole.text = pretendedUserType.name
+            tvCreatedTickets.text = loggedInUserSoldTicketsNo.toString()
+            tvValidatedTickets.text = loggedInUserValidatedTicketsNo.toString()
         }
     }
 
@@ -294,12 +315,10 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString(PRETENDED_USER_ROLE, pretendedUserRole)
         outState.putInt(CURRENT_MENU_ITEM_ID, currentMenuItemId)
     }
 
     companion object {
-        const val PRETENDED_USER_ROLE = "pretendedUserRole"
         private const val CURRENT_MENU_ITEM_ID = "currentMenuItemId"
     }
 

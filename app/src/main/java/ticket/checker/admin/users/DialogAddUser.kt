@@ -16,17 +16,13 @@ import retrofit2.Response
 import ticket.checker.R
 import ticket.checker.admin.listeners.ActionListener
 import ticket.checker.beans.User
-import ticket.checker.dialogs.DialogInfo
-import ticket.checker.dialogs.DialogType
+import ticket.checker.extras.UserType
 import ticket.checker.extras.Util
-import ticket.checker.extras.Util.ROLE_ADMIN
-import ticket.checker.extras.Util.ROLE_USER
 import ticket.checker.extras.Util.hashString
 import ticket.checker.services.ServiceManager
 
 class DialogAddUser : DialogFragment(), View.OnClickListener {
     var actionListener: ActionListener<User>? = null
-    private val roles = hashMapOf("ADMIN" to ROLE_ADMIN, "USER" to ROLE_USER)
 
     private var btnClose : ImageButton? = null
     private var tvTitle : TextView? = null
@@ -90,14 +86,14 @@ class DialogAddUser : DialogFragment(), View.OnClickListener {
             }
             R.id.btnSubmit -> {
                 if(validate()) {
-                    submitUser(etUsername?.text.toString(), etPassword?.text.toString(), etName?.text.toString(), roles.getOrElse(spinnerRole?.selectedItem as String, { ROLE_USER }))
+                    submitUser(etUsername?.text.toString(), etPassword?.text.toString(), etName?.text.toString(), spinnerRole?.selectedItem as UserType)
                 }
             }
         }
     }
 
     private fun setupLoadingSpinner() {
-        val adapter = ArrayAdapter<String>(context, R.layout.spinner_item, roles.keys.toTypedArray())
+        val adapter = ArrayAdapter<UserType>(context, R.layout.spinner_item, UserType.values())
         spinnerRole?.adapter = adapter
     }
 
@@ -149,13 +145,13 @@ class DialogAddUser : DialogFragment(), View.OnClickListener {
         return isValid
     }
 
-    private fun submitUser(username : String, password : String, name : String, role : String) {
+    private fun submitUser(username : String, password : String, name : String, userType : UserType) {
         tvResult?.visibility = View.INVISIBLE
         submitButton?.visibility = View.GONE
         loadingSpinner?.visibility = View.VISIBLE
 
         val encryptedPassword = hashString("SHA-256", password)
-        val user = User(username, encryptedPassword, name , role)
+        val user = User(username, encryptedPassword, name , userType)
         val call = ServiceManager.getUserService().createUser(user)
         call.enqueue(submitCallback)
     }

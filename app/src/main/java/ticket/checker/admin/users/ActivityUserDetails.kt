@@ -1,43 +1,50 @@
 package ticket.checker.admin.users
 
 import android.content.Intent
+import android.media.Image
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ticket.checker.ActivityAdmin
-import ticket.checker.R
+import ticket.checker.ActivityControlPanel
 import ticket.checker.AppTicketChecker
+import ticket.checker.R
 import ticket.checker.beans.User
-import ticket.checker.listeners.DialogExitListener
 import ticket.checker.dialogs.DialogInfo
-import ticket.checker.listeners.DialogResponseListener
 import ticket.checker.dialogs.DialogType
+import ticket.checker.extras.UserType
 import ticket.checker.extras.Util.DATE_FORMAT_WITH_HOUR
 import ticket.checker.extras.Util.POSITION
-import ticket.checker.extras.Util.ROLE_ADMIN
 import ticket.checker.extras.Util.USER_ID
 import ticket.checker.extras.Util.USER_NAME
-import ticket.checker.extras.Util.USER_ROLE
+import ticket.checker.extras.Util.USER_TYPE
 import ticket.checker.extras.Util.treatBasicError
+import ticket.checker.listeners.DialogExitListener
+import ticket.checker.listeners.DialogResponseListener
 import ticket.checker.services.ServiceManager
 
 class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExitListener, DialogResponseListener {
 
     private var isFirstLoad = true
 
-    private var userId: Long = -1
-    private var userName: String? = null
-    private var userRole: String? = null
-    private var userPosition: Int = -1
-    private var isAdmin: Boolean = false
+    private val userId: Long by lazy {
+        intent.getLongExtra(USER_ID, -1)
+    }
+
+    private val userName: String by lazy {
+        intent.getStringExtra(USER_NAME)
+    }
+    private val userType: UserType by lazy {
+        intent.getSerializableExtra(USER_TYPE) as UserType
+    }
+    private val userPosition: Int by lazy {
+        intent.getIntExtra(POSITION, -1)
+    }
 
     private val toolbar: Toolbar by lazy {
         findViewById<Toolbar>(R.id.toolbar)
@@ -54,11 +61,14 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
     private val tvTicketsValidated: TextView by lazy {
         findViewById<TextView>(R.id.ticketsValidated)
     }
+    private val btnEdit : ImageButton by lazy {
+        findViewById<ImageButton>(R.id.btnEdit)
+    }
     private val btnRemove: Button by lazy {
         findViewById<Button>(R.id.btnRemove)
     }
-    private val btnBack: ImageView by lazy {
-        findViewById<ImageView>(R.id.btnBack)
+    private val btnBack: ImageButton by lazy {
+        findViewById<ImageButton>(R.id.btnBack)
     }
     private val loadingSpinner: ProgressBar by lazy {
         findViewById<ProgressBar>(R.id.loadingSpinner)
@@ -97,21 +107,11 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        userId = intent.getLongExtra(USER_ID, -1)
-        userName = intent.getStringExtra(USER_NAME)
-        userRole = intent.getStringExtra(USER_ROLE)
-        userPosition = intent.getIntExtra(POSITION, -1)
         setContentView(R.layout.activity_user_details)
         (findViewById<TextView>(R.id.toolbarTitle) as TextView).text = userName
 
-        isAdmin = userRole == ROLE_ADMIN
-        if (isAdmin) {
-            tvRole.text = "ADMIN"
-            tvRole.setTextColor(resources.getColor(R.color.yesGreen))
-        } else {
-            tvRole.text = "USER"
-            tvRole.setTextColor(resources.getColor(R.color.darkerGrey))
-        }
+        tvRole.text = userType.role
+        tvRole.setTextColor(ContextCompat.getColor(applicationContext, userType.colorResource))
 
         setSupportActionBar(toolbar)
         btnRemove.setOnClickListener(this)
@@ -137,11 +137,11 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
             R.id.btnRemove -> {
                 val dialog: DialogInfo?
                 when {
-                    userId == AppTicketChecker.userId -> {
+                    userId == AppTicketChecker.loggedInUserId -> {
                         dialog = DialogInfo.newInstance("Delete failed", "You can not delete yourself", DialogType.ERROR)
                         dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
                     }
-                    isAdmin -> {
+                    userType == UserType.ADMIN -> {
                         dialog = DialogInfo.newInstance("Delete failed", "You are not allowed to delete another admin", DialogType.ERROR)
                         dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
                     }
@@ -166,7 +166,7 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
     override fun onItemRemoved() {
         val data = Intent()
         data.putExtra(POSITION, userPosition)
-        setResult(ActivityAdmin.ITEM_REMOVED, data)
+        setResult(ActivityControlPanel.ITEM_REMOVED, data)
         onBackPressed()
     }
 

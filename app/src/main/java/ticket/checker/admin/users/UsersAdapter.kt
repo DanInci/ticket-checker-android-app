@@ -3,28 +3,24 @@ package ticket.checker.admin.users
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import ticket.checker.ActivityAdmin
-import ticket.checker.ActivityAdmin.Companion.LIST_ADMINS
-import ticket.checker.ActivityAdmin.Companion.LIST_ALL
-import ticket.checker.ActivityAdmin.Companion.LIST_USERS
+import ticket.checker.ActivityControlPanel
+import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
 import ticket.checker.R
 import ticket.checker.admin.AItemsAdapter
-import ticket.checker.admin.tickets.ActivityTicketDetails
 import ticket.checker.beans.User
-import ticket.checker.extras.Util
+import ticket.checker.extras.UserType
 import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.extras.Util.POSITION
-import ticket.checker.extras.Util.ROLE_ADMIN
 import ticket.checker.extras.Util.USER_ID
 import ticket.checker.extras.Util.USER_NAME
-import ticket.checker.extras.Util.USER_ROLE
+import ticket.checker.extras.Util.USER_TYPE
 import java.util.*
 
 /**
@@ -55,12 +51,12 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
         val intent  = Intent(activity, ActivityUserDetails::class.java)
         val userId = items[position-1].id
         val userName = items[position-1].name
-        val userRole = items[position-1].role
+        val userType = items[position-1].userType
         intent.putExtra(POSITION, position)
         intent.putExtra(USER_ID, userId)
         intent.putExtra(USER_NAME, userName)
-        intent.putExtra(USER_ROLE, userRole)
-        activity.startActivityForResult(intent, ActivityAdmin.CHANGES_TO_ADAPTER_ITEM)
+        intent.putExtra(USER_TYPE, userType)
+        activity.startActivityForResult(intent, ActivityControlPanel.CHANGES_TO_ADAPTER_ITEM)
         activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
@@ -93,7 +89,7 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
 
         fun updateUserHolderInfo(user : User) {
             setName(user.name)
-            setRole(user.role)
+            setUserType(user.userType)
             setCreatedAt(user.createdDate)
         }
 
@@ -101,14 +97,21 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
             tvName.text = name
         }
 
-        private fun setRole(role : String) {
-            if(role == ROLE_ADMIN) {
-                tvRole.visibility = View.VISIBLE
-                icPerson.background = itemView.context.resources.getDrawable(R.drawable.ic_person_green)
+        private fun setUserType(userType : UserType) {
+            tvRole.text = userType.name
+            if(userType == UserType.USER) {
+                tvRole.visibility = View.GONE
             }
             else {
-                tvRole.visibility = View.GONE
-                icPerson.background = itemView.context.resources.getDrawable(R.drawable.ic_person_grey)
+                tvRole.visibility = View.VISIBLE
+                tvRole.setTextColor(ContextCompat.getColor(itemView.context, userType.colorResource))
+            }
+
+            if(userType ==  UserType.ADMIN) {
+                icPerson.background = ContextCompat.getDrawable(itemView.context, R.drawable.ic_admin)
+            }
+            else {
+                icPerson.background = ContextCompat.getDrawable(itemView.context, R.drawable.ic_user)
             }
         }
 
@@ -139,16 +142,12 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
             }
             else {
                 tvUsersNumbers.visibility = View.VISIBLE
-                var users = ""
-                when(filter) {
+                val users = when(filter) {
                     LIST_ALL -> {
-                        users = if (totalUsers == 1)  "registered account" else "registered accounts"
+                        if (totalUsers == 1)  "registered account" else "registered accounts"
                     }
-                    LIST_ADMINS -> {
-                        users = if (totalUsers == 1)  "admin" else "admins"
-                    }
-                    LIST_USERS -> {
-                        users = if (totalUsers == 1)  "user" else "users"
+                    else -> {
+                        if (totalUsers == 1)  filter else filter + "s"
                     }
                 }
                 tvUsersNumbers.text = "There is a total of $totalUsers $users"

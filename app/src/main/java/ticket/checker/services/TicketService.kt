@@ -19,6 +19,9 @@ interface TicketService {
     fun createTicket(@Body ticket : Ticket) : Call<Ticket>
 
     @POST("/tickets/{ticketId}")
+    fun editTicket(@Path("ticketId") ticketId : String, @Body ticket : Ticket) : Call<Ticket>
+
+    @POST("/tickets/validate/{ticketId}")
     fun validateTicket(@Header("validate") validate : Boolean, @Path("ticketId") ticketId : String) : Call<Void>
 
     @DELETE("/tickets/{ticketId}")

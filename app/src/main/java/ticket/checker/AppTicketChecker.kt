@@ -3,6 +3,7 @@ package ticket.checker
 import android.app.Application
 import android.content.Context
 import android.preference.PreferenceManager
+import ticket.checker.extras.UserType
 import ticket.checker.services.ServiceManager
 import java.util.*
 
@@ -26,23 +27,26 @@ class AppTicketChecker : Application() {
         var port = ""
         var isLoggedIn = false
 
-        var userId: Long? = null
-        var userName: String? = null
-        var userRole: String? = null
-        var userCreatedDate: Date? = null
-        var userSoldTicketsNo: Int? = null
-        var userValidatedTicketsNo: Int? = null
+        var loggedInUserId: Long? = null
+        var loggedInUserName: String? = null
+        var loggedInUserType: UserType = UserType.USER
+        var loggedInUserCreatedDate: Date? = null
+        var loggedInUserSoldTicketsNo: Int? = null
+        var loggedInUserValidatedTicketsNo: Int? = null
+
+        var pretendedUserType : UserType = UserType.USER
 
         fun clearSession() {
             ServiceManager.invalidateSession()
             deleteSessionPreferences()
             isLoggedIn = false
-            userId = null
-            userName = null
-            userRole = null
-            userCreatedDate = null
-            userSoldTicketsNo = null
-            userValidatedTicketsNo = null
+            loggedInUserId = null
+            loggedInUserName = null
+            loggedInUserType = UserType.USER
+            loggedInUserCreatedDate = null
+            loggedInUserSoldTicketsNo = null
+            loggedInUserValidatedTicketsNo = null
+            pretendedUserType = UserType.USER
         }
 
         fun saveConnectionConfig(appName : String, address : String, port : String) {

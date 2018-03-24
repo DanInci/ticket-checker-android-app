@@ -10,12 +10,13 @@ import com.bumptech.glide.request.RequestOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ticket.checker.AppTicketChecker.Companion.userCreatedDate
-import ticket.checker.AppTicketChecker.Companion.userId
-import ticket.checker.AppTicketChecker.Companion.userName
-import ticket.checker.AppTicketChecker.Companion.userRole
-import ticket.checker.AppTicketChecker.Companion.userSoldTicketsNo
-import ticket.checker.AppTicketChecker.Companion.userValidatedTicketsNo
+import ticket.checker.AppTicketChecker.Companion.loggedInUserCreatedDate
+import ticket.checker.AppTicketChecker.Companion.loggedInUserId
+import ticket.checker.AppTicketChecker.Companion.loggedInUserName
+import ticket.checker.AppTicketChecker.Companion.loggedInUserSoldTicketsNo
+import ticket.checker.AppTicketChecker.Companion.loggedInUserType
+import ticket.checker.AppTicketChecker.Companion.loggedInUserValidatedTicketsNo
+import ticket.checker.AppTicketChecker.Companion.pretendedUserType
 import ticket.checker.beans.User
 import ticket.checker.dialogs.DialogConnectionConfig
 import ticket.checker.dialogs.DialogInfo
@@ -147,12 +148,13 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun login(user : User) {
-        userId = user.id
-        userName = user.name
-        userRole = user.role
-        userCreatedDate = user.createdDate
-        userSoldTicketsNo = user.soldTicketsNo
-        userValidatedTicketsNo = user.validatedTicketsNo
+        loggedInUserId = user.id
+        loggedInUserName = user.name
+        loggedInUserType = user.userType
+        loggedInUserCreatedDate = user.createdDate
+        loggedInUserSoldTicketsNo = user.soldTicketsNo
+        loggedInUserValidatedTicketsNo = user.validatedTicketsNo
+        pretendedUserType = user.userType
         toMenuActivity()
     }
 

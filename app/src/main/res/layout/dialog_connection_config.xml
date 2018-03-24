@@ -84,7 +84,7 @@
                     android:textColor="@color/text_style"
                     android:textColorHint="@color/darkerGrey"
                     android:textSize="20sp"
-                    android:inputType="textVisiblePassword"
+                    android:inputType="number"
                     android:maxLength="100"
                     android:padding="10dp"
                     android:hint="PORT"

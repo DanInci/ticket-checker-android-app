@@ -22,29 +22,48 @@
             android:background="@color/colorPrimary"
             android:theme="@style/AppTheme.ToolbarStyle"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:titleTextColor="@android:color/white"
-            android:gravity="center">
+            app:titleTextColor="@android:color/white">
 
-            <ImageView
-                android:id="@+id/btnBack"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="?selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                app:srcCompat="@drawable/ic_navigate_before" />
-
-            <TextView
-                android:id="@+id/toolbarTitle"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:paddingStart="-48dp"
-                android:text="Ticket #2323"
-                android:textAlignment="center"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:layout_height="match_parent">
+
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:scaleType="fitCenter"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:srcCompat="@drawable/ic_navigate_before"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"/>
+
+                <TextView
+                    android:id="@+id/toolbarTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ticket #2323"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:layout_centerInParent="true"/>
+
+                <ImageButton
+                    android:id="@+id/btnEdit"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:scaleType="fitCenter"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:srcCompat="@drawable/ic_edit"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"/>
+            </RelativeLayout>
         </android.support.v7.widget.Toolbar>
 
         <LinearLayout
@@ -313,6 +332,7 @@
 
 
         <LinearLayout
+            android:id="@+id/buttonsContainer"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginBottom="20dp"
@@ -325,7 +345,6 @@
                 android:layout_width="150dp"
                 android:layout_height="35dp"
                 android:layout_gravity="center"
-                android:layout_marginEnd="5dp"
                 android:layout_marginTop="5dp"
                 android:background="@drawable/btn_style"
                 android:drawableEnd="@drawable/ic_clear_white"
@@ -342,7 +361,7 @@
                 android:layout_width="150dp"
                 android:layout_height="35dp"
                 android:layout_gravity="center"
-                android:layout_marginStart="5dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
                 android:background="@drawable/btn_no_style"
                 android:drawableEnd="@drawable/ic_delete"

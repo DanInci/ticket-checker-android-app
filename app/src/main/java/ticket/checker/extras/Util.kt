@@ -19,10 +19,6 @@ import java.util.*
 object Util {
     val DATE_FORMAT = SimpleDateFormat("dd MMM yyyy")
     val DATE_FORMAT_WITH_HOUR = SimpleDateFormat("dd MMM yyyy HH:mm")
-    val STANDARD_DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd")
-
-    const val ROLE_USER = "ROLE_USER"
-    const val ROLE_ADMIN = "ROLE_ADMIN"
 
     const val ERROR_TICKET_VALIDATION = "TicketValidationException"
     const val ERROR_TICKET_EXISTS = "TicketExistsException"
@@ -30,9 +26,9 @@ object Util {
 
     const val TICKET_NUMBER = "ticketNumber"
     const val TICKET_STATUS = "ticketStatus"
-    const val USER_ID = "userId"
-    const val USER_NAME = "userName"
-    const val USER_ROLE = "userRole"
+    const val USER_ID = "loggedInUserId"
+    const val USER_NAME = "loggedInUserName"
+    const val USER_TYPE = "userType"
     const val POSITION = "adapterPosition"
 
     fun formatDate(date : Date) : String {
@@ -148,7 +144,7 @@ object Util {
                     hasResponded = true
                 }
                 403 -> {
-                    val dialogError = DialogInfo.newInstance("Authorization required", "You are not allowed to see this information", DialogType.ERROR)
+                    val dialogError = DialogInfo.newInstance("Authorization required", "You are not allowed to do this action", DialogType.ERROR)
                     dialogError.show(fragmentManager, "DIALOG_AUTH_ERROR")
                     hasResponded = true
                 }

@@ -66,7 +66,7 @@ class DialogAddTicket : DialogFragment(), View.OnClickListener {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val view = inflater!!.inflate(R.layout.dialog_add_ticket, container, false)
+        val view = inflater.inflate(R.layout.dialog_add_ticket, container, false)
         btnClose = view.findViewById(R.id.btnClose)
         btnClose?.setOnClickListener(this)
         tvTitle = view.findViewById(R.id.tvTitle)

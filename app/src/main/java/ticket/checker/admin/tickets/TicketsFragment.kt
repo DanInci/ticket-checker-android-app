@@ -1,9 +1,9 @@
 package ticket.checker.admin.tickets
 
 import android.os.Bundle
-import ticket.checker.ActivityAdmin.Companion.LIST_ALL
-import ticket.checker.ActivityAdmin.Companion.LIST_NOT_VALIDATED
-import ticket.checker.ActivityAdmin.Companion.LIST_VALIDATED
+import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
+import ticket.checker.ActivityControlPanel.Companion.LIST_NOT_VALIDATED
+import ticket.checker.ActivityControlPanel.Companion.LIST_VALIDATED
 import ticket.checker.admin.AAdminFragment
 import ticket.checker.admin.AItemsAdapter
 import ticket.checker.beans.Ticket

@@ -1,7 +1,7 @@
 package ticket.checker.admin.users
 
 import android.os.Bundle
-import ticket.checker.ActivityAdmin.Companion.LIST_ALL
+import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
 import ticket.checker.admin.AAdminFragment
 import ticket.checker.admin.AItemsAdapter
 import ticket.checker.beans.User
