@@ -14,7 +14,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.R
-import ticket.checker.admin.listeners.ActionListener
+import ticket.checker.admin.listeners.ListChangeListener
 import ticket.checker.beans.User
 import ticket.checker.extras.UserType
 import ticket.checker.extras.Util
@@ -22,7 +22,7 @@ import ticket.checker.extras.Util.hashString
 import ticket.checker.services.ServiceManager
 
 class DialogAddUser : DialogFragment(), View.OnClickListener {
-    var actionListener: ActionListener<User>? = null
+    var listChangeListener: ListChangeListener<User>? = null
 
     private var btnClose : ImageButton? = null
     private var tvTitle : TextView? = null
@@ -40,7 +40,7 @@ class DialogAddUser : DialogFragment(), View.OnClickListener {
             loadingSpinner?.visibility = View.GONE
             submitButton?.visibility = View.VISIBLE
             if(response.isSuccessful) {
-                actionListener?.onAdd(response.body() as User)
+                listChangeListener?.onAdd(response.body() as User)
                 tvResult?.visibility = View.VISIBLE
                 tvResult?.setTextColor(ContextCompat.getColor(context!!, R.color.yesGreen))
                 tvResult?.text = "You have added the user successfully"

@@ -38,6 +38,16 @@ class UsersFragment : AAdminFragment<User, Int>() {
         }
     }
 
+    override fun onEdit(editedObject: User, editedObjectPosition: Int) {
+        val role = editedObject.role
+        val modifiedFilter = "ROLE_" + filter.toUpperCase()
+        if(modifiedFilter == role || filter == LIST_ALL) {
+            itemsAdapter.itemEdited(editedObject, editedObjectPosition)
+        }
+        else {
+            itemsAdapter.itemRemoved(editedObjectPosition)
+        }
+    }
 
     companion object {
         fun newInstance(usersFilter : String): UsersFragment {

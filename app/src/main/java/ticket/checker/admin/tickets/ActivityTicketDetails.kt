@@ -10,34 +10,38 @@ import android.widget.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import ticket.checker.ActivityControlPanel.Companion.EDITED_OBJECT
+import ticket.checker.ActivityControlPanel.Companion.ITEM_EDITED
 import ticket.checker.ActivityControlPanel.Companion.ITEM_REMOVED
-import ticket.checker.ActivityControlPanel.Companion.TICKET_CHANGE_VALIDATION
-import ticket.checker.AppTicketChecker.Companion.loggedInUserName
 import ticket.checker.AppTicketChecker.Companion.pretendedUserType
 import ticket.checker.R
+import ticket.checker.admin.listeners.EditListener
 import ticket.checker.beans.Ticket
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
 import ticket.checker.extras.UserType
 import ticket.checker.extras.Util
+import ticket.checker.extras.Util.CURRENT_TICKET
 import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.extras.Util.DATE_FORMAT_WITH_HOUR
 import ticket.checker.extras.Util.POSITION
-import ticket.checker.extras.Util.TICKET_NUMBER
-import ticket.checker.extras.Util.TICKET_STATUS
 import ticket.checker.listeners.DialogExitListener
 import ticket.checker.listeners.DialogResponseListener
 import ticket.checker.services.ServiceManager
-import java.util.*
 
 class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogExitListener, DialogResponseListener {
+    private var itemWasRemoved: Boolean = false
+    private var itemWasEdited: Boolean = false
     private var isFirstLoad = true
 
-    private var ticketId: String = ""
-    private var ticketPosition: Int = -1
-    private var isValidated: Boolean = false
-    private var itemWasRemoved: Boolean = false
+    private var currentTicket: Ticket? = null
+    private val ticketPosition: Int by lazy {
+        intent.getIntExtra(POSITION, -1)
+    }
 
+    private val tvTitle : TextView by lazy {
+        findViewById<TextView>(R.id.toolbarTitle)
+    }
     private val toolbar: Toolbar by lazy {
         findViewById<Toolbar>(R.id.toolbar)
     }
@@ -79,6 +83,12 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
         findViewById<ProgressBar>(R.id.loadingSpinner)
     }
 
+    private val editListener : EditListener<Ticket> = object : EditListener<Ticket> {
+        override fun onEdit(editedObject: Ticket) {
+            updateTicketInfo(editedObject)
+        }
+    }
+
     private val ticketCallback = object<T> :  Callback<T> {
         override fun onResponse(call: Call<T>, response: Response<T>) {
             val method = call.request().method()
@@ -95,13 +105,13 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
                         }
                     }
                     "POST" -> {
-                        isValidated = !isValidated
-                        updateViewsWithValidation()
+                        itemWasEdited = true
+                        updateTicketInfo(response.body() as Ticket)
                         switchToLoadingView(false)
                     }
                     "DELETE" -> {
                         loadingSpinner.visibility = View.GONE
-                        val dialogRemoveSuccessful = DialogInfo.newInstance("Remove successful", "Ticket #$ticketId was successfully removed", DialogType.SUCCESS)
+                        val dialogRemoveSuccessful = DialogInfo.newInstance("Remove successful", "Ticket #${currentTicket?.ticketId} was successfully removed", DialogType.SUCCESS)
                         dialogRemoveSuccessful.dialogExitListener = this@ActivityTicketDetails
                         dialogRemoveSuccessful.show(supportFragmentManager, "DIALOG_REMOVE_SUCCESSFUL")
                     }
@@ -120,11 +130,11 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ticketId = intent.getStringExtra(TICKET_NUMBER)
-        ticketPosition = intent.getIntExtra(POSITION, -1)
-        isValidated = savedInstanceState?.getBoolean(TICKET_STATUS) ?: intent.getBooleanExtra(TICKET_STATUS, false)
         setContentView(R.layout.activity_ticket_details)
-        (findViewById<TextView>(R.id.toolbarTitle) as TextView).text = "#$ticketId"
+
+        val ticket = savedInstanceState?.getSerializable(CURRENT_TICKET) ?: intent.getSerializableExtra(CURRENT_TICKET)
+        updateTicketInfo(ticket as Ticket)
+
         setSupportActionBar(toolbar)
         btnEdit.setOnClickListener(this)
         btnValidate.setOnClickListener(this)
@@ -142,18 +152,21 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
 
     override fun onStart() {
         super.onStart()
-        val call = ServiceManager.getTicketService().getTicketById(ticketId)
+        val call = ServiceManager.getTicketService().getTicketById(currentTicket?.ticketId!!)
         call.enqueue(ticketCallback as Callback<Ticket>)
     }
 
     override fun onBackPressed() {
-        val data = Intent()
-        data.putExtra(POSITION, ticketPosition)
         if (itemWasRemoved) {
+            val data = Intent()
+            data.putExtra(POSITION, ticketPosition)
             setResult(ITEM_REMOVED, data)
         } else {
-            if (isValidated != intent.getBooleanExtra(TICKET_STATUS, false)) {
-                setResult(TICKET_CHANGE_VALIDATION, data)
+            if(itemWasEdited) {
+                val data = Intent()
+                data.putExtra(POSITION, ticketPosition)
+                data.putExtra(EDITED_OBJECT, currentTicket)
+                setResult(ITEM_EDITED, data)
             }
         }
         super.onBackPressed()
@@ -162,7 +175,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean(TICKET_STATUS, isValidated)
+        outState.putSerializable(CURRENT_TICKET, currentTicket)
     }
 
     override fun onClick(v: View) {
@@ -171,15 +184,18 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
                 onBackPressed()
             }
             R.id.btnEdit -> {
-
+                val dialogEditTicket = DialogEditTicket.newInstance(currentTicket?.ticketId!!)
+                dialogEditTicket.editListener = editListener
+                dialogEditTicket.show(supportFragmentManager, "DIALOG_EDIT_TICKET")
             }
             R.id.btnValidate -> {
                 switchToLoadingView(true)
-                val call = ServiceManager.getTicketService().validateTicket(!isValidated, ticketId)
-                call.enqueue(ticketCallback as Callback<Void>)
+                val isValidated = currentTicket?.validatedAt != null
+                val call = ServiceManager.getTicketService().validateTicket(!isValidated, currentTicket?.ticketId!!)
+                call.enqueue(ticketCallback as Callback<Ticket>)
             }
             R.id.btnRemove -> {
-                val dialogConfirm = DialogInfo.newInstance("Confirm remove", "Are you sure you want to remove ticket #$ticketId ?", DialogType.YES_NO)
+                val dialogConfirm = DialogInfo.newInstance("Confirm remove", "Are you sure you want to remove ticket #${currentTicket?.ticketId} ?", DialogType.YES_NO)
                 dialogConfirm.dialogResponseListener = this
                 dialogConfirm.show(supportFragmentManager, "DIALOG_CONFIRM_REMOVAL")
             }
@@ -189,7 +205,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
     override fun onResponse(response: Boolean) {
         if (response) {
             switchToLoadingView(true)
-            val call = ServiceManager.getTicketService().deleteTicketById(ticketId)
+            val call = ServiceManager.getTicketService().deleteTicketById(currentTicket?.ticketId!!)
             call.enqueue(ticketCallback as Callback<Void>)
         }
     }
@@ -207,24 +223,6 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
         onBackPressed()
     }
 
-    private fun updateViewsWithValidation() {
-        if (isValidated) {
-            tvStatus.text = "VALIDATED"
-            btnValidate.text = "Invalidate"
-            btnValidate.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_clear_white, 0)
-            tvStatus.setTextColor(ContextCompat.getColor(baseContext, R.color.yesGreen))
-            tvValidatedAt.text = DATE_FORMAT_WITH_HOUR.format(Date())
-            tvValidatedBy.text = loggedInUserName
-        } else {
-            tvStatus.text = "NOT VALIDATED"
-            btnValidate.text = "Validate"
-            btnValidate.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_white, 0)
-            tvStatus.setTextColor(ContextCompat.getColor(baseContext, R.color.darkerGrey))
-            tvValidatedAt.text = "-"
-            tvValidatedBy.text = "-"
-        }
-    }
-
     private fun updateTicketInfo(ticket: Ticket) {
         findViewById<ProgressBar>(R.id.lsSoldTo).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsSoldToBirthDate).visibility = View.INVISIBLE
@@ -232,6 +230,9 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
         findViewById<ProgressBar>(R.id.lsSoldBy).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsValidatedAt).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsValidatedBy).visibility = View.INVISIBLE
+
+        currentTicket = ticket
+        tvTitle.text = "#${ticket.ticketId}"
 
         tvSoldTo.text = if (ticket.soldTo.isEmpty()) "-" else ticket.soldTo
         tvSoldToBirthDate.text = if(ticket.soldToBirthdate != null) DATE_FORMAT.format(ticket.soldToBirthdate) else "-"
@@ -247,20 +248,24 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
         }
 
         if (ticket.validatedAt != null) {
+            tvStatus.text = "VALIDATED"
+            btnValidate.text = "Invalidate"
+            btnValidate.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_clear_white, 0)
+            tvStatus.setTextColor(ContextCompat.getColor(baseContext, R.color.yesGreen))
+
             tvValidatedAt.text = DATE_FORMAT_WITH_HOUR.format(ticket.validatedAt)
-            isValidated = true
-        } else {
-            tvValidatedAt.text = "-"
-            isValidated = false
-        }
-        updateViewsWithValidation()
-        if (ticket.validatedAt != null) {
             if (ticket.validatedBy != null) {
                 tvValidatedBy.text = ticket.validatedBy.name
             } else {
                 tvValidatedAt.text = "?"
             }
         } else {
+            btnValidate.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_white, 0)
+            tvStatus.setTextColor(ContextCompat.getColor(baseContext, R.color.darkerGrey))
+            tvStatus.text = "NOT VALIDATED"
+            btnValidate.text = "Validate"
+
+            tvValidatedAt.text = "-"
             tvValidatedBy.text = "-"
         }
     }
@@ -275,5 +280,4 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
             }
         }
     }
-
 }

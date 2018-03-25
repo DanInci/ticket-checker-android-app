@@ -16,11 +16,9 @@ import ticket.checker.R
 import ticket.checker.admin.AItemsAdapter
 import ticket.checker.beans.User
 import ticket.checker.extras.UserType
+import ticket.checker.extras.Util.CURRENT_USER
 import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.extras.Util.POSITION
-import ticket.checker.extras.Util.USER_ID
-import ticket.checker.extras.Util.USER_NAME
-import ticket.checker.extras.Util.USER_TYPE
 import java.util.*
 
 /**
@@ -49,13 +47,8 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
     override fun launchInfoActivity(view: View, position : Int) {
         val activity = context as Activity
         val intent  = Intent(activity, ActivityUserDetails::class.java)
-        val userId = items[position-1].id
-        val userName = items[position-1].name
-        val userType = items[position-1].userType
         intent.putExtra(POSITION, position)
-        intent.putExtra(USER_ID, userId)
-        intent.putExtra(USER_NAME, userName)
-        intent.putExtra(USER_TYPE, userType)
+        intent.putExtra(CURRENT_USER, items[position-1])
         activity.startActivityForResult(intent, ActivityControlPanel.CHANGES_TO_ADAPTER_ITEM)
         activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
@@ -66,6 +59,14 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
         notifyItemInserted(1)
         newItemStats++
         updateHeaderInfo(filter, newItemStats)
+    }
+
+    override fun itemEdited(editedItem: User, position: Int) {
+        if(isItemPosition(position)) {
+            items.removeAt(position - 1)
+            items.add(position - 1, editedItem)
+            notifyItemChanged(position)
+        }
     }
 
     override fun itemRemoved(position: Int) {

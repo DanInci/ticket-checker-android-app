@@ -15,10 +15,9 @@ import ticket.checker.R
 import ticket.checker.admin.AItemsAdapter
 import ticket.checker.beans.Ticket
 import ticket.checker.extras.Util
+import ticket.checker.extras.Util.CURRENT_TICKET
 import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.extras.Util.POSITION
-import ticket.checker.extras.Util.TICKET_NUMBER
-import ticket.checker.extras.Util.TICKET_STATUS
 import java.util.*
 
 /**
@@ -47,11 +46,8 @@ class TicketsAdapter(val context: Context) : AItemsAdapter<Ticket,Array<Int>>(co
     override fun launchInfoActivity(view: View, position : Int) {
         val activity = context as Activity
         val intent  = Intent(activity, ActivityTicketDetails::class.java)
-        val ticketId = items[position-1].ticketId
-        val isValidated = items[position-1].validatedAt != null
-        intent.putExtra(TICKET_NUMBER, ticketId)
         intent.putExtra(POSITION, position)
-        intent.putExtra(TICKET_STATUS, isValidated)
+        intent.putExtra(CURRENT_TICKET, items[position-1])
         activity.startActivityForResult(intent, CHANGES_TO_ADAPTER_ITEM)
         activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
@@ -64,6 +60,39 @@ class TicketsAdapter(val context: Context) : AItemsAdapter<Ticket,Array<Int>>(co
         updateHeaderInfo(filter, newItemStats)
     }
 
+    override fun itemEdited(editedItem: Ticket, position: Int) {
+        if(isItemPosition(position)) {
+            val oldObject = items[position-1]
+            val changedValidation = editedItem.validatedAt != oldObject.validatedAt
+            if(changedValidation) {
+                val newItemStats = itemStats ?: arrayOf(0, 0)
+                if(editedItem.validatedAt != null) {
+                    newItemStats[1]++
+                }
+                else {
+                    newItemStats[1]--
+                }
+
+                if(filter == LIST_ALL) {  // the validation change would only be visible if all kind of tickets are shown
+                    items.removeAt(position -1)
+                    items.add(position - 1, editedItem)
+                    notifyItemChanged(position)
+                    updateHeaderInfo(filter, newItemStats)
+                }
+                else {
+                    items.removeAt(position - 1)
+                    notifyItemRemoved(position)
+                    updateHeaderInfo(filter, newItemStats)
+                }
+            }
+            else {
+                items.removeAt(position -1)
+                items.add(position - 1, editedItem)
+                notifyItemChanged(position)
+            }
+        }
+    }
+
     override fun itemRemoved(position: Int) {
         if(isItemPosition(position)) {
             val newItemStats = itemStats ?: arrayOf(0, 0)
@@ -73,23 +102,6 @@ class TicketsAdapter(val context: Context) : AItemsAdapter<Ticket,Array<Int>>(co
             }
             items.removeAt(position - 1)
             notifyItemRemoved(position)
-            updateHeaderInfo(filter, newItemStats)
-        }
-    }
-
-    fun ticketChangeValidation(position : Int) {
-        if(isItemPosition(position)) {
-            val ticket = items[position-1]
-            val newItemStats = itemStats ?: arrayOf(0,0)
-            if(ticket.validatedAt == null) {
-                newItemStats[1]++
-                ticket.validatedAt = Date()
-            }
-            else {
-                newItemStats[1]--
-                ticket.validatedAt = null
-            }
-            notifyItemChanged(position)
             updateHeaderInfo(filter, newItemStats)
         }
     }

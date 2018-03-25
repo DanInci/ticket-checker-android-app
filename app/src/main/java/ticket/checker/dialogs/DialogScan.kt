@@ -140,7 +140,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
             R.id.btnValidate -> {
                 showLoading()
                 val call = ServiceManager.getTicketService().validateTicket(!isTicketValidated, ticketNumber as String)
-                call.enqueue(verificationCallback as Callback<Void>)
+                call.enqueue(verificationCallback as Callback<Ticket>)
             }
             R.id.btnAdd -> {
                 if(validatedAdd()) {

@@ -14,7 +14,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.R
-import ticket.checker.admin.listeners.ActionListener
+import ticket.checker.admin.listeners.ListChangeListener
 import ticket.checker.beans.Ticket
 import ticket.checker.extras.BirthDateFormatException
 import ticket.checker.extras.BirthDateIncorrectException
@@ -23,7 +23,7 @@ import ticket.checker.services.ServiceManager
 import java.util.*
 
 class DialogAddTicket : DialogFragment(), View.OnClickListener {
-    var actionListener: ActionListener<Ticket>? = null
+    var listChangeListener: ListChangeListener<Ticket>? = null
 
     private var birthDate : Date? = null
 
@@ -41,7 +41,7 @@ class DialogAddTicket : DialogFragment(), View.OnClickListener {
             loadingSpinner?.visibility = View.GONE
             submitButton?.visibility = View.VISIBLE
             if (response.isSuccessful) {
-                actionListener?.onAdd(response.body() as Ticket)
+                listChangeListener?.onAdd(response.body() as Ticket)
                 tvResult?.visibility = View.VISIBLE
                 tvResult?.setTextColor(ContextCompat.getColor(context!!, R.color.yesGreen))
                 tvResult?.text = "You have created the ticket successfully"

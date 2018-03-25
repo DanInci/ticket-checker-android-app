@@ -15,7 +15,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
 import ticket.checker.R
-import ticket.checker.admin.listeners.ActionListener
+import ticket.checker.admin.listeners.ListChangeListener
 import ticket.checker.admin.listeners.EndlessScrollListener
 import ticket.checker.admin.listeners.FilterChangeListener
 import ticket.checker.admin.listeners.RecyclerItemClickListener
@@ -24,7 +24,7 @@ import ticket.checker.extras.Util
 /**
  * Created by Dani on 09.02.2018.
  */
-abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ActionListener<T>, RecyclerItemClickListener.OnItemClickListener {
+abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ListChangeListener<T>, RecyclerItemClickListener.OnItemClickListener {
     protected var filter : String = "NOT_INITIALISED"
     abstract val loadLimit : Int
     private var firstLoad = true

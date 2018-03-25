@@ -18,9 +18,10 @@
         android:layout_marginBottom="15dp">
 
         <TextView
+            android:id="@+id/dialogTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add New Ticket"
+            android:text="Edit Admin"
             android:textColor="@android:color/white"
             android:textSize="25sp"
             android:layout_centerVertical="true"/>
@@ -52,23 +53,7 @@
             android:layout_centerInParent="true">
 
             <EditText
-                android:id="@+id/etTicketNumber"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/et_dialog_style"
-                android:textColor="@color/text_style"
-                android:textColorHint="@color/darkerGrey"
-                android:textSize="20sp"
-                android:inputType="textVisiblePassword"
-                android:maxLength="100"
-                android:padding="10dp"
-                android:hint="TICKET NUMBER *"
-                android:drawableLeft="@drawable/ic_ticket_primary"
-                android:drawablePadding="15dp"
-                android:layout_marginBottom="5dp"/>
-
-            <EditText
-                android:id="@+id/etSoldTo"
+                android:id="@+id/etName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/et_dialog_style"
@@ -76,59 +61,56 @@
                 android:hint="NAME"
                 android:textColorHint="@color/darkerGrey"
                 android:drawablePadding="15dp"
-                android:drawableLeft="@drawable/ic_person_outline"
+                android:drawableLeft="@drawable/ic_name"
                 android:textSize="20sp"
                 android:inputType="textVisiblePassword"
                 android:maxLength="100"
                 android:padding="10dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp" />
+                android:layout_marginBottom="5dp"
+                android:enabled="false"/>
 
-            <EditText
-                android:id="@+id/etSoldToBirthDate"
+            <Spinner
+                android:id="@+id/spinnerRole"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/et_dialog_style"
-                android:textColor="@color/text_style"
-                android:hint="DATE of BIRTH"
-                android:textColorHint="@color/darkerGrey"
-                android:drawablePadding="15dp"
-                android:drawableLeft="@drawable/ic_event"
-                android:textSize="20sp"
-                android:inputType="date"
-                android:maxLength="100"
-                android:padding="10dp"
+                android:background="@drawable/spinner_dialog_style"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp" />
+                android:layout_marginBottom="5dp"
+                android:dropDownWidth="match_parent"
+                android:popupBackground="@drawable/spinner_background"
+                android:clickable="false"
+                android:focusable="false"/>
 
             <LinearLayout
+                android:id="@+id/bottomContainer"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:orientation="horizontal"
                 android:gravity="center">
 
                 <Button
-                    android:id="@+id/btnSubmit"
+                    android:id="@+id/btnEdit"
                     android:layout_width="150dp"
                     android:layout_height="35dp"
                     android:layout_marginTop="5dp"
                     android:background="@drawable/btn_style"
-                    android:drawableEnd="@drawable/ic_add"
+                    android:drawableEnd="@drawable/ic_edit"
                     android:paddingEnd="10dp"
                     android:paddingStart="10dp"
-                    android:text="Add Ticket"
+                    android:text="Edit User"
                     android:textAllCaps="false"
                     android:layout_gravity="center"
                     android:textColor="@drawable/btn_text_color"
                     android:textSize="20sp"
-                    android:layout_marginBottom="5dp" />
+                    android:layout_marginBottom="5dp"
+                    android:visibility="gone"/>
 
                 <ProgressBar
                     android:id="@+id/loadingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:visibility="gone" />
+                    android:layout_gravity="center"/>
 
             </LinearLayout>
 

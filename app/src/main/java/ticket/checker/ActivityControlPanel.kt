@@ -16,6 +16,8 @@ import ticket.checker.admin.tickets.DialogAddTicket
 import ticket.checker.admin.tickets.TicketsFragment
 import ticket.checker.admin.users.DialogAddUser
 import ticket.checker.admin.users.UsersFragment
+import ticket.checker.beans.Ticket
+import ticket.checker.beans.User
 import ticket.checker.extras.UserType
 import ticket.checker.extras.Util.POSITION
 
@@ -77,12 +79,12 @@ class ActivityControlPanel : AppCompatActivity() {
             when (itemId) {
                 R.id.action_ticket_add -> {
                     val dialogAddTicket = DialogAddTicket()
-                    dialogAddTicket.actionListener = ticketsFragment
+                    dialogAddTicket.listChangeListener = ticketsFragment
                     dialogAddTicket.show(supportFragmentManager, "DIALOG_ADD")
                 }
                 R.id.action_users_add -> {
                     val dialogAddUser = DialogAddUser()
-                    dialogAddUser.actionListener = usersFragment
+                    dialogAddUser.listChangeListener = usersFragment
                     dialogAddUser.show(supportFragmentManager, "DIALOG_ADD")
                 }
                 R.id.action_ticket_all -> {
@@ -172,8 +174,16 @@ class ActivityControlPanel : AppCompatActivity() {
                             }
                         }
                     }
-                    TICKET_CHANGE_VALIDATION -> {
-                        ticketsFragment?.onChangeValidation(position)
+                    ITEM_EDITED -> {
+                        val editedObject = data.getSerializableExtra(EDITED_OBJECT)
+                        when (currentFragmentId) {
+                            R.id.navigation_tickets -> {
+                                ticketsFragment?.onEdit(editedObject as Ticket, position)
+                            }
+                            R.id.navigation_users -> {
+                                usersFragment?.onEdit(editedObject as User, position)
+                            }
+                        }
                     }
                 }
             }
@@ -246,7 +256,8 @@ class ActivityControlPanel : AppCompatActivity() {
 
         const val CHANGES_TO_ADAPTER_ITEM = 0
         const val ITEM_REMOVED = 0
-        const val TICKET_CHANGE_VALIDATION = 1
+        const val ITEM_EDITED = 1
+        const val EDITED_OBJECT = "editedObject"
         const val LIST_ALL = "all"
         const val LIST_VALIDATED = "validated"
         const val LIST_NOT_VALIDATED = "notValidated"

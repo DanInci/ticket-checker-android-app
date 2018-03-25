@@ -114,6 +114,8 @@ abstract class AItemsAdapter<T, Y>(context : Context) : RecyclerView.Adapter<Rec
 
     abstract fun itemAdded(addedItem : T)
 
+    abstract fun itemEdited(editedItem : T, position : Int)
+
     abstract fun itemRemoved(position : Int)
 
     abstract fun launchInfoActivity(view : View, position : Int)

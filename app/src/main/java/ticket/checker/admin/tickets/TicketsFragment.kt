@@ -47,13 +47,8 @@ class TicketsFragment : AAdminFragment<Ticket, Array<Int>>() {
         }
     }
 
-    fun onChangeValidation(position : Int) {
-        if(filter == LIST_ALL) {  // the validation change would only be visible if all kind of tickets are shown
-            (itemsAdapter as TicketsAdapter).ticketChangeValidation(position)
-        }
-        else {
-            itemsAdapter.itemRemoved(position)
-        }
+    override fun onEdit(editedObject: Ticket, editedObjectPosition: Int) {
+        itemsAdapter.itemEdited(editedObject, editedObjectPosition)
     }
 
     companion object {

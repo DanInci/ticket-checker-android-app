@@ -18,17 +18,15 @@ import java.util.*
  */
 object Util {
     val DATE_FORMAT = SimpleDateFormat("dd MMM yyyy")
+    val DATE_FORMAT_FORM = SimpleDateFormat("dd.MM.yyyy")
     val DATE_FORMAT_WITH_HOUR = SimpleDateFormat("dd MMM yyyy HH:mm")
 
     const val ERROR_TICKET_VALIDATION = "TicketValidationException"
     const val ERROR_TICKET_EXISTS = "TicketExistsException"
     const val ERROR_USERNAME_EXISTS = "UsernameExistsException"
 
-    const val TICKET_NUMBER = "ticketNumber"
-    const val TICKET_STATUS = "ticketStatus"
-    const val USER_ID = "loggedInUserId"
-    const val USER_NAME = "loggedInUserName"
-    const val USER_TYPE = "userType"
+    const val CURRENT_USER = "currentUser"
+    const val CURRENT_TICKET = "currentTicket"
     const val POSITION = "adapterPosition"
 
     fun formatDate(date : Date) : String {
