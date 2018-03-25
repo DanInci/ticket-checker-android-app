@@ -159,9 +159,21 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
                 onBackPressed()
             }
             R.id.btnEdit -> {
-                val editDialog = DialogEditUser.newInstance(currentUser?.id!!, currentUser?.name!!)
-                editDialog.editListener = editListener
-                editDialog.show(supportFragmentManager, "DIALOG_EDIT_USER")
+                when {
+                    currentUser?.id!! == AppTicketChecker.loggedInUserId -> {
+                        val dialog = DialogInfo.newInstance("Edit failed", "You can not edit yourself", DialogType.ERROR)
+                        dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
+                    }
+                    currentUser?.userType == UserType.ADMIN -> {
+                        val dialog = DialogInfo.newInstance("Edit failed", "You are not allowed to edit another admin", DialogType.ERROR)
+                        dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
+                    }
+                    else -> {
+                        val dialog = DialogEditUser.newInstance(currentUser?.id!!, currentUser?.name!!)
+                        dialog.editListener = editListener
+                        dialog.show(supportFragmentManager, "DIALOG_EDIT_USER")
+                    }
+                }
             }
             R.id.btnRemove -> {
                 val dialog: DialogInfo?
