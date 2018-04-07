@@ -14,7 +14,7 @@ interface UserService {
     fun getUser() : Call<User>
 
     @GET("/users")
-    fun getUsers(@Query("role") role : String?, @Query("page") page : Int?, @Query("size") size : Int?) : Call<List<User>>
+    fun getUsers(@Query("type") type : String?,@Query("value") value : String?, @Query("page") page : Int?, @Query("size") size : Int?) : Call<List<User>>
 
     @GET("/users/{loggedInUserId}")
     fun getUsersById(@Path("loggedInUserId") userId : Long) : Call<User>

@@ -392,11 +392,12 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:clipToPadding="false"
-                android:weightSum="100">
+                android:weightSum="100"
+                android:layout_marginBottom="20dp">
 
                 <android.support.v7.widget.CardView
                     android:id="@+id/controlPanel"
-                    android:visibility="visible"
+                    android:visibility="gone"
                     android:layout_width="0dp"
                     android:layout_weight="70"
                     android:layout_height="180dp"

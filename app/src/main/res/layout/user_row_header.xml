@@ -17,6 +17,7 @@
         android:gravity="center"
         android:text="There are a total of 10 users"
         android:textColor="@color/textBlack"
-        android:textSize="16sp"/>
+        android:textSize="16sp"
+        android:visibility="invisible"/>
 
 </LinearLayout>

@@ -3,14 +3,13 @@ package ticket.checker.admin.tickets
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import ticket.checker.ActivityControlPanel.Companion.CHANGES_TO_ADAPTER_ITEM
-import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
-import ticket.checker.ActivityControlPanel.Companion.LIST_NOT_VALIDATED
-import ticket.checker.ActivityControlPanel.Companion.LIST_VALIDATED
+import ticket.checker.ActivityControlPanel.Companion.FILTER_VALIDATED
 import ticket.checker.R
 import ticket.checker.admin.AItemsAdapter
 import ticket.checker.beans.Ticket
@@ -23,7 +22,7 @@ import java.util.*
 /**
  * Created by Dani on 08.02.2018.
  */
-class TicketsAdapter(val context: Context) : AItemsAdapter<Ticket,Array<Int>>(context) {
+class TicketsAdapter(val context: Context) : AItemsAdapter<Ticket, Int>(context) {
 
     override fun inflateItemHolder(parent: ViewGroup): RecyclerView.ViewHolder {
         val view =  inflater.inflate(R.layout.ticket_row, parent, false)
@@ -39,83 +38,68 @@ class TicketsAdapter(val context: Context) : AItemsAdapter<Ticket,Array<Int>>(co
         (holder as TicketHolder).updateTicketHolderInfo(item)
     }
 
-    override fun updateHeaderInfo(holder: RecyclerView.ViewHolder, filter: String, itemStats: Array<Int>?) {
-        (holder as HeaderHolder).updateTicketHeaderInfo(filter, itemStats)
+    override fun setHeaderVisibility(holder: RecyclerView.ViewHolder, isVisible: Boolean) {
+        (holder as HeaderHolder).setVisibility(isVisible)
+    }
+
+    override fun updateHeaderInfo(holder: RecyclerView.ViewHolder, filterType: String?, filterValue : String, itemStats: Int?) {
+        (holder as HeaderHolder).updateTicketHeaderInfo(filterType, filterValue, itemStats)
     }
 
     override fun launchInfoActivity(view: View, position : Int) {
-        val activity = context as Activity
-        val intent  = Intent(activity, ActivityTicketDetails::class.java)
-        intent.putExtra(POSITION, position)
-        intent.putExtra(CURRENT_TICKET, items[position-1])
-        activity.startActivityForResult(intent, CHANGES_TO_ADAPTER_ITEM)
-        activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        if(isItemPosition(position)) {
+            val activity = context as Activity
+            val intent = Intent(activity, ActivityTicketDetails::class.java)
+            intent.putExtra(POSITION, position)
+            intent.putExtra(CURRENT_TICKET, items[position - 1])
+            activity.startActivityForResult(intent, CHANGES_TO_ADAPTER_ITEM)
+            activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        }
     }
 
     override fun itemAdded(addedItem: Ticket) {
-        val newItemStats = itemStats?: arrayOf(0,0)
-        newItemStats[0]++
+        var newItemStats = itemStats?: 0
+        newItemStats++
         items.add(0, addedItem)
         notifyItemInserted(1)
-        updateHeaderInfo(filter, newItemStats)
+        updateHeaderInfo(filterType, filterValue, newItemStats)
     }
 
     override fun itemEdited(editedItem: Ticket, position: Int) {
         if(isItemPosition(position)) {
-            val oldObject = items[position-1]
-            val changedValidation = editedItem.validatedAt != oldObject.validatedAt
-            if(changedValidation) {
-                val newItemStats = itemStats ?: arrayOf(0, 0)
-                if(editedItem.validatedAt != null) {
-                    newItemStats[1]++
-                }
-                else {
-                    newItemStats[1]--
-                }
-
-                if(filter == LIST_ALL) {  // the validation change would only be visible if all kind of tickets are shown
-                    items.removeAt(position -1)
-                    items.add(position - 1, editedItem)
-                    notifyItemChanged(position)
-                    updateHeaderInfo(filter, newItemStats)
-                }
-                else {
-                    items.removeAt(position - 1)
-                    notifyItemRemoved(position)
-                    updateHeaderInfo(filter, newItemStats)
-                }
-            }
-            else {
-                items.removeAt(position -1)
-                items.add(position - 1, editedItem)
-                notifyItemChanged(position)
-            }
+            items.removeAt(position -1)
+            items.add(position - 1, editedItem)
+            notifyItemChanged(position)
         }
     }
 
     override fun itemRemoved(position: Int) {
         if(isItemPosition(position)) {
-            val newItemStats = itemStats ?: arrayOf(0, 0)
-            newItemStats[0]--
+            var newItemStats = itemStats ?: 0
+            newItemStats--
             if (items[position - 1].validatedAt != null) {
-                newItemStats[1]--
+                newItemStats--
             }
             items.removeAt(position - 1)
             notifyItemRemoved(position)
-            updateHeaderInfo(filter, newItemStats)
+            updateHeaderInfo(filterType, filterValue, newItemStats)
         }
     }
 
     private class TicketHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         private val leftBar = itemView.findViewById<View>(R.id.leftBar)
         private val tvTicketId = itemView.findViewById<TextView>(R.id.tvTicketId)
+        private val tvValidated = itemView.findViewById<TextView>(R.id.tvValidated)
+        private val tvSoldToText = itemView.findViewById<TextView>(R.id.tvSoldToText)
+        private val tvTicketSoldTo = itemView.findViewById<TextView>(R.id.tvTicketSoldTo)
         private val tvSoldAtText = itemView.findViewById<TextView>(R.id.tvSoldAtText)
         private val tvTicketSoldAt = itemView.findViewById<TextView>(R.id.tvTicketSoldAt)
-        private val tvValidated = itemView.findViewById<TextView>(R.id.tvValidated)
+
 
         fun updateTicketHolderInfo(ticket: Ticket) {
             setTicketId(ticket.ticketId)
             setValidated(ticket.validatedAt)
+            setSoldTo(ticket.soldTo)
             setSoldAt(ticket.soldAt)
         }
 
@@ -127,10 +111,22 @@ class TicketsAdapter(val context: Context) : AItemsAdapter<Ticket,Array<Int>>(co
             if (date != null) {
                 tvValidated.visibility = View.VISIBLE
                 tvValidated.text = Util.formatDate(date)
-                leftBar.setBackgroundColor(itemView.resources.getColor(R.color.yesGreen))
+                leftBar.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.yesGreen))
             } else {
                 tvValidated.visibility = View.GONE
-                leftBar.setBackgroundColor(itemView.resources.getColor(R.color.darkerGrey))
+                leftBar.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.darkerGrey))
+            }
+        }
+
+        private fun setSoldTo(soldTo: String?) {
+            if(soldTo.isNullOrEmpty()) {
+                tvSoldToText.text = "Sold"
+                tvTicketSoldTo.visibility = View.GONE
+            }
+            else {
+                tvSoldToText.text = "Sold to "
+                tvTicketSoldTo.visibility = View.VISIBLE
+                tvTicketSoldTo.text = soldTo
             }
         }
 
@@ -148,35 +144,46 @@ class TicketsAdapter(val context: Context) : AItemsAdapter<Ticket,Array<Int>>(co
 
     private class HeaderHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvTotalTickets = itemView.findViewById<TextView>(R.id.ticketNumbers)
-        private val tvValidatedTickets = itemView.findViewById<TextView>(R.id.ticketsValidatedNumbers)
 
-        fun updateTicketHeaderInfo(filter : String, ticketNumbers : Array<Int>?) {
-            if(ticketNumbers == null || ticketNumbers.isEmpty()) {
-                tvTotalTickets.visibility = View.INVISIBLE
-                tvValidatedTickets.visibility = View.INVISIBLE
+        fun setVisibility(isVisible : Boolean) {
+            tvTotalTickets.visibility = if(isVisible) View.VISIBLE else View.INVISIBLE
+        }
+
+        fun updateTicketHeaderInfo(filterType : String?, filterValue : String, ticketNumbers : Int?) {
+            if(ticketNumbers == null)
+                return
+
+            if(ticketNumbers == 0) {
+                tvTotalTickets?.visibility = View.VISIBLE
+                tvTotalTickets.text = "No tickets found"
             }
             else {
-                tvTotalTickets.visibility = View.VISIBLE
-                val totalTickets = ticketNumbers.getOrElse(0, {0})
-                val tickets = if (totalTickets == 1)  "ticket" else "tickets"
-                tvTotalTickets.text = "There is a total of $totalTickets $tickets"
-                when (filter) {
-                    LIST_ALL -> {
-                        tvValidatedTickets.visibility = View.VISIBLE
-                        val validatedTickets = ticketNumbers.getOrElse(1, {0})
-                        if (validatedTickets == 0) {
-                            tvValidatedTickets.setTextColor(itemView.resources.getColor(R.color.darkerGrey))
-                            tvValidatedTickets.text = "No ticket has been validated yet"
+                tvTotalTickets?.visibility = View.VISIBLE
+                val tickets = when(filterType) {
+                    null -> {
+                        if (ticketNumbers == 1) "ticket" else "tickets"
+                    }
+                    FILTER_VALIDATED -> {
+                        if (ticketNumbers == 1) {
+                            if (filterValue == "true") {
+                                "validated ticket"
+                            } else {
+                                "not validated ticket"
+                            }
                         } else {
-                            tvValidatedTickets.setTextColor(itemView.resources.getColor(R.color.yesGreen))
-                            val are = if (validatedTickets == 1) "is" else "are"
-                            tvValidatedTickets.text = "$validatedTickets of them $are validated"
+                            if (filterValue == "true") {
+                                "validated tickets"
+                            } else {
+                                "not validated tickets"
+                            }
                         }
                     }
-                    LIST_VALIDATED, LIST_NOT_VALIDATED -> {
-                        tvValidatedTickets.visibility = View.GONE
+                    else -> {
+                        if (ticketNumbers == 1) "ticket" else "tickets"
+
                     }
                 }
+                tvTotalTickets.text = "There is a total of $ticketNumbers $tickets"
             }
         }
     }

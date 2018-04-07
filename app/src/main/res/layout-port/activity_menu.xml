@@ -290,63 +290,67 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
                 android:clipToPadding="false"
+                android:gravity="center"
+                android:orientation="horizontal"
                 android:weightSum="100">
 
                 <android.support.v7.widget.CardView
                     android:id="@+id/scan"
                     android:layout_width="0dp"
-                    android:layout_weight="45"
                     android:layout_height="190dp"
                     android:layout_margin="10dp"
-                    android:foreground="?android:attr/selectableItemBackground"
+                    android:layout_weight="45"
                     android:clickable="true"
-                    android:focusable="true">
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:gravity="center">
+                        android:gravity="center"
+                        android:orientation="vertical">
+
                         <ImageView
                             android:layout_width="64dp"
                             android:layout_height="64dp"
                             android:background="@drawable/circle_background_purle"
-                            app:srcCompat="@drawable/ic_camera"
-                            android:padding="10dp"/>
+                            android:padding="10dp"
+                            app:srcCompat="@drawable/ic_camera" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textStyle="bold"
                             android:layout_marginTop="10dp"
-                            android:text="Scan"/>
+                            android:text="Scan"
+                            android:textStyle="bold" />
+
                         <View
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
-                            android:background="@color/backgroundGrey"
-                            android:layout_margin="10dp"/>
+                            android:layout_margin="10dp"
+                            android:background="@color/backgroundGrey" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textStyle="italic"
                             android:gravity="center"
-                            android:text="Use your camera to scan tickets"
                             android:padding="5dp"
-                            android:textColor="@color/darkerGrey"/>
+                            android:text="Use your camera to scan tickets"
+                            android:textColor="@color/darkerGrey"
+                            android:textStyle="italic" />
                     </LinearLayout>
                 </android.support.v7.widget.CardView>
 
                 <android.support.v7.widget.CardView
                     android:id="@+id/statistics"
                     android:layout_width="0dp"
-                    android:layout_weight="45"
                     android:layout_height="190dp"
                     android:layout_margin="10dp"
-                    android:foreground="?android:attr/selectableItemBackground"
+                    android:layout_weight="45"
                     android:clickable="true"
-                    android:focusable="true">
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -392,7 +396,8 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:clipToPadding="false"
-                android:weightSum="100">
+                android:weightSum="100"
+                android:layout_marginBottom="20dp">
 
                 <android.support.v7.widget.CardView
                     android:id="@+id/controlPanel"

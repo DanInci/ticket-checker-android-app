@@ -3,6 +3,7 @@ package ticket.checker
 import android.content.res.Configuration
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.Toolbar
 import android.view.Menu
@@ -96,11 +97,12 @@ class ActivityStatistics : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_statistics)
         setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
         btnBack.setOnClickListener { finish() }
         currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM) ?: R.id.action_hourly
         currentInterval = savedInstanceState?.getString(CURRENT_INTERVAL) ?: INTERVAL_HOURLY
         refreshLayout.setOnRefreshListener { onRefresh() }
-        refreshLayout.setColorSchemeColors(resources.getColor(R.color.colorPrimary))
+        refreshLayout.setColorSchemeColors(ContextCompat.getColor(applicationContext, R.color.colorPrimary))
         customizeChartStyle(validatedChart)
         customizeChartStyle(soldChart)
     }
@@ -180,8 +182,8 @@ class ActivityStatistics : AppCompatActivity() {
             entries.add(BarEntry(index.toFloat(), stats.count.toFloat()))
         }
         val barDataSet = BarDataSet(entries,"$typeTitle Tickets")
-        barDataSet.color = resources.getColor(R.color.materialYellow)
-        barDataSet.valueTextColor = resources.getColor(R.color.darkerGrey)
+        barDataSet.color = ContextCompat.getColor(applicationContext, R.color.materialYellow)
+        barDataSet.valueTextColor = ContextCompat.getColor(applicationContext, R.color.darkerGrey)
         barDataSet.valueTextSize = 12f
         barDataSet.valueFormatter = CustomValueFormatter()
         val barData = BarData(barDataSet)
@@ -220,9 +222,9 @@ class ActivityStatistics : AppCompatActivity() {
     private fun customizeChartStyle(chart : BarChart) {
         chart.setFitBars(true)
         chart.description.isEnabled = false
-        chart.legend.textColor = resources.getColor(R.color.textBlack)
+        chart.legend.textColor = ContextCompat.getColor(applicationContext, R.color.textBlack)
         chart.setNoDataText("No ticket data available")
-        chart.setNoDataTextColor(resources.getColor(R.color.textBlack))
+        chart.setNoDataTextColor(ContextCompat.getColor(applicationContext, R.color.textBlack))
         chart.setTouchEnabled(false)
 
         val left = chart.axisLeft
@@ -237,7 +239,7 @@ class ActivityStatistics : AppCompatActivity() {
         bottom.setDrawAxisLine(true)
         bottom.setDrawGridLines(false)
         bottom.granularity = 1f
-        bottom.textColor = resources.getColor(R.color.textBlack)
+        bottom.textColor = ContextCompat.getColor(applicationContext, R.color.textBlack)
     }
 
     private fun updateTitle(interval : String) {

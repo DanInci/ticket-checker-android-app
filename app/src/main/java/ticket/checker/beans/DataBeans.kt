@@ -13,7 +13,7 @@ data class User(var id : Long?,var username : String, var password : String, var
     val userType : UserType
         get() = UserType.fromRoleToUserType(role)
 }
-data class Ticket(val ticketId : String,val soldBy : User?, val soldTo : String, val soldToBirthdate : Date?, val soldAt : Date?, val validatedBy : User?, var validatedAt : Date?)  : Serializable {
+data class Ticket(val ticketId : String,val soldBy : User?, val soldTo : String?, val soldToBirthdate : Date?, val soldAt : Date?, val validatedBy : User?, var validatedAt : Date?)  : Serializable {
     constructor(ticketId : String, soldTo : String, soldToBirthdate : Date?) : this (ticketId, null, soldTo, soldToBirthdate,null, null, null)
 }
 data class Statistic(val date : Date, val count : Int) : Serializable

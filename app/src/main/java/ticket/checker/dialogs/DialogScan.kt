@@ -183,9 +183,9 @@ class DialogScan : DialogFragment(), View.OnClickListener {
 
         if(ticket != null) {
             viewSellTicket?.visibility = View.GONE
-            tvOwnerName?.visibility = if (ticket.soldTo.isEmpty()) View.GONE else View.VISIBLE
+            tvOwnerName?.visibility = if (ticket.soldTo.isNullOrEmpty()) View.GONE else View.VISIBLE
             tvOwnerBirthDate?.visibility = if (ticket.soldToBirthdate == null) View.GONE else View.VISIBLE
-            tvOwnerName?.text = if (ticket.soldTo.isEmpty()) "~not specified~" else ticket.soldTo
+            tvOwnerName?.text = if (ticket.soldTo.isNullOrEmpty()) "~not specified~" else ticket.soldTo
             tvOwnerBirthDate?.text = if (ticket.soldToBirthdate == null) "~not specified~" else DATE_FORMAT.format(ticket.soldToBirthdate)
 
             when(pretendedUserType) {

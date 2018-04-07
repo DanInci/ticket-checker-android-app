@@ -121,7 +121,7 @@ class DialogEditTicket : DialogFragment(), View.OnClickListener {
         etSoldTo?.isEnabled = true
         etSoldTo?.setText(ticket.soldTo)
         etSoldTo?.error = null
-        etSoldTo?.post({ etSoldTo?.setSelection(ticket.soldTo.length) })
+        etSoldTo?.post({ etSoldTo?.setSelection(ticket.soldTo?.length ?: 0) })
         etSoldToBirthDate?.isEnabled = true
         etSoldToBirthDate?.setText(Util.DATE_FORMAT_FORM.format(ticket.soldToBirthdate))
         etSoldToBirthDate?.error = null

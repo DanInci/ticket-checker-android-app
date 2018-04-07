@@ -85,6 +85,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
 
     private val editListener : EditListener<Ticket> = object : EditListener<Ticket> {
         override fun onEdit(editedObject: Ticket) {
+            itemWasEdited = true
             updateTicketInfo(editedObject)
         }
     }
@@ -234,7 +235,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
         currentTicket = ticket
         tvTitle.text = "#${ticket.ticketId}"
 
-        tvSoldTo.text = if (ticket.soldTo.isEmpty()) "-" else ticket.soldTo
+        tvSoldTo.text = if (ticket.soldTo.isNullOrEmpty()) "-" else ticket.soldTo
         tvSoldToBirthDate.text = if(ticket.soldToBirthdate != null) DATE_FORMAT.format(ticket.soldToBirthdate) else "-"
         tvSoldAt.text = if (ticket.soldAt != null) DATE_FORMAT_WITH_HOUR.format(ticket.soldAt) else "-"
         if (ticket.soldAt != null) {

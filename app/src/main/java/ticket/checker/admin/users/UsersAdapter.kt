@@ -11,7 +11,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import ticket.checker.ActivityControlPanel
-import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
+import ticket.checker.ActivityControlPanel.Companion.FILTER_ROLE
 import ticket.checker.R
 import ticket.checker.admin.AItemsAdapter
 import ticket.checker.beans.User
@@ -40,17 +40,23 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
         (holder as UserHolder).updateUserHolderInfo(item)
     }
 
-    override fun updateHeaderInfo(holder: RecyclerView.ViewHolder, filter: String, itemStats: Int?) {
-        (holder as HeaderHolder).updateUsersHeaderInfo(filter, itemStats)
+    override fun setHeaderVisibility(holder: RecyclerView.ViewHolder, isVisible: Boolean) {
+        (holder as HeaderHolder).setVisibility(isVisible)
+    }
+
+    override fun updateHeaderInfo(holder: RecyclerView.ViewHolder, filterType: String?, filterValue : String, itemStats: Int?) {
+        (holder as HeaderHolder).updateUsersHeaderInfo(filterType, filterValue, itemStats)
     }
 
     override fun launchInfoActivity(view: View, position : Int) {
-        val activity = context as Activity
-        val intent  = Intent(activity, ActivityUserDetails::class.java)
-        intent.putExtra(POSITION, position)
-        intent.putExtra(CURRENT_USER, items[position-1])
-        activity.startActivityForResult(intent, ActivityControlPanel.CHANGES_TO_ADAPTER_ITEM)
-        activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        if(isItemPosition(position)) {
+            val activity = context as Activity
+            val intent  = Intent(activity, ActivityUserDetails::class.java)
+            intent.putExtra(POSITION, position)
+            intent.putExtra(CURRENT_USER, items[position-1])
+            activity.startActivityForResult(intent, ActivityControlPanel.CHANGES_TO_ADAPTER_ITEM)
+            activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        }
     }
 
     override fun itemAdded(addedItem: User) {
@@ -58,7 +64,7 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
         items.add(0,addedItem)
         notifyItemInserted(1)
         newItemStats++
-        updateHeaderInfo(filter, newItemStats)
+        updateHeaderInfo(filterType, filterValue, newItemStats)
     }
 
     override fun itemEdited(editedItem: User, position: Int) {
@@ -75,7 +81,7 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
             newItemStats--
             items.removeAt(position - 1)
             notifyItemRemoved(position)
-            updateHeaderInfo(filter, newItemStats)
+            updateHeaderInfo(filterType, filterValue, newItemStats)
         }
     }
 
@@ -137,18 +143,29 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
     private class HeaderHolder(itemView : View) : RecyclerView.ViewHolder(itemView) {
         private val tvUsersNumbers : TextView = itemView.findViewById(R.id.tvUsersNumbers)
 
-        fun updateUsersHeaderInfo(filter : String, totalUsers : Int?) {
-            if(totalUsers == null) {
-                tvUsersNumbers.visibility = View.GONE
+        fun setVisibility(isVisible : Boolean) {
+            tvUsersNumbers.visibility = if(isVisible) View.VISIBLE else View.INVISIBLE
+        }
+
+        fun updateUsersHeaderInfo(filterType : String?, filterValue : String, totalUsers : Int?) {
+            if(totalUsers == null)
+                return
+
+            if(totalUsers == 0) {
+                tvUsersNumbers.visibility = View.VISIBLE
+                tvUsersNumbers.text = "No accounts found"
             }
             else {
                 tvUsersNumbers.visibility = View.VISIBLE
-                val users = when(filter) {
-                    LIST_ALL -> {
-                        if (totalUsers == 1)  "registered account" else "registered accounts"
+                val users = when(filterType) {
+                    null -> {
+                        if (totalUsers == 1)  "account" else "accounts"
+                    }
+                    FILTER_ROLE -> {
+                        if (totalUsers == 1)  filterValue else filterValue + "s"
                     }
                     else -> {
-                        if (totalUsers == 1)  filter else filter + "s"
+                        if (totalUsers == 1)  "account" else "accounts"
                     }
                 }
                 tvUsersNumbers.text = "There is a total of $totalUsers $users"

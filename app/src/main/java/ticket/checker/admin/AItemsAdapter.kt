@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
-import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
 import ticket.checker.R
 
 /**
@@ -27,7 +26,9 @@ abstract class AItemsAdapter<T, Y>(context : Context) : RecyclerView.Adapter<Rec
     private var headerHolder : RecyclerView.ViewHolder? = null
     private var footerHolder : RecyclerView.ViewHolder? = null
 
-    protected var filter : String = LIST_ALL
+    protected var filterType : String? = null
+    protected var filterValue : String = ""
+
     protected var items: MutableList<T> = mutableListOf()
     protected var itemStats : Y? = null
 
@@ -56,7 +57,7 @@ abstract class AItemsAdapter<T, Y>(context : Context) : RecyclerView.Adapter<Rec
             }
             HEADER -> {
                 headerHolder = holder
-                updateHeaderInfo(holder, filter, itemStats)
+                updateHeaderInfo(holder, filterType, filterValue, itemStats)
             }
             FOOTER -> {
                 footerHolder = holder
@@ -93,15 +94,17 @@ abstract class AItemsAdapter<T, Y>(context : Context) : RecyclerView.Adapter<Rec
     fun resetItemsList() {
         val endItemsIndex = items.size + COUNT_HEADER + COUNT_FOOTER
         items = mutableListOf()
+        setHeaderVisibility(headerHolder as RecyclerView.ViewHolder, false)
         notifyItemRangeRemoved(COUNT_HEADER, endItemsIndex)
     }
 
-    fun updateHeaderInfo(filter: String, itemStats: Y) {
-        this.filter = filter
+    fun updateHeaderInfo(filterT: String?, filterV : String, itemStats: Y) {
+        this.filterType = filterT
+        this.filterValue = filterV
         this.itemStats = itemStats
 
         if(headerHolder != null) {
-            updateHeaderInfo(headerHolder as RecyclerView.ViewHolder, filter, itemStats)
+            updateHeaderInfo(headerHolder as RecyclerView.ViewHolder, filterType, filterValue, itemStats)
         }
     }
 
@@ -126,7 +129,9 @@ abstract class AItemsAdapter<T, Y>(context : Context) : RecyclerView.Adapter<Rec
 
     protected abstract fun updateItemInfo(holder : RecyclerView.ViewHolder, item : T)
 
-    protected abstract fun updateHeaderInfo(holder: RecyclerView.ViewHolder, filter : String, itemStats : Y?)
+    protected abstract fun setHeaderVisibility(holder : RecyclerView.ViewHolder, isVisible : Boolean)
+
+    protected abstract fun updateHeaderInfo(holder: RecyclerView.ViewHolder, filterType : String?, filterValue : String, itemStats : Y?)
 
     private class FooterHolder(viewItem : View) : RecyclerView.ViewHolder(viewItem) {
         private val loadingSpinner : ProgressBar = viewItem.findViewById(R.id.loadingSpinner)

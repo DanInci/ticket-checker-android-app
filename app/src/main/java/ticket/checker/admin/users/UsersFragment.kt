@@ -1,7 +1,8 @@
 package ticket.checker.admin.users
 
 import android.os.Bundle
-import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
+import ticket.checker.ActivityControlPanel.Companion.FILTER_ROLE
+import ticket.checker.ActivityControlPanel.Companion.FILTER_SEARCH
 import ticket.checker.admin.AAdminFragment
 import ticket.checker.admin.AItemsAdapter
 import ticket.checker.beans.User
@@ -18,42 +19,64 @@ class UsersFragment : AAdminFragment<User, Int>() {
         return usersAdapter
     }
 
-    override fun loadHeader(filter: String) {
-        val modifiedFilters = if (filter == "all") null else filter
-        val call = ServiceManager.getStatisticsService().getUserNumbers(modifiedFilters)
+    override fun loadHeader(filterType: String?, filterValue : String) {
+        val call = ServiceManager.getStatisticsService().getUserNumbers(filterType, filterValue)
         call.enqueue(headerCallback)
     }
 
-    override fun loadItems(page: Int, filter: String) {
-        val modifiedFilters = if (filter == "all") null else filter
-        val call = ServiceManager.getUserService().getUsers(modifiedFilters, page, loadLimit)
+    override fun loadItems(page: Int, filterType: String?, filterValue : String?) {
+        val call = ServiceManager.getUserService().getUsers(filterType, filterValue, page, loadLimit)
         call.enqueue(itemsCallback)
     }
 
     override fun onAdd(addedObject: User) {
-        val role = addedObject.role
-        val modifiedFilter = "ROLE_" + filter.toUpperCase()
-        if(modifiedFilter == role || filter == LIST_ALL) {
-            itemsAdapter.itemAdded(addedObject)
+        when(filterType) {
+            null -> {
+                itemsAdapter.itemAdded(addedObject)
+            }
+            FILTER_ROLE -> {
+                if(addedObject.role == "ROLE_" + filterValue.toUpperCase()) {
+                    itemsAdapter.itemAdded(addedObject)
+                }
+            }
+            FILTER_SEARCH -> {
+                if(addedObject.name.startsWith(filterValue, true)) {
+                    itemsAdapter.itemAdded(addedObject)
+                }
+            }
         }
     }
 
     override fun onEdit(editedObject: User, editedObjectPosition: Int) {
-        val role = editedObject.role
-        val modifiedFilter = "ROLE_" + filter.toUpperCase()
-        if(modifiedFilter == role || filter == LIST_ALL) {
-            itemsAdapter.itemEdited(editedObject, editedObjectPosition)
-        }
-        else {
-            itemsAdapter.itemRemoved(editedObjectPosition)
+        when(filterType) {
+            null -> {
+                itemsAdapter.itemEdited(editedObject, editedObjectPosition)
+            }
+            FILTER_ROLE -> {
+                if(editedObject.role == "ROLE_" + filterValue.toUpperCase()) {
+                    itemsAdapter.itemEdited(editedObject, editedObjectPosition)
+                }
+                else {
+                    itemsAdapter.itemRemoved(editedObjectPosition)
+                }
+            }
+            FILTER_SEARCH -> {
+                if(editedObject.name.startsWith(filterValue, true)) {
+                    itemsAdapter.itemEdited(editedObject, editedObjectPosition)
+                }
+                else {
+                    itemsAdapter.itemRemoved(editedObjectPosition)
+                }
+            }
         }
     }
 
     companion object {
-        fun newInstance(usersFilter : String): UsersFragment {
+        fun newInstance(filterType : String?, filterValue : String): UsersFragment {
             val fragment = UsersFragment()
             val args = Bundle()
-            args.putString(FILTER, usersFilter)
+            args.putString(FILTER_TYPE, filterType)
+            args.putString(FILTER_VALUE, filterValue)
             fragment.arguments = args
             return fragment
         }

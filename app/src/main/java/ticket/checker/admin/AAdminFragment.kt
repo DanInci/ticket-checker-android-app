@@ -13,7 +13,6 @@ import android.widget.ProgressBar
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
 import ticket.checker.R
 import ticket.checker.admin.listeners.ListChangeListener
 import ticket.checker.admin.listeners.EndlessScrollListener
@@ -25,7 +24,9 @@ import ticket.checker.extras.Util
  * Created by Dani on 09.02.2018.
  */
 abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ListChangeListener<T>, RecyclerItemClickListener.OnItemClickListener {
-    protected var filter : String = "NOT_INITIALISED"
+    protected var filterType : String? = "NOT_INITIALISED"
+    protected var filterValue : String = ""
+
     abstract val loadLimit : Int
     private var firstLoad = true
 
@@ -42,7 +43,7 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ListChang
     protected val headerCallback = object : Callback<Y> {
         override fun onResponse(call: Call<Y>, response: Response<Y>) {
             if (response.isSuccessful) {
-                itemsAdapter.updateHeaderInfo(filter, response.body()!!)
+                itemsAdapter.updateHeaderInfo(filterType, filterValue, response.body()!!)
             } else {
                 onErrorResponse(call, response)
             }
@@ -72,8 +73,9 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ListChang
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (filter == "NOT_INITIALISED") {
-            filter = arguments?.getString(FILTER) ?: LIST_ALL
+        if (filterType == "NOT_INITIALISED") {
+            filterType = arguments?.getString(FILTER_TYPE)
+            filterValue = arguments?.getString(FILTER_VALUE) ?: ""
         }
     }
 
@@ -90,7 +92,7 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ListChang
             override fun onLoadMore(page: Int, totalItemsCount: Int, recyclerView: RecyclerView) {
                 if((totalItemsCount-2) % loadLimit == 0) {
                     itemsAdapter.setLoading(true)
-                    loadItems(page, filter)
+                    loadItems(page, filterType, filterValue)
                 }
             }
         }
@@ -117,8 +119,9 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ListChang
         reloadAll()
     }
 
-    override fun onFilterChange(newFilter: String) {
-        this.filter = newFilter
+    override fun onFilterChange(filterType : String?, filterValue: String) {
+        this.filterType = filterType
+        this.filterValue = filterValue
         itemsAdapter.resetItemsList()
         scrollListener?.resetState()
         reloadAll()
@@ -133,8 +136,8 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ListChang
 
     private fun reloadAll() {
         onResetFirstLoad()
-        loadHeader(filter)
-        loadItems(0, filter)
+        loadHeader(filterType, filterValue)
+        loadItems(0, filterType, filterValue)
     }
 
     private fun onResetFirstLoad() {
@@ -171,12 +174,13 @@ abstract class AAdminFragment<T,Y> : Fragment(), FilterChangeListener, ListChang
 
     abstract fun setupItemsAdapter() : AItemsAdapter<T,Y>
 
-    abstract fun loadHeader(filter : String)
+    abstract fun loadHeader(filterType : String?, filterValue : String)
 
-    abstract fun loadItems(page: Int, filter : String)
+    abstract fun loadItems(page: Int, filterType : String?, filterValue : String?)
 
     companion object {
-        const val FILTER = "filter"
+        const val FILTER_TYPE = "filterType"
+        const val FILTER_VALUE = "filterValue"
         private const val LOAD_CURRENT_PAGE = "lastLoadPage"
         private const val LOAD_PREVIOUS_ITEM_COUNT = "previousItemCount"
         private const val LOAD_LOADING = "loading"

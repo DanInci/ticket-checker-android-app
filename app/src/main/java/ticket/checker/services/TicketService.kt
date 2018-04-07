@@ -10,7 +10,7 @@ import ticket.checker.beans.Ticket
 interface TicketService {
 
     @GET("/tickets")
-    fun getTickets(@Query("validated") isValidated : Boolean?, @Query("page") page : Int?, @Query("size") size : Int?) : Call<List<Ticket>>
+    fun getTickets(@Query("type") type : String?,@Query("value") value : String?, @Query("page") page : Int?, @Query("size") size : Int?) : Call<List<Ticket>>
 
     @GET("/tickets/{ticketId}")
     fun getTicketById(@Path("ticketId") ticketId : String) : Call<Ticket>

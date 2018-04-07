@@ -7,6 +7,11 @@
         android:title="Add"
         app:showAsAction="always" />
     <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_action_action_search"
+        android:title="Search"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_ticket_all"
         android:checkable="true"
         android:title="All" />

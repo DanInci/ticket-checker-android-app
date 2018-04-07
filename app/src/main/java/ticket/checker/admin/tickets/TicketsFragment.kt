@@ -1,61 +1,80 @@
 package ticket.checker.admin.tickets
 
 import android.os.Bundle
-import ticket.checker.ActivityControlPanel.Companion.LIST_ALL
-import ticket.checker.ActivityControlPanel.Companion.LIST_NOT_VALIDATED
-import ticket.checker.ActivityControlPanel.Companion.LIST_VALIDATED
+import ticket.checker.ActivityControlPanel.Companion.FILTER_SEARCH
+import ticket.checker.ActivityControlPanel.Companion.FILTER_VALIDATED
 import ticket.checker.admin.AAdminFragment
 import ticket.checker.admin.AItemsAdapter
 import ticket.checker.beans.Ticket
 import ticket.checker.services.ServiceManager
 
-class TicketsFragment : AAdminFragment<Ticket, Array<Int>>() {
+class TicketsFragment : AAdminFragment<Ticket, Int>() {
 
     override val loadLimit: Int
         get() = 20
 
-    override fun setupItemsAdapter(): AItemsAdapter<Ticket, Array<Int>> {
+    override fun setupItemsAdapter(): AItemsAdapter<Ticket, Int> {
        return TicketsAdapter(context!!)
     }
 
-    override fun loadHeader(filter : String) {
-        val call = ServiceManager.getStatisticsService().getFilteredTicketNumbers(filter)
+    override fun loadHeader(filterType : String?, filterValue : String) {
+        val call = ServiceManager.getStatisticsService().getTicketNumbers(filterType,filterValue)
         call.enqueue(headerCallback)
     }
 
-    override fun loadItems(page: Int, filter : String) {
-        val ticketService = ServiceManager.getTicketService()
-        when (filter) {
-            LIST_ALL -> {
-                val call = ticketService.getTickets(null, page, loadLimit)
-                call.enqueue(itemsCallback)
-            }
-            LIST_VALIDATED -> {
-                val call = ticketService.getTickets(true, page, loadLimit)
-                call.enqueue(itemsCallback)
-            }
-            LIST_NOT_VALIDATED -> {
-                val call = ticketService.getTickets(false, page, loadLimit)
-                call.enqueue(itemsCallback)
-            }
-        }
+    override fun loadItems(page: Int, filterType: String?, filterValue : String?) {
+        val call = ServiceManager.getTicketService().getTickets(filterType, filterValue, page, loadLimit)
+        call.enqueue(itemsCallback)
     }
 
     override fun onAdd(addedObject: Ticket) {
-        if(filter != LIST_VALIDATED) {  // you cant find the new ticket in the validated section
-            itemsAdapter.itemAdded(addedObject)
+        when(filterType) {
+            null -> {
+                itemsAdapter.itemAdded(addedObject)
+            }
+            FILTER_VALIDATED -> {
+                if(filterValue != "true") {
+                    itemsAdapter.itemAdded(addedObject)
+                }
+            }
+            FILTER_SEARCH -> {
+                if(addedObject.ticketId.startsWith(filterValue, true) || (addedObject.soldTo != null && addedObject.soldTo.startsWith(filterValue, true))) {
+                    itemsAdapter.itemAdded(addedObject)
+                }
+            }
         }
     }
 
     override fun onEdit(editedObject: Ticket, editedObjectPosition: Int) {
-        itemsAdapter.itemEdited(editedObject, editedObjectPosition)
+        when(filterType) {
+            null -> {
+                itemsAdapter.itemEdited(editedObject, editedObjectPosition)
+            }
+            FILTER_VALIDATED -> {
+                if((editedObject.validatedAt == null && filterValue == "false") || (editedObject.validatedAt != null && filterValue == "true")) {
+                    itemsAdapter.itemEdited(editedObject, editedObjectPosition)
+                }
+                else {
+                    itemsAdapter.itemRemoved(editedObjectPosition)
+                }
+            }
+            FILTER_SEARCH -> {
+                if((editedObject.soldTo != null && editedObject.soldTo.startsWith(filterValue, true)) || editedObject.ticketId.startsWith(filterValue, true)) {
+                    itemsAdapter.itemEdited(editedObject, editedObjectPosition)
+                }
+                else {
+                    itemsAdapter.itemRemoved(editedObjectPosition)
+                }
+            }
+        }
     }
 
     companion object {
-        fun newInstance(ticketsFilter : String): TicketsFragment {
+        fun newInstance(filterType : String?, filterValue : String): TicketsFragment {
             val fragment = TicketsFragment()
             val args = Bundle()
-            args.putString(FILTER, ticketsFilter)
+            args.putString(FILTER_TYPE, filterType)
+            args.putString(FILTER_VALUE, filterValue)
             fragment.arguments = args
             return fragment
         }

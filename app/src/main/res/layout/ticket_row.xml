@@ -65,11 +65,28 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/tvSoldToText"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textColor="@color/darkerGrey"
+                android:text="Sold to "
+                android:gravity="center_vertical"/>
+
+            <TextView
+                android:id="@+id/tvTicketSoldTo"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textColor="@color/darkerGrey"
+                android:text="Daniel"
+                android:textStyle="italic|bold"
+                android:gravity="center_vertical"/>
+
+            <TextView
                 android:id="@+id/tvSoldAtText"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:textColor="@color/darkerGrey"
-                android:text="Sold at "
+                android:text=" at "
                 android:gravity="center_vertical"/>
 
             <TextView
