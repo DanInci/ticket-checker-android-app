@@ -104,13 +104,15 @@ class DialogAddTicket : DialogFragment(), View.OnClickListener {
             etTicketNumber?.error = "This field is required"
             isValid = false
         }
+
+        val soldTo = etSoldTo?.text.toString()
+        if(soldTo.isEmpty()) {
+            etSoldTo?.error = "This field is required"
+            isValid = false
+        }
+
         val birthDateString = etSoldToBirthDate?.text.toString()
         if(!birthDateString.isEmpty()) {
-            if(etSoldTo?.text.toString().isEmpty()) {
-                etSoldTo?.error = "You forgot the name"
-                isValid = false
-            }
-
             try {
                 birthDate = Util.getBirthdateFromText(birthDateString)
             }

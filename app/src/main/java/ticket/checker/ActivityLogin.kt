@@ -41,6 +41,7 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     private val loginCallback : Callback<User> = object : Callback<User> {
         override fun onResponse(call: Call<User>, response: Response<User>) {
             loggingInDialog.dismiss()
+            btnLogin.isClickable = true
             if(response.isSuccessful) {
                 if(autoLoginCheckBox.isChecked) {
                     val encryptedPass = Util.hashString("SHA-256",savedPass)
@@ -65,6 +66,7 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
         }
         override fun onFailure(call: Call<User>, t: Throwable?) {
             loggingInDialog.dismiss()
+            btnLogin.isClickable = true
             Util.treatBasicError(call, null, supportFragmentManager)
         }
     }
@@ -96,6 +98,7 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
                     if(AppTicketChecker.address != "") {
                         loggingInDialog.show(supportFragmentManager, "DIALOG_LOGGING_IN")
                         doLogin(etUsername.text.toString(), etPassword.text.toString())
+                        btnLogin.isClickable = false
                     }
                     else {
                         val connectionConfigureDialog = DialogConnectionConfig.newInstance(AppTicketChecker.address,AppTicketChecker.port)

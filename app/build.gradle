@@ -5,6 +5,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
+    signingConfigs {
+        defaultSigning {
+            keyAlias 'TicketCheckerKey'
+            keyPassword '123456987asd'
+            storeFile file('C:/Users/Dani/Android Projects/keyStore.jks')
+            storePassword '123456987asd'
+        }
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "ticket.checker"
@@ -15,17 +23,28 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
+        signingConfig signingConfigs.defaultSigning
     }
     buildTypes {
         release {
-            minifyEnabled false
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.defaultSigning
+            proguardFile 'D:/Proiecte/AndroidStudio/TicketChecker/app/proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFile 'D:/Proiecte/AndroidStudio/TicketChecker/app/proguard-rules.pro'
+            signingConfig signingConfigs.defaultSigning
         }
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:mediarouter-v7:27.1.1'
@@ -38,7 +57,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.3.0'
     implementation 'com.github.bumptech.glide:glide:4.6.1'
-    implementation 'com.google.android.gms:play-services-vision:12.0.1'
+    implementation 'com.google.android.gms:play-services-vision:15.0.0'
     implementation 'jp.wasabeef:glide-transformations:2.0.2'
     implementation 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
     implementation 'com.miguelcatalan:materialsearchview:1.4.0'

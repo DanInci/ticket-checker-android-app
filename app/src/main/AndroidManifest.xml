@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FLASHLIGHT"/>
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
@@ -33,7 +34,7 @@
             android:windowSoftInputMode="adjustPan"/>
         <activity android:name=".admin.tickets.ActivityTicketDetails"/>
         <activity android:name=".admin.users.ActivityUserDetails"/>
-        <activity android:name=".ActivityStatistics"></activity>
+        <activity android:name=".ActivityStatistics" />
     </application>
 
 </manifest>

@@ -111,7 +111,7 @@ class DialogEditTicket : DialogFragment(), View.OnClickListener {
             }
             R.id.btnEdit -> {
                 if (validate()) {
-                    editTicket(ticketNumber as String, etSoldTo?.text.toString(), soldToBirthDate as Date)
+                    editTicket(ticketNumber as String, etSoldTo?.text.toString(), soldToBirthDate)
                 }
             }
         }
@@ -123,19 +123,21 @@ class DialogEditTicket : DialogFragment(), View.OnClickListener {
         etSoldTo?.error = null
         etSoldTo?.post({ etSoldTo?.setSelection(ticket.soldTo?.length ?: 0) })
         etSoldToBirthDate?.isEnabled = true
-        etSoldToBirthDate?.setText(Util.DATE_FORMAT_FORM.format(ticket.soldToBirthdate))
+        etSoldToBirthDate?.setText(if(ticket.soldToBirthdate != null)  Util.DATE_FORMAT_FORM.format(ticket.soldToBirthdate) else "")
         etSoldToBirthDate?.error = null
     }
 
     private fun validate(): Boolean {
         var isValid = true
         tvResult?.visibility = View.INVISIBLE
+
+        val soldTo = etSoldTo?.text.toString()
+        if(soldTo.isEmpty()) {
+            etSoldTo?.error = "You forgot the name"
+            isValid = false
+        }
         val birthDateString = etSoldToBirthDate?.text.toString()
         if(!birthDateString.isEmpty()) {
-            if(etSoldTo?.text.toString().isEmpty()) {
-                etSoldTo?.error = "You forgot the name"
-                isValid = false
-            }
             try {
                 soldToBirthDate = Util.getBirthdateFromText(birthDateString)
             }
@@ -151,7 +153,7 @@ class DialogEditTicket : DialogFragment(), View.OnClickListener {
         return isValid
     }
 
-    private fun editTicket(ticketNumber : String, soldTo: String, soldToBirthDate : Date) {
+    private fun editTicket(ticketNumber : String, soldTo: String, soldToBirthDate : Date?) {
         tvResult?.visibility = View.INVISIBLE
         editButton?.visibility = View.GONE
         loadingSpinner?.visibility = View.VISIBLE

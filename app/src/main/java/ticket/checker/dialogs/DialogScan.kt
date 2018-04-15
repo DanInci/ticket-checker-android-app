@@ -268,14 +268,15 @@ class DialogScan : DialogFragment(), View.OnClickListener {
 
     private fun validatedAdd() : Boolean {
         var isValid = true
+
+        val soldTo = etSoldTo?.text.toString()
+        if(soldTo.isEmpty()) {
+            etSoldTo?.error = "You forgot the name"
+            isValid = false
+        }
+
         val birthDateString = etSoldToBirthDate?.text.toString()
         if(!birthDateString.isEmpty()) {
-            val soldTo = etSoldTo?.text.toString()
-            if(soldTo.isEmpty()) {
-                etSoldTo?.error = "You forgot the name"
-                isValid = false
-            }
-
             try {
                 birthDate = Util.getBirthdateFromText(birthDateString)
             }

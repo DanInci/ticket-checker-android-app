@@ -11,7 +11,7 @@
     <color name="colorSecondaryLight">#ffd149</color>
 
     <color name="white">#FFF</color>
-    <color name="transparentWhite">#88FFFFFF</color>
+    <color name="transparentWhite">#66FFFFFF</color>
     <color name="backgroundGrey">#eeeef0</color>
     <color name="lightGrey">#d2d2d2</color>
     <color name="darkerGrey">#ababad</color>
