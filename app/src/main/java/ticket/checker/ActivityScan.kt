@@ -3,10 +3,10 @@ package ticket.checker
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.Camera
-import android.hardware.camera2.CameraAccessException
-import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraManager
-import android.os.*
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.Vibrator
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.DisplayMetrics
@@ -16,11 +16,11 @@ import android.view.SurfaceView
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
-import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
 import ticket.checker.dialogs.DialogScan
+import ticket.checker.extras.CameraSource
 import ticket.checker.listeners.IScanDialogListener
 import java.io.IOException
 
@@ -39,7 +39,6 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
     }
 
     private var isTorchOn = false
-    private var cameraId: String? = null
 
     private val barcodeProcessor = object : Detector.Processor<Barcode> {
         override fun release() {}
@@ -75,7 +74,6 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
             stopBarcodeDetection()
         }
     }
-    private val requestCameraPermissionId = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,21 +81,13 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
         cameraPreview.holder.addCallback(cameraPreviewCallback)
         btnBack.setOnClickListener(this)
         btnFlash.setOnClickListener(this)
-
-        val cameraManager = applicationContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        cameraManager.cameraIdList.forEach {
-            val cameraCharacteristics = cameraManager.getCameraCharacteristics(it)
-            val lensFacing = cameraCharacteristics.get(CameraCharacteristics.LENS_FACING)
-            if (lensFacing == CameraCharacteristics.LENS_FACING_FRONT && cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)) {
-                cameraId = it
-            }
-        }
     }
 
     override fun onStop() {
         super.onStop()
         if (isTorchOn) {
             toggleFlash(false)
+            stopBarcodeDetection()
         }
     }
 
@@ -105,19 +95,13 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
         super.onPause()
         if (isTorchOn) {
             toggleFlash(false)
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (isTorchOn) {
-            toggleFlash(true)
+            stopBarcodeDetection()
         }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
-            requestCameraPermissionId -> {
+            CAMERA_PERMISSION -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     startBarcodeDetection(false)
                 }
@@ -137,51 +121,43 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
     private fun startBarcodeDetection(askForPermission: Boolean) {
         if (ActivityCompat.checkSelfPermission(applicationContext, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             if (askForPermission) {
-                ActivityCompat.requestPermissions(this@ActivityScan, arrayOf(android.Manifest.permission.CAMERA), requestCameraPermissionId)
+                ActivityCompat.requestPermissions(this@ActivityScan, arrayOf(android.Manifest.permission.CAMERA), CAMERA_PERMISSION)
             }
             return
         }
         try {
             cameraSource = createCameraSource()
             cameraSource?.start(cameraPreview.holder)
+            if(isTorchOn) {
+                toggleFlash(true)
+            }
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
 
     private fun toggleFlash(torchMode: Boolean) : Boolean {
-        if (Build.VERSION.SDK_INT >= 23 && cameraId != null) {
-            try {
-                val cameraManager: CameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
-                cameraManager.setTorchMode(cameraId, torchMode)
-                if (torchMode) {
+        if(cameraSource != null) {
+            if(torchMode) {
+                val successful = cameraSource?.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH) ?: false
+                if(successful) {
                     btnFlash.setImageResource(R.drawable.ic_flashlight_on)
-                } else {
-                    btnFlash.setImageResource(R.drawable.ic_flashlight_off)
-                }
-                return torchMode
-            } catch (e: CameraAccessException) {
-                e.printStackTrace()
-            }
-        }
-        else if(cameraId != null) {
-            try {
-                val cameraObj = Camera.open(cameraId!!.toInt())
-                if(torchMode) {
-                    cameraObj.parameters.flashMode = Camera.Parameters.FLASH_MODE_TORCH
-                    cameraObj.startPreview()
+                    return torchMode
                 }
                 else {
-                    cameraObj.parameters.flashMode = Camera.Parameters.FLASH_MODE_OFF
-                    cameraObj.stopPreview()
+                    Toast.makeText(baseContext, "Your device does not support back camera flash!", Toast.LENGTH_LONG).show()
                 }
-                return torchMode
-            } catch (e : Exception) {
-                e.printStackTrace()
             }
-        }
-        else {
-            Toast.makeText(baseContext, "Your device does not support back camera flash!", Toast.LENGTH_LONG).show()
+            else {
+                val successful = cameraSource?.setFlashMode(Camera.Parameters.FLASH_MODE_OFF) ?: false
+                if(successful) {
+                    btnFlash.setImageResource(R.drawable.ic_flashlight_off)
+                    return torchMode
+                }
+                else {
+                    Toast.makeText(baseContext, "Your device does not support back camera flash!", Toast.LENGTH_LONG).show()
+                }
+            }
         }
         return !torchMode
     }
@@ -196,7 +172,7 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
         return CameraSource.Builder(this, createBarcodeDetector())
                 .setRequestedPreviewSize(displayMetrics.widthPixels, displayMetrics.heightPixels)
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
-                .setAutoFocusEnabled(true)
+                .setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)
                 .setRequestedFps(15.0f)
                 .build()
     }
@@ -205,6 +181,11 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
         val barcodeDetector = BarcodeDetector.Builder(this@ActivityScan).setBarcodeFormats(Barcode.ALL_FORMATS).build()
         barcodeDetector.setProcessor(barcodeProcessor)
         return barcodeDetector
+    }
+
+    companion object {
+        const val CAMERA_PERMISSION = 1001
+        const val FLASH_STYLE = "flashStyle"
     }
 
 }
