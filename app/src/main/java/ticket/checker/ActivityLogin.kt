@@ -10,6 +10,7 @@ import com.bumptech.glide.request.RequestOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import ticket.checker.AppTicketChecker.Companion.isLoggedIn
 import ticket.checker.AppTicketChecker.Companion.loggedInUserCreatedDate
 import ticket.checker.AppTicketChecker.Companion.loggedInUserId
 import ticket.checker.AppTicketChecker.Companion.loggedInUserName
@@ -158,12 +159,16 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
         loggedInUserSoldTicketsNo = user.soldTicketsNo
         loggedInUserValidatedTicketsNo = user.validatedTicketsNo
         pretendedUserType = user.userType
+        isLoggedIn = true
         toMenuActivity()
     }
 
     private fun toMenuActivity() {
         val intent = Intent(this, ActivityMenu::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(intent)
+        finish()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

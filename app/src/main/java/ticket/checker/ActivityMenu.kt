@@ -197,25 +197,25 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
             R.id.action_admin_mode -> {
                 pretendedUserType = UserType.ADMIN
                 switchViews()
-                updateProfileInfo()
+                tvCurrentRole.text = pretendedUserType.name
                 currentMenuItemId = R.id.action_admin_mode
             }
             R.id.action_publisher_mode -> {
                 pretendedUserType = UserType.PUBLISHER
                 switchViews()
-                updateProfileInfo()
+                tvCurrentRole.text = pretendedUserType.name
                 currentMenuItemId = R.id.action_publisher_mode
             }
             R.id.action_validator_mode -> {
                 pretendedUserType = UserType.VALIDATOR
                 switchViews()
-                updateProfileInfo()
+                tvCurrentRole.text = pretendedUserType.name
                 currentMenuItemId = R.id.action_validator_mode
             }
             R.id.action_user_mode -> {
                 pretendedUserType = UserType.USER
                 switchViews()
-                updateProfileInfo()
+                tvCurrentRole.text = pretendedUserType.name
                 currentMenuItemId = R.id.action_user_mode
             }
             R.id.action_logout -> logout()
@@ -252,22 +252,22 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
                 cvScan.visibility = View.VISIBLE
                 cvStatistics.visibility = View.VISIBLE
                 cvControlPanel.visibility = View.VISIBLE
-                findViewById<TextView>(R.id.controlPanelTitle).setText("Administration area")
-                findViewById<TextView>(R.id.controlPanelDescription).setText("Use your administrator priveleges to add, delete tickets or see user information")
+                findViewById<TextView>(R.id.controlPanelTitle).text = "Administration area"
+                findViewById<TextView>(R.id.controlPanelDescription).text = "Use your administrator priveleges to add, delete tickets or see user information"
             }
             UserType.PUBLISHER -> {
                 cvScan.visibility = View.VISIBLE
                 cvStatistics.visibility = View.VISIBLE
                 cvControlPanel.visibility = View.VISIBLE
-                findViewById<TextView>(R.id.controlPanelTitle).setText("Publisher area")
-                findViewById<TextView>(R.id.controlPanelDescription).setText("Use your publisher priveleges to add tickets or see information about them")
+                findViewById<TextView>(R.id.controlPanelTitle).text = "Publisher area"
+                findViewById<TextView>(R.id.controlPanelDescription).text = "Use your publisher priveleges to add tickets or see information about them"
             }
             UserType.VALIDATOR -> {
                 cvScan.visibility = View.VISIBLE
                 cvStatistics.visibility = View.VISIBLE
                 cvControlPanel.visibility = View.VISIBLE
-                findViewById<TextView>(R.id.controlPanelTitle).setText("Validator area")
-                findViewById<TextView>(R.id.controlPanelDescription).setText("Use your validator priveleges to validate/invalidate tickets or see information about them")
+                findViewById<TextView>(R.id.controlPanelTitle).text = "Validator area"
+                findViewById<TextView>(R.id.controlPanelDescription).text = "Use your validator priveleges to validate/invalidate tickets or see information about them"
             }
             UserType.USER -> {
                 cvScan.visibility = View.VISIBLE
@@ -306,11 +306,10 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 
     private fun logout() {
         AppTicketChecker.clearSession()
-        finish()
-    }
-
-    override fun onBackPressed() {
-        //DO nothing
+        val intent = Intent(this, ActivityLogin::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
