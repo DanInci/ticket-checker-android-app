@@ -13,7 +13,6 @@ import android.widget.TextView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ticket.checker.ActivityControlPanel
 import ticket.checker.ActivityControlPanel.Companion.EDITED_OBJECT
 import ticket.checker.ActivityControlPanel.Companion.ITEM_EDITED
 import ticket.checker.ActivityControlPanel.Companion.ITEM_REMOVED

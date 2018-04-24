@@ -16,6 +16,10 @@ import ticket.checker.extras.Util.hashString
 object ServiceManager {
     private const val GSON_SERIALIZER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
 
+    lateinit var baseUrl : String
+    lateinit var currentUsername : String
+    lateinit var currentPassword : String
+
     private var retrofit: Retrofit? = null
 
     private var userService: UserService? = null
@@ -27,13 +31,16 @@ object ServiceManager {
     }
 
     fun createSession(username: String, password: String, hashRequired: Boolean) {
-        var encryptedPassword = password
+        currentUsername = username
+        currentPassword = password
+
         if (hashRequired) {
-            encryptedPassword = hashString("SHA-256", password)
+            currentPassword = hashString("SHA-256", password)
         }
-        val interceptor = AuthInterceptor(username, encryptedPassword)
+
+        val interceptor = AuthInterceptor(username, currentPassword)
         val httpClient = OkHttpClient.Builder().addInterceptor(interceptor).build()
-        val baseUrl = if(AppTicketChecker.port != "") "http://${AppTicketChecker.address}:${AppTicketChecker.port}" else "http://${AppTicketChecker.address}"
+        baseUrl = if(AppTicketChecker.port != "") "http://${AppTicketChecker.address}:${AppTicketChecker.port}" else "http://${AppTicketChecker.address}"
         val builder = Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setDateFormat(GSON_SERIALIZER_DATE_FORMAT).create()))
@@ -67,6 +74,9 @@ object ServiceManager {
         userService = null
         ticketService = null
         statisticsService = null
+
+        currentUsername = ""
+        currentPassword = ""
     }
 
     private fun getRetrofitClient() : Retrofit {

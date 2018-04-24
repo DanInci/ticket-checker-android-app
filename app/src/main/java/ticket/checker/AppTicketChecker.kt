@@ -3,24 +3,37 @@ package ticket.checker
 import android.app.Application
 import android.content.Context
 import android.preference.PreferenceManager
+import org.acra.ACRA
+import org.acra.ReportField.*
+import org.acra.annotation.AcraCore
+import org.acra.annotation.AcraToast
 import ticket.checker.extras.UserType
+import ticket.checker.reports.CustomReportsSenderFactory
 import ticket.checker.services.ServiceManager
 import java.util.*
 
 /**
  * Created by Dani on 16.02.2018.
  */
+@AcraCore(reportSenderFactoryClasses = [CustomReportsSenderFactory::class],
+        reportContent = [USER_APP_START_DATE, APP_VERSION_NAME, APP_VERSION_CODE, ANDROID_VERSION, PHONE_MODEL, STACK_TRACE])
+@AcraToast(resText = R.string.error_report_notification_text)
 class AppTicketChecker : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        appContext = applicationContext
+        appContext = this
         loadConnectionConfig()
         loadSession()
     }
 
+    override fun attachBaseContext(base: Context?) {
+        super.attachBaseContext(base)
+        ACRA.init(this)
+    }
+
     companion object {
-        private var appContext : Context? = null
+        lateinit var appContext: Application
 
         var appName = "Ticket Checker"
         var address = ""
@@ -34,7 +47,7 @@ class AppTicketChecker : Application() {
         var loggedInUserSoldTicketsNo: Int? = null
         var loggedInUserValidatedTicketsNo: Int? = null
 
-        var pretendedUserType : UserType = UserType.USER
+        var pretendedUserType: UserType = UserType.USER
 
         fun clearSession() {
             ServiceManager.invalidateSession()
@@ -49,7 +62,7 @@ class AppTicketChecker : Application() {
             pretendedUserType = UserType.USER
         }
 
-        fun saveConnectionConfig(appName : String, address : String, port : String) {
+        fun saveConnectionConfig(appName: String, address: String, port: String) {
             val pref = PreferenceManager.getDefaultSharedPreferences(appContext)
             val editor = pref.edit()
             editor.putString(SAVED_APP_NAME, appName)
@@ -66,7 +79,17 @@ class AppTicketChecker : Application() {
             editor.apply()
         }
 
-        fun loadConnectionConfig() {
+        fun loadSession() {
+            val pref = PreferenceManager.getDefaultSharedPreferences(appContext)
+            val username = pref.getString(SAVED_USERNAME, NOT_FOUND)
+            val password = pref.getString(SAVED_PASSWORD, NOT_FOUND)
+            if (username != NOT_FOUND && password != NOT_FOUND) {
+                ServiceManager.createSession(username, password, false)
+                isLoggedIn = true
+            }
+        }
+
+        private fun loadConnectionConfig() {
             val pref = PreferenceManager.getDefaultSharedPreferences(appContext)
             val appName = pref.getString(SAVED_APP_NAME, NOT_FOUND)
             val address = pref.getString(SAVED_ADDRESS, NOT_FOUND)
@@ -75,16 +98,6 @@ class AppTicketChecker : Application() {
                 this.address = address
                 this.port = port
                 this.appName = appName
-            }
-        }
-
-        fun loadSession() {
-            val pref = PreferenceManager.getDefaultSharedPreferences(appContext)
-            val username = pref.getString(SAVED_USERNAME, NOT_FOUND)
-            val password = pref.getString(SAVED_PASSWORD, NOT_FOUND)
-            if (username != NOT_FOUND && password != NOT_FOUND) {
-                ServiceManager.createSession(username, password, false)
-                isLoggedIn = true
             }
         }
 
@@ -103,6 +116,4 @@ class AppTicketChecker : Application() {
         private const val SAVED_PASSWORD = "ticket.checker.savedPassword"
         private const val NOT_FOUND = "NOT_FOUND"
     }
-
-
 }

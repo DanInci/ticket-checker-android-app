@@ -20,7 +20,7 @@ import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
 import ticket.checker.dialogs.DialogScan
-import ticket.checker.extras.CameraSource
+import ticket.checker.camera.CameraSource
 import ticket.checker.listeners.IScanDialogListener
 import java.io.IOException
 
@@ -78,6 +78,8 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scan)
+        2/0
+
         cameraPreview.holder.addCallback(cameraPreviewCallback)
         btnBack.setOnClickListener(this)
         btnFlash.setOnClickListener(this)
@@ -185,7 +187,6 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
 
     companion object {
         const val CAMERA_PERMISSION = 1001
-        const val FLASH_STYLE = "flashStyle"
     }
 
 }

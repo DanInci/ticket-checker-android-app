@@ -1,4 +1,4 @@
-package ticket.checker.extras;
+package ticket.checker.camera;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
