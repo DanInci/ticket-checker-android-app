@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <SurfaceView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/cameraPreview"
+    <ticket.checker.camera.CameraSurfaceView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/cameraSurfaceView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -62,12 +62,11 @@
         android:layout_below="@id/toolbar"
         android:background="@color/colorPrimaryDark" />
 
-
-    <ImageView
-        android:layout_width="170dp"
-        android:layout_height="150dp"
-        android:src="@drawable/ic_barcode"
-        android:layout_centerInParent="true"/>
+    <ticket.checker.camera.FocusView
+        android:layout_below="@id/toolbar"
+        android:id="@+id/focusView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <TextView
         android:layout_width="match_parent"
