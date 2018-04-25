@@ -3,10 +3,12 @@ package ticket.checker.admin.tickets
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.TextView
 import ticket.checker.ActivityControlPanel.Companion.CHANGES_TO_ADAPTER_ITEM
 import ticket.checker.ActivityControlPanel.Companion.FILTER_VALIDATED
@@ -110,7 +112,12 @@ class TicketsAdapter(val context: Context) : AItemsAdapter<Ticket, Int>(context)
         private fun setValidated(date: Date?) {
             if (date != null) {
                 tvValidated.visibility = View.VISIBLE
-                tvValidated.text = Util.formatDate(date)
+                if((itemView.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+                    tvValidated.text = Util.formatDate(date, true)
+                }
+                else {
+                    tvValidated.text = Util.formatDate(date, false)
+                }
                 leftBar.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.yesGreen))
             } else {
                 tvValidated.visibility = View.GONE

@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.DisplayMetrics
 import android.util.SparseArray
+import android.view.SurfaceHolder
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
@@ -69,6 +70,35 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
             }
         }
     }
+    private val surfaceHolderCallback = object : SurfaceHolder.Callback {
+        override fun surfaceCreated(holder: SurfaceHolder?) {
+            if (ActivityCompat.checkSelfPermission(this@ActivityScan, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this@ActivityScan, arrayOf(android.Manifest.permission.CAMERA), ActivityScan.CAMERA_PERMISSION)
+                return
+            }
+            cameraSource.start(cameraSurfaceView.holder)
+            if(isTorchOn) {
+                toggleFlash(true)
+            }
+            startBarcodeDetection()
+        }
+
+        override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
+
+        }
+
+        override fun surfaceDestroyed(holder: SurfaceHolder?) {
+            if (ActivityCompat.checkSelfPermission(this@ActivityScan, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                 return
+            }
+
+            if (isTorchOn) {
+                toggleFlash(false)
+            }
+            stopBarcodeDetection()
+            cameraSource.stop()
+        }
+    }
     private val scanDialogListener = object : IScanDialogListener {
         override fun dismiss() {
             startBarcodeDetection()
@@ -80,40 +110,19 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_scan)
 
         barcodeDetector.setProcessor(barcodeProcessor)
-        cameraSurfaceView.holder.addCallback(cameraSource)
         cameraSurfaceView.cameraSource = cameraSource
         cameraSurfaceView.focusView = focusView
+        cameraSurfaceView.holder.addCallback(surfaceHolderCallback)
 
         btnBack.setOnClickListener(this)
         btnFlash.setOnClickListener(this)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        startBarcodeDetection()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        if (isTorchOn) {
-            toggleFlash(false)
-            stopBarcodeDetection()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (isTorchOn) {
-            toggleFlash(false)
-            stopBarcodeDetection()
-        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
             CAMERA_PERMISSION -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    startBarcodeDetection()
+                    cameraSource.start(cameraSurfaceView.holder)
                 }
             }
         }
@@ -130,7 +139,7 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
 
     private fun toggleFlash(torchMode: Boolean) : Boolean {
         if(torchMode) {
-            val successful = cameraSource.setFocusMode(Camera.Parameters.FLASH_MODE_TORCH)
+            val successful = cameraSource.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH)
             if(successful) {
                 btnFlash.setImageResource(R.drawable.ic_flashlight_on)
                 return torchMode
@@ -157,10 +166,6 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun startBarcodeDetection() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this@ActivityScan, arrayOf(android.Manifest.permission.CAMERA), ActivityScan.CAMERA_PERMISSION)
-            return
-        }
         cameraSource.setDetectionActive(true)
     }
 

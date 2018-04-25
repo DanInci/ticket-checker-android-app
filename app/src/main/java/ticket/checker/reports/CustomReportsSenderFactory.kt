@@ -1,6 +1,7 @@
 package ticket.checker.reports
 
 import android.content.Context
+import android.util.Log
 import com.google.auto.service.AutoService
 import org.acra.config.CoreConfiguration
 import org.acra.data.StringFormat
@@ -16,10 +17,15 @@ class CustomReportsSenderFactory : ReportSenderFactory {
     override fun create(context: Context, config: CoreConfiguration): ReportSender {
         val httpSender =  HttpSender(config, HttpSender.Method.POST, StringFormat.JSON, "$baseUrl/report")
         httpSender.setBasicAuth(currentUsername, currentPassword)
+        Log.i(TAG, "Http Sender created with the following for $currentUsername")
         return httpSender
     }
 
     override fun enabled(config: CoreConfiguration): Boolean {
         return true
+    }
+
+    companion object {
+        private const val TAG = "ReportsSenderFactory"
     }
 }

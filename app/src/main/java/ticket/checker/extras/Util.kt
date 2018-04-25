@@ -29,26 +29,26 @@ object Util {
     const val CURRENT_TICKET = "currentTicket"
     const val POSITION = "adapterPosition"
 
-    fun formatDate(date : Date) : String {
+    fun formatDate(date : Date, shortFormat : Boolean) : String {
         val then = date.time
         val now = Date().time
         val diff = now - then
 
         return when(diff) {
             in 0..59999 -> {
-                "Validated a few seconds ago"
+                if(shortFormat) "few seconds ago"  else "Validated a few seconds ago"
             }
             in 60000..3599999 -> {
-                "Validated " + diff/60000 + " minutes ago"
+                if(shortFormat) "${diff/60000} minutes ago"  else "Validated ${diff/60000} minutes ago"
             }
             in 3600000..86399999 -> {
-                "Validated " + diff/3600000 + " hours ago"
+                if(shortFormat) "${diff/3600000} hours ago"  else "Validated ${diff/3600000} hours ago"
             }
             in 86400000..604799999 -> {
-                "Validated " + diff/86400000 + " days ago"
+                if(shortFormat) "${diff/86400000} days ago"  else "Validated ${diff/86400000} days ago"
             }
             else -> {
-                "Validated " + "at " + DATE_FORMAT.format(date)
+                if(shortFormat) DATE_FORMAT.format(date)  else "Validated at " + DATE_FORMAT.format(date)
             }
         }
     }

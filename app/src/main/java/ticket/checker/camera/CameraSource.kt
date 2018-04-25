@@ -3,11 +3,13 @@ package ticket.checker.camera
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.hardware.Camera
 import android.os.Build
 import android.os.SystemClock
+import android.support.v4.app.ActivityCompat
 import android.util.Log
 import android.view.Surface
 import android.view.SurfaceHolder
@@ -15,12 +17,13 @@ import android.view.WindowManager
 import com.google.android.gms.common.images.Size
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.Frame
+import ticket.checker.ActivityScan
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.*
 
 
-class CameraSource : SurfaceHolder.Callback {
+class CameraSource {
     private lateinit var mContext: Context
     var mFacing = CAMERA_FACING_BACK
 
@@ -55,7 +58,7 @@ class CameraSource : SurfaceHolder.Callback {
      * @param surfaceHolder the surface holder to use for the preview frames
      * @throws IOException if the supplied surface holder could not be used as the preview display
      */
-    private fun start(surfaceHolder: SurfaceHolder): CameraSource {
+    fun start(surfaceHolder: SurfaceHolder): CameraSource {
         synchronized(mCameraLock) {
             mCamera = createCamera()
             mCamera.setPreviewDisplay(surfaceHolder)
@@ -66,18 +69,6 @@ class CameraSource : SurfaceHolder.Callback {
             mProcessingThread.start()
         }
         return this
-    }
-
-    override fun surfaceCreated(holder: SurfaceHolder) {
-        start(holder)
-    }
-
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-
-    }
-
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
-       stop()
     }
 
     fun setDetectionActive(active : Boolean) {
