@@ -3,13 +3,11 @@ package ticket.checker.camera
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.hardware.Camera
 import android.os.Build
 import android.os.SystemClock
-import android.support.v4.app.ActivityCompat
 import android.util.Log
 import android.view.Surface
 import android.view.SurfaceHolder
@@ -17,7 +15,6 @@ import android.view.WindowManager
 import com.google.android.gms.common.images.Size
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.Frame
-import ticket.checker.ActivityScan
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.*
@@ -69,6 +66,10 @@ class CameraSource {
             mProcessingThread.start()
         }
         return this
+    }
+
+    fun setDetector(mDetector: Detector<*>?) {
+        mFrameProcessor.changeDetector(mDetector)
     }
 
     fun setDetectionActive(active : Boolean) {
@@ -685,8 +686,10 @@ class CameraSource {
      * associated processing are done for the previous frame, detection on the mostly recently
      * received frame will immediately start on the same thread.
      */
-    private inner class FrameProcessingRunnable internal constructor(private var mDetector: Detector<*>?) : Runnable {
+    private inner class FrameProcessingRunnable : Runnable {
         private val mStartTimeMillis = SystemClock.elapsedRealtime()
+
+        private var mDetector: Detector<*>? = null
 
         // This lock guards all of the member variables below.
         private val mLock = java.lang.Object()
@@ -716,6 +719,13 @@ class CameraSource {
         internal fun setActive(active: Boolean) {
             synchronized(mLock) {
                 mActive = active
+                mLock.notifyAll()
+            }
+        }
+
+        internal fun changeDetector(mDetector: Detector<*>?) {
+            synchronized(mLock) {
+                this.mDetector = mDetector
                 mLock.notifyAll()
             }
         }
@@ -819,6 +829,9 @@ class CameraSource {
                     if(mDetectActive) {
                         mDetector?.receiveFrame(outputFrame)
                     }
+                    else {
+                        Log.i(TAG,"Detector is not active")
+                    }
                 } catch (t: Throwable) {
                     Log.e(TAG, "Exception thrown from receiver.", t)
                 } finally {
@@ -883,15 +896,12 @@ class CameraSource {
     //==============================================================================================
     // Builder
     //==============================================================================================
-    class Builder(context: Context?, private val mDetector: Detector<*>?) {
+    class Builder(context: Context?) {
         private val mCameraSource = CameraSource()
 
         init {
             if (context == null) {
                 throw IllegalArgumentException("No context supplied.")
-            }
-            if (mDetector == null) {
-                throw IllegalArgumentException("No detector supplied.")
             }
             mCameraSource.mContext = context
         }
@@ -942,7 +952,7 @@ class CameraSource {
          * Creates an instance of the camera source.
          */
         fun build(): CameraSource {
-            mCameraSource.mFrameProcessor = mCameraSource.FrameProcessingRunnable(mDetector)
+            mCameraSource.mFrameProcessor = mCameraSource.FrameProcessingRunnable()
             return mCameraSource
         }
     }

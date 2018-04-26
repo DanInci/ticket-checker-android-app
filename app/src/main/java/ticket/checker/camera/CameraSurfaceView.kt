@@ -27,7 +27,7 @@ class CameraSurfaceView(context : Context, attrs : AttributeSet) : SurfaceView(c
                 val x = event.x.toInt()
                 val y = event.y.toInt()
 
-                val touchRect = Rect(x-100, y-100, x + 100, (y + 100))
+                val touchRect = Rect(x-100, y-100, x + 100, y + 100)
                 val targetFocusRect = Rect(touchRect.left * 2000/this.width - 1000,
                         touchRect.top * 2000/this.height - 1000,
                         touchRect.right * 2000/this.width - 1000,

@@ -43,14 +43,14 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.newSigning
+            signingConfig signingConfigs.defaultSigning
             proguardFile 'D:/Proiecte/AndroidStudio/TicketChecker/app/proguard-rules.pro'
         }
         debug {
             debuggable true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             proguardFile 'D:/Proiecte/AndroidStudio/TicketChecker/app/proguard-rules.pro'
-            signingConfig signingConfigs.newSigning
+            signingConfig signingConfigs.defaultSigning
             minifyEnabled false
         }
     }

@@ -5,12 +5,14 @@ import android.content.pm.PackageManager
 import android.hardware.Camera
 import android.os.Bundle
 import android.os.Vibrator
+import android.preference.PreferenceManager
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.DisplayMetrics
 import android.util.SparseArray
 import android.view.SurfaceHolder
 import android.view.View
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import com.google.android.gms.vision.Detector
@@ -19,25 +21,24 @@ import com.google.android.gms.vision.barcode.BarcodeDetector
 import ticket.checker.camera.CameraSource
 import ticket.checker.camera.CameraSurfaceView
 import ticket.checker.camera.FocusView
+import ticket.checker.dialogs.DialogBarcodeConfig
 import ticket.checker.dialogs.DialogScan
+import ticket.checker.extras.BarcodeType
+import ticket.checker.listeners.BarcodeTypeChangeListener
 import ticket.checker.listeners.IScanDialogListener
 
 
-class ActivityScan : AppCompatActivity(), View.OnClickListener {
+class ActivityScan : AppCompatActivity(), View.OnClickListener, BarcodeTypeChangeListener {
 
     private val cameraSource by lazy {
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
-        CameraSource.Builder(this, barcodeDetector)
+        CameraSource.Builder(this)
                 .setRequestedPreviewSize(displayMetrics.widthPixels, displayMetrics.heightPixels)
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
                 .setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)
                 .setRequestedFps(15.0f)
                 .build()
-    }
-
-    private val barcodeDetector by lazy {
-        BarcodeDetector.Builder(this@ActivityScan).setBarcodeFormats(Barcode.ALL_FORMATS).build()
     }
 
     private val cameraSurfaceView: CameraSurfaceView by lazy {
@@ -50,9 +51,13 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
         findViewById<ImageView>(R.id.btnBack)
     }
     private val btnFlash by lazy {
-        findViewById<ImageView>(R.id.btnFlash)
+        findViewById<ImageButton>(R.id.btnFlash)
+    }
+    private val btnConfig by lazy {
+        findViewById<ImageButton>(R.id.btnConfig)
     }
 
+    private var currentBarcodeType = BarcodeType.ALL_FORMATS
     private var isTorchOn = false
 
     private val barcodeProcessor = object : Detector.Processor<Barcode> {
@@ -60,7 +65,7 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
         override fun receiveDetections(detections: Detector.Detections<Barcode>) {
             val qrCodes: SparseArray<Barcode> = detections.detectedItems
             if (qrCodes.size() != 0) {
-                stopBarcodeDetection()
+                cameraSource.setDetectionActive(false)
                 val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                 vibrator.vibrate(300)
                 val code = qrCodes.get(qrCodes.keyAt(0))
@@ -77,10 +82,10 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
                 return
             }
             cameraSource.start(cameraSurfaceView.holder)
+            cameraSource.setDetectionActive(true)
             if(isTorchOn) {
                 toggleFlash(true)
             }
-            startBarcodeDetection()
         }
 
         override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
@@ -95,13 +100,13 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
             if (isTorchOn) {
                 toggleFlash(false)
             }
-            stopBarcodeDetection()
+            cameraSource.setDetectionActive(false)
             cameraSource.stop()
         }
     }
     private val scanDialogListener = object : IScanDialogListener {
         override fun dismiss() {
-            startBarcodeDetection()
+            cameraSource.setDetectionActive(true)
         }
     }
 
@@ -109,13 +114,17 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scan)
 
-        barcodeDetector.setProcessor(barcodeProcessor)
+        currentBarcodeType = getSavedBarcodeType()
+        val barcodeDetector = getBarcodeDetector(currentBarcodeType)
+        cameraSource.setDetector(barcodeDetector)
+
         cameraSurfaceView.cameraSource = cameraSource
         cameraSurfaceView.focusView = focusView
         cameraSurfaceView.holder.addCallback(surfaceHolderCallback)
 
         btnBack.setOnClickListener(this)
         btnFlash.setOnClickListener(this)
+        btnConfig.setOnClickListener(this)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -123,9 +132,17 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
             CAMERA_PERMISSION -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     cameraSource.start(cameraSurfaceView.holder)
+                    cameraSource.setDetectionActive(true)
                 }
             }
         }
+    }
+
+    override fun onBarcodeTypeChanged(barcodeType: BarcodeType) {
+        saveBarcodeType(barcodeType)
+        currentBarcodeType = barcodeType
+        val barcodeDetector = getBarcodeDetector(currentBarcodeType)
+        cameraSource.setDetector(barcodeDetector)
     }
 
     override fun onClick(v: View) {
@@ -133,6 +150,11 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
             R.id.btnBack -> finish()
             R.id.btnFlash -> {
                 isTorchOn = toggleFlash(!isTorchOn)
+            }
+            R.id.btnConfig -> {
+                val barcodeTypeConfigDialog = DialogBarcodeConfig.newInstance(currentBarcodeType)
+                barcodeTypeConfigDialog.barcodeTypChangeListener = this
+                barcodeTypeConfigDialog.show(supportFragmentManager, "DIALOG_BARCODE_CONFIG")
             }
         }
     }
@@ -161,16 +183,28 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener {
         return !torchMode
     }
 
-    private fun stopBarcodeDetection() {
-        cameraSource.setDetectionActive(false)
+    private fun getBarcodeDetector(barcodeType: BarcodeType) : BarcodeDetector {
+        val detector =  BarcodeDetector.Builder(this@ActivityScan).setBarcodeFormats(barcodeType.id).build()
+        detector.setProcessor(barcodeProcessor)
+        return detector
     }
 
-    private fun startBarcodeDetection() {
-        cameraSource.setDetectionActive(true)
+    private fun getSavedBarcodeType() : BarcodeType {
+        val pref = PreferenceManager.getDefaultSharedPreferences(AppTicketChecker.appContext)
+        val barcodeTypeId = pref.getInt(CURRENT_BARCODE_TYPE, BarcodeType.ALL_FORMATS.id)
+        return BarcodeType.fromIdToBarcodeType(barcodeTypeId)
+    }
+
+    private fun saveBarcodeType(barcodeType : BarcodeType) {
+        val pref = PreferenceManager.getDefaultSharedPreferences(AppTicketChecker.appContext)
+        val editor = pref.edit()
+        editor.putInt(CURRENT_BARCODE_TYPE, barcodeType.id)
+        editor.apply()
     }
 
     companion object {
         const val CAMERA_PERMISSION = 1001
+        const val CURRENT_BARCODE_TYPE = "currentBarcodeType"
     }
 
 }

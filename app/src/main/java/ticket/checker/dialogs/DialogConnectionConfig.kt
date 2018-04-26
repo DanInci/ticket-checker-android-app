@@ -115,7 +115,7 @@ class DialogConnectionConfig : DialogFragment(), View.OnClickListener {
 
     private fun validate() : Boolean {
         val address = etAddress?.text.toString()
-        if(address.isNullOrEmpty()) {
+        if(address.isEmpty()) {
             etAddress?.error =  "This field is required"
             return false
         }

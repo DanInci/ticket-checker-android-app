@@ -23,7 +23,7 @@
             android:background="@null"
             android:scaleType="fitCenter"
             android:layout_gravity="end"
-            android:src="@drawable/ic_settings"/>
+            android:src="@drawable/ic_settings_primary"/>
 
         <ImageView
             android:id="@+id/imgLogo"
