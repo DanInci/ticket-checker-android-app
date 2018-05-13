@@ -16,6 +16,7 @@ import ticket.checker.R
 import ticket.checker.extras.BarcodeType
 import ticket.checker.listeners.BarcodeTypeChangeListener
 
+
 class DialogBarcodeConfig : DialogFragment(), View.OnClickListener {
 
     var barcodeTypChangeListener : BarcodeTypeChangeListener? = null
@@ -49,6 +50,7 @@ class DialogBarcodeConfig : DialogFragment(), View.OnClickListener {
         spinnerBarcodeType.isFocusable = true
         spinnerBarcodeType.adapter = ArrayAdapter<String>(view.context, R.layout.spinner_item,  BarcodeType.values().map { it -> it.format })
         spinnerBarcodeType.setSelection(currentBarcodeType.ordinal)
+        adjustDropDownHeight(spinnerBarcodeType)
         btnSave = view.findViewById(R.id.btnSave)
         btnSave.setOnClickListener(this)
     }
@@ -65,6 +67,13 @@ class DialogBarcodeConfig : DialogFragment(), View.OnClickListener {
                 dismiss()
             }
         }
+    }
+
+    private fun adjustDropDownHeight(spinner: Spinner) {
+        val popup = Spinner::class.java.getDeclaredField("mPopup")
+        popup.isAccessible = true
+        val popupWindow = popup.get(spinner) as android.widget.ListPopupWindow
+        popupWindow.height = 300
     }
 
     companion object {
