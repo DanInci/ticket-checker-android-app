@@ -186,6 +186,9 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener, BarcodeTypeChang
     private fun getBarcodeDetector(barcodeType: BarcodeType) : BarcodeDetector {
         val detector =  BarcodeDetector.Builder(this@ActivityScan).setBarcodeFormats(barcodeType.id).build()
         detector.setProcessor(barcodeProcessor)
+        if(!detector.isOperational) {
+            Toast.makeText(applicationContext, "Detector is not operational! Wait a little for dependencies to download!", Toast.LENGTH_LONG).show()
+        }
         return detector
     }
 

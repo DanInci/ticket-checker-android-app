@@ -35,7 +35,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
-        signingConfig signingConfigs.defaultSigning
+        signingConfig signingConfigs.newSigning
     }
     buildTypes {
         release {
@@ -43,14 +43,14 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.defaultSigning
+            signingConfig signingConfigs.newSigning
             proguardFile 'D:/Proiecte/AndroidStudio/TicketChecker/app/proguard-rules.pro'
         }
         debug {
             debuggable true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             proguardFile 'D:/Proiecte/AndroidStudio/TicketChecker/app/proguard-rules.pro'
-            signingConfig signingConfigs.defaultSigning
+            signingConfig signingConfigs.newSigning
             minifyEnabled false
         }
     }
