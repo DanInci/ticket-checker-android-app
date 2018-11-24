@@ -9,16 +9,10 @@ def acraVersion = '5.1.3'
 android {
     signingConfigs {
         defaultSigning {
-            keyAlias 'TicketCheckerKey'
+            keyAlias 'ticket-checker-app'
             keyPassword '123456987asd'
-            storeFile file('C:/Users/Dani/Android Projects/keyStore.jks')
+            storeFile file('../../../KeyStore/key-store.jks')
             storePassword '123456987asd'
-        }
-        newSigning {
-            keyAlias 'TicketCheckerKey'
-            keyPassword '123456987asd'
-            storePassword '123456987asd'
-            storeFile file('C:/Users/dincicau/Keys/keyStore.jks')
         }
     }
     compileOptions {
@@ -35,7 +29,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
-        signingConfig signingConfigs.newSigning
+        signingConfig signingConfigs.defaultSigning
     }
     buildTypes {
         release {
@@ -43,14 +37,14 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.newSigning
-            proguardFile 'D:/Proiecte/AndroidStudio/TicketChecker/app/proguard-rules.pro'
+            signingConfig signingConfigs.defaultSigning
+            proguardFile 'proguard-rules.pro'
         }
         debug {
             debuggable true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            proguardFile 'D:/Proiecte/AndroidStudio/TicketChecker/app/proguard-rules.pro'
-            signingConfig signingConfigs.newSigning
+            proguardFile 'proguard-rules.pro'
+            signingConfig signingConfigs.defaultSigning
             minifyEnabled false
         }
     }

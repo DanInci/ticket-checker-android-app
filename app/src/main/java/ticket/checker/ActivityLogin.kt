@@ -43,7 +43,7 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
         override fun onResponse(call: Call<User>, response: Response<User>) {
             loggingInDialog.dismiss()
             btnLogin.isClickable = true
-            if(response.isSuccessful) {
+            if(s.isSuccessful) {
                 if(autoLoginCheckBox.isChecked) {
                     val encryptedPass = Util.hashString("SHA-256",savedPass)
                     AppTicketChecker.saveSession(savedUser, encryptedPass)

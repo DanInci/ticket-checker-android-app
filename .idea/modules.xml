@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/TicketChecker.iml" filepath="$PROJECT_DIR$/TicketChecker.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ticket-checker-android-app.iml" filepath="$PROJECT_DIR$/ticket-checker-android-app.iml" />
     </modules>
   </component>
 </project>
