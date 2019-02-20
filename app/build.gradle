@@ -7,14 +7,6 @@ apply plugin: 'kotlin-android-extensions'
 def acraVersion = '5.1.3'
 
 android {
-    signingConfigs {
-        defaultSigning {
-            keyAlias 'ticket-checker-app'
-            keyPassword '123456987asd'
-            storeFile file('../../../KeyStore/key-store.jks')
-            storePassword '123456987asd'
-        }
-    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -29,7 +21,6 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
-        signingConfig signingConfigs.defaultSigning
     }
     buildTypes {
         release {
@@ -37,15 +28,13 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.defaultSigning
             proguardFile 'proguard-rules.pro'
         }
         debug {
             debuggable true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             proguardFile 'proguard-rules.pro'
-            signingConfig signingConfigs.defaultSigning
-            minifyEnabled false
         }
     }
 }
