@@ -32,6 +32,7 @@ class DialogAddTicket : DialogFragment(), View.OnClickListener {
     private var etTicketNumber: EditText? = null
     private var etSoldTo: EditText? = null
     private var etSoldToBirthDate: EditText? = null
+    private var etSoldToTelephone: EditText? = null
     private var submitButton: Button? = null
     private var loadingSpinner: ProgressBar? = null
     private var tvResult: TextView? = null
@@ -52,6 +53,8 @@ class DialogAddTicket : DialogFragment(), View.OnClickListener {
                 etSoldTo?.error = null
                 etSoldToBirthDate?.setText("")
                 etSoldToBirthDate?.error = null
+                etSoldToTelephone?.setText("")
+                etSoldToTelephone?.error = null
             } else {
                 onErrorResponse(call, response)
             }
@@ -73,6 +76,7 @@ class DialogAddTicket : DialogFragment(), View.OnClickListener {
         etTicketNumber = view.findViewById(R.id.etTicketNumber)
         etSoldTo = view.findViewById(R.id.etSoldTo)
         etSoldToBirthDate = view.findViewById(R.id.etSoldToBirthDate)
+        etSoldToTelephone = view.findViewById(R.id.etSoldToTelephone)
         submitButton = view.findViewById(R.id.btnSubmit)
         submitButton?.setOnClickListener(this)
         loadingSpinner = view.findViewById(R.id.loadingSpinner)
@@ -90,7 +94,7 @@ class DialogAddTicket : DialogFragment(), View.OnClickListener {
             }
             R.id.btnSubmit -> {
                 if (validate()) {
-                    submitTicket(etTicketNumber?.text.toString(), etSoldTo?.text.toString())
+                    submitTicket(etTicketNumber?.text.toString(), etSoldTo?.text.toString(), etSoldToTelephone?.text.toString())
                 }
             }
         }
@@ -129,12 +133,12 @@ class DialogAddTicket : DialogFragment(), View.OnClickListener {
         return isValid
     }
 
-    private fun submitTicket(ticketNumber: String, soldTo: String) {
+    private fun submitTicket(ticketNumber: String, soldTo: String, etSoldToTelephone: String?) {
         tvResult?.visibility = View.INVISIBLE
         submitButton?.visibility = View.GONE
         loadingSpinner?.visibility = View.VISIBLE
 
-        val ticket = Ticket(ticketNumber, soldTo, birthDate)
+        val ticket = Ticket(ticketNumber, soldTo, birthDate, etSoldToTelephone)
         val call = ServiceManager.getTicketService().createTicket(ticket)
         call.enqueue(submitCallback)
     }

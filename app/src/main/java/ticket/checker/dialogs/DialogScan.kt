@@ -41,6 +41,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
     private var tvTicketNumber: TextView? = null
     private var tvOwnerName : TextView? = null
     private var tvOwnerBirthDate : TextView? = null
+    private var tvOwnerTelephone : TextView? = null
     private var viewValidateTicket : LinearLayout? = null
     private var viewSellTicket : LinearLayout? = null
     private var viewDeleteTicket : LinearLayout? = null
@@ -50,6 +51,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
     private var btnClose: ImageButton? = null
     private var etSoldTo: EditText? = null
     private var etSoldToBirthDate: EditText? = null
+    private var etSoldToTelephone: EditText? = null
     private var btnAdd: Button? = null
     private var btnValidate: Button? = null
     private var btnDelete: Button? = null
@@ -112,6 +114,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         tvTicketNumber?.text = ticketNumber
         tvOwnerName = view.findViewById(R.id.tvOwnerName)
         tvOwnerBirthDate = view.findViewById(R.id.tvOwnerBirthDate)
+        tvOwnerTelephone = view.findViewById(R.id.tvOwnerTelephone)
         viewValidateTicket = view.findViewById(R.id.viewValidateTicket)
         viewSellTicket = view.findViewById(R.id.viewSellTicket)
         viewDeleteTicket = view.findViewById(R.id.viewDeleteTicket)
@@ -121,6 +124,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         btnClose?.setOnClickListener(this)
         etSoldTo = view.findViewById(R.id.etSoldTo)
         etSoldToBirthDate = view.findViewById(R.id.etSoldToBirthDate)
+        etSoldToTelephone = view.findViewById(R.id.etSoldToTelephone)
         btnAdd = view.findViewById(R.id.btnAdd)
         btnAdd?.setOnClickListener(this)
         btnValidate = view.findViewById(R.id.btnValidate)
@@ -146,7 +150,8 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                 if(validatedAdd()) {
                     showLoading()
                     val soldTo = etSoldTo?.text?.toString() ?: ""
-                    val ticket = Ticket(ticketNumber as String, soldTo, birthDate)
+                    val telephone = etSoldToTelephone?.text?.toString()
+                    val ticket = Ticket(ticketNumber as String, soldTo, birthDate, telephone)
                     val call = ServiceManager.getTicketService().createTicket(ticket)
                     call.enqueue(verificationCallback as Callback<Ticket>)
                 }
@@ -185,8 +190,10 @@ class DialogScan : DialogFragment(), View.OnClickListener {
             viewSellTicket?.visibility = View.GONE
             tvOwnerName?.visibility = if (ticket.soldTo.isNullOrEmpty()) View.GONE else View.VISIBLE
             tvOwnerBirthDate?.visibility = if (ticket.soldToBirthdate == null) View.GONE else View.VISIBLE
+            tvOwnerTelephone?.visibility = if (ticket.telephone == null) View.GONE else View.VISIBLE
             tvOwnerName?.text = if (ticket.soldTo.isNullOrEmpty()) "~not specified~" else ticket.soldTo
             tvOwnerBirthDate?.text = if (ticket.soldToBirthdate == null) "~not specified~" else DATE_FORMAT.format(ticket.soldToBirthdate)
+            tvOwnerTelephone?.text = if (ticket.telephone == null) "~not specified~" else ticket.telephone
 
             when(pretendedUserType) {
                 UserType.ADMIN -> {
@@ -244,6 +251,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         else {
             tvOwnerName?.visibility = View.GONE
             tvOwnerBirthDate?.visibility = View.GONE
+            tvOwnerTelephone?.visibility = View.GONE
             viewValidateTicket?.visibility = View.GONE
             viewDeleteTicket?.visibility = View.GONE
 

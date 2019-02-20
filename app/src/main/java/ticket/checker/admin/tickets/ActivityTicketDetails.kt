@@ -54,6 +54,9 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
     private val tvSoldToBirthDate : TextView  by lazy {
         findViewById<TextView>(R.id.soldToBirthDate)
     }
+    private val tvSoldToTelephone : TextView  by lazy {
+        findViewById<TextView>(R.id.soldToTelephone)
+    }
     private val tvSoldAt: TextView by lazy {
         findViewById<TextView>(R.id.soldAt)
     }
@@ -227,6 +230,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
     private fun updateTicketInfo(ticket: Ticket) {
         findViewById<ProgressBar>(R.id.lsSoldTo).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsSoldToBirthDate).visibility = View.INVISIBLE
+        findViewById<ProgressBar>(R.id.lsSoldToTelephone).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsSoldAt).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsSoldBy).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsValidatedAt).visibility = View.INVISIBLE
@@ -237,6 +241,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
 
         tvSoldTo.text = if (ticket.soldTo.isNullOrEmpty()) "-" else ticket.soldTo
         tvSoldToBirthDate.text = if(ticket.soldToBirthdate != null) DATE_FORMAT.format(ticket.soldToBirthdate) else "-"
+        tvSoldToTelephone.text = if(ticket.telephone != null) ticket.telephone else "-"
         tvSoldAt.text = if (ticket.soldAt != null) DATE_FORMAT_WITH_HOUR.format(ticket.soldAt) else "-"
         if (ticket.soldAt != null) {
             if (ticket.soldBy != null) {

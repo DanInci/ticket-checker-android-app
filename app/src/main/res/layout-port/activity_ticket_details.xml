@@ -189,6 +189,41 @@
                     </RelativeLayout>
 
                     <RelativeLayout
+                        android:id="@+id/soldToTelephoneRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginStart="20dp">
+
+                        <TextView
+                            android:id="@+id/soldToTelephoneLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Telephone: "
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/soldToTelephone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentTop="true"
+                            android:textColor="@color/darkerGrey"
+                            android:textSize="20sp"
+                            android:textStyle="normal" />
+
+                        <ProgressBar
+                            android:id="@+id/lsSoldToTelephone"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginEnd="35dp" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
                         android:id="@+id/soldAtRow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

@@ -32,6 +32,7 @@ class DialogEditTicket : DialogFragment(), View.OnClickListener {
     private var tvTitle: TextView? = null
     private var etSoldTo: EditText? = null
     private var etSoldToBirthDate: EditText? = null
+    private var etSoldToTelephone: EditText? = null
     private var bottomContainer : LinearLayout? = null
     private var editButton: Button? = null
     private var loadingSpinner: ProgressBar? = null
@@ -93,6 +94,7 @@ class DialogEditTicket : DialogFragment(), View.OnClickListener {
         tvTitle?.text = "Edit #$ticketNumber"
         etSoldTo = view.findViewById(R.id.etSoldTo)
         etSoldToBirthDate = view.findViewById(R.id.etSoldToBirthDate)
+        etSoldToTelephone = view.findViewById(R.id.etSoldToTelephone)
         bottomContainer = view.findViewById(R.id.bottomContainer)
         editButton = view.findViewById(R.id.btnEdit)
         editButton?.setOnClickListener(this)
@@ -111,7 +113,7 @@ class DialogEditTicket : DialogFragment(), View.OnClickListener {
             }
             R.id.btnEdit -> {
                 if (validate()) {
-                    editTicket(ticketNumber as String, etSoldTo?.text.toString(), soldToBirthDate)
+                    editTicket(ticketNumber as String, etSoldTo?.text.toString(), soldToBirthDate, etSoldToTelephone?.text.toString())
                 }
             }
         }
@@ -125,6 +127,9 @@ class DialogEditTicket : DialogFragment(), View.OnClickListener {
         etSoldToBirthDate?.isEnabled = true
         etSoldToBirthDate?.setText(if(ticket.soldToBirthdate != null)  Util.DATE_FORMAT_FORM.format(ticket.soldToBirthdate) else "")
         etSoldToBirthDate?.error = null
+        etSoldToTelephone?.isEnabled = true
+        etSoldToTelephone?.setText(ticket.telephone)
+        etSoldToTelephone?.error = null
     }
 
     private fun validate(): Boolean {
@@ -153,12 +158,12 @@ class DialogEditTicket : DialogFragment(), View.OnClickListener {
         return isValid
     }
 
-    private fun editTicket(ticketNumber : String, soldTo: String, soldToBirthDate : Date?) {
+    private fun editTicket(ticketNumber : String, soldTo: String, soldToBirthDate : Date?, etSoldToTelephone: String?) {
         tvResult?.visibility = View.INVISIBLE
         editButton?.visibility = View.GONE
         loadingSpinner?.visibility = View.VISIBLE
 
-        val ticket = Ticket(ticketNumber, soldTo, soldToBirthDate)
+        val ticket = Ticket(ticketNumber, soldTo, soldToBirthDate, etSoldToTelephone)
         val call = ServiceManager.getTicketService().editTicket(ticketNumber, ticket)
         call.enqueue(editCallback)
     }
