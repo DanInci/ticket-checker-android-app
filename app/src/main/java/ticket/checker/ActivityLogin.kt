@@ -155,7 +155,7 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
         loggedInUserId = user.id
         loggedInUserName = user.name
         loggedInUserType = user.userType
-        loggedInUserCreatedDate = user.createdDate
+        loggedInUserCreatedDate = user.createdAt
         loggedInUserSoldTicketsNo = user.soldTicketsNo
         loggedInUserValidatedTicketsNo = user.validatedTicketsNo
         pretendedUserType = user.userType

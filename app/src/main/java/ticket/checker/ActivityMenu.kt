@@ -72,7 +72,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
                 val user = response.body() as User
                 loggedInUserId = user.id
                 loggedInUserName = user.name
-                loggedInUserCreatedDate = user.createdDate
+                loggedInUserCreatedDate = user.createdAt
                 loggedInUserType = user.userType
                 loggedInUserSoldTicketsNo = user.soldTicketsNo
                 loggedInUserValidatedTicketsNo = user.validatedTicketsNo

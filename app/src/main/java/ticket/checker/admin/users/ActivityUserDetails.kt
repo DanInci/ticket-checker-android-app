@@ -224,7 +224,7 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
         tvRole.text = user.userType.role
         tvRole.setTextColor(ContextCompat.getColor(applicationContext, user.userType.colorResource))
 
-        tvCreatedAt.text = DATE_FORMAT_WITH_HOUR.format(user.createdDate)
+        tvCreatedAt.text = DATE_FORMAT_WITH_HOUR.format(user.createdAt)
         tvTicketsCreated.text = "${user.soldTicketsNo}"
         tvTicketsValidated.text = "${user.validatedTicketsNo}"
     }

@@ -97,7 +97,7 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
         fun updateUserHolderInfo(user : User) {
             setName(user.name)
             setUserType(user.userType)
-            setCreatedAt(user.createdDate)
+            setCreatedAt(user.createdAt)
         }
 
         private fun setName(name : String) {
