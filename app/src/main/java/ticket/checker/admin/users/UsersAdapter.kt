@@ -136,7 +136,7 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
     override fun getItemId(position: Int): Long {
         return when(position) {
             0, items.size + 1 -> RecyclerView.NO_ID
-            else -> items[position-1].id!!
+            else -> items[position-1].userId!!
         }
     }
 

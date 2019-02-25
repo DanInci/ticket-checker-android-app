@@ -152,7 +152,7 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun login(user : User) {
-        loggedInUserId = user.id
+        loggedInUserId = user.userId
         loggedInUserName = user.name
         loggedInUserType = user.userType
         loggedInUserCreatedDate = user.createdAt

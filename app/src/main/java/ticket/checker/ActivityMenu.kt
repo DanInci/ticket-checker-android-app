@@ -70,7 +70,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         override fun onResponse(call: Call<User>, response: Response<User>) {
             if (response.isSuccessful) {
                 val user = response.body() as User
-                loggedInUserId = user.id
+                loggedInUserId = user.userId
                 loggedInUserName = user.name
                 loggedInUserCreatedDate = user.createdAt
                 loggedInUserType = user.userType

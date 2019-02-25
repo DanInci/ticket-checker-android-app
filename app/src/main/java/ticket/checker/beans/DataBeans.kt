@@ -7,7 +7,7 @@ import java.util.*
 /**
  * Created by Dani on 24.01.2018.
  */
-data class User(var id : Long?,var username : String, var password : String, var name : String, var role : String, var createdAt : Date?, var soldTicketsNo : Int?, var validatedTicketsNo : Int?) : Serializable {
+data class User(var userId : Long?,var username : String, var password : String, var name : String, var role : String, var createdAt : Date?, var soldTicketsNo : Int?, var validatedTicketsNo : Int?) : Serializable {
     constructor(username : String, password : String, name : String, userType : UserType) : this(null, username, password, name, UserType.fromUserTypeToRole(userType), null, null, null)
 
     val userType : UserType

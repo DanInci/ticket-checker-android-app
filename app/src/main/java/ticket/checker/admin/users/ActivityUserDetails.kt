@@ -125,7 +125,7 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
 
     override fun onStart() {
         super.onStart()
-        val call = ServiceManager.getUserService().getUsersById(currentUser?.id as Long)
+        val call = ServiceManager.getUserService().getUsersById(currentUser?.userId as Long)
         call.enqueue(userCallback as Callback<User>)
     }
 
@@ -159,7 +159,7 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
             }
             R.id.btnEdit -> {
                 when {
-                    currentUser?.id!! == AppTicketChecker.loggedInUserId -> {
+                    currentUser?.userId!! == AppTicketChecker.loggedInUserId -> {
                         val dialog = DialogInfo.newInstance("Edit failed", "You can not edit yourself", DialogType.ERROR)
                         dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
                     }
@@ -168,7 +168,7 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
                         dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
                     }
                     else -> {
-                        val dialog = DialogEditUser.newInstance(currentUser?.id!!, currentUser?.name!!)
+                        val dialog = DialogEditUser.newInstance(currentUser?.userId!!, currentUser?.name!!)
                         dialog.editListener = editListener
                         dialog.show(supportFragmentManager, "DIALOG_EDIT_USER")
                     }
@@ -177,7 +177,7 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
             R.id.btnRemove -> {
                 val dialog: DialogInfo?
                 when {
-                    currentUser?.id!! == AppTicketChecker.loggedInUserId -> {
+                    currentUser?.userId!! == AppTicketChecker.loggedInUserId -> {
                         dialog = DialogInfo.newInstance("Delete failed", "You can not delete yourself", DialogType.ERROR)
                         dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
                     }
@@ -198,7 +198,7 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
     override fun onResponse(response: Boolean) {
         if (response) {
             switchToLoadingView(true)
-            val call = ServiceManager.getUserService().deleteUserById(currentUser?.id!!)
+            val call = ServiceManager.getUserService().deleteUserById(currentUser?.userId!!)
             call.enqueue(userCallback as Callback<Void>)
         }
     }
