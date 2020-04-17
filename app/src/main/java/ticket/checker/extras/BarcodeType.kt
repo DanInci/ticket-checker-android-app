@@ -21,10 +21,10 @@ enum class BarcodeType(val format : String, val id : Int) : Serializable {
 
     companion object {
         fun fromFormatToBarcodeType(format : String) : BarcodeType {
-            return BarcodeType.values().find { it.format == format } ?: ALL_FORMATS
+            return values().find { it.format == format } ?: ALL_FORMATS
         }
         fun fromIdToBarcodeType(id : Int) : BarcodeType {
-            return BarcodeType.values().find { it.id == id } ?: ALL_FORMATS
+            return values().find { it.id == id } ?: ALL_FORMATS
         }
     }
 }
