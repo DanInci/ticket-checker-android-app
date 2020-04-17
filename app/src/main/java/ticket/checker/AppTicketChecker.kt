@@ -1,23 +1,15 @@
 package ticket.checker
 
 import android.app.Application
-import android.content.Context
 import android.preference.PreferenceManager
-import org.acra.ACRA
-import org.acra.ReportField.*
-import org.acra.annotation.AcraCore
-import org.acra.annotation.AcraToast
+
 import ticket.checker.extras.UserType
-import ticket.checker.reports.CustomReportsSenderFactory
 import ticket.checker.services.ServiceManager
 import java.util.*
 
 /**
  * Created by Dani on 16.02.2018.
  */
-@AcraCore(reportSenderFactoryClasses = [CustomReportsSenderFactory::class],
-        reportContent = [USER_APP_START_DATE, APP_VERSION_NAME, APP_VERSION_CODE, ANDROID_VERSION, PHONE_MODEL, STACK_TRACE])
-@AcraToast(resText = R.string.error_report_notification_text)
 class AppTicketChecker : Application() {
 
     override fun onCreate() {
@@ -25,11 +17,6 @@ class AppTicketChecker : Application() {
         appContext = this
         loadConnectionConfig()
         loadSession()
-    }
-
-    override fun attachBaseContext(base: Context?) {
-        super.attachBaseContext(base)
-        ACRA.init(this)
     }
 
     companion object {
