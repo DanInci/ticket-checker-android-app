@@ -15,14 +15,10 @@ import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.R
 import ticket.checker.admin.listeners.EditListener
-import ticket.checker.beans.Ticket
 import ticket.checker.beans.User
-import ticket.checker.extras.BirthDateFormatException
-import ticket.checker.extras.BirthDateIncorrectException
-import ticket.checker.extras.UserType
+import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
-import java.util.*
 
 class DialogEditUser : DialogFragment(), View.OnClickListener {
     var editListener: EditListener<User>? = null
@@ -114,7 +110,7 @@ class DialogEditUser : DialogFragment(), View.OnClickListener {
             }
             R.id.btnEdit -> {
                 if (validate()) {
-                    editUser(userId as Long, etName?.text.toString(), spinnerRole?.selectedItem as UserType)
+                    editUser(userId as Long, etName?.text.toString(), spinnerRole?.selectedItem as OrganizationRole)
                 }
             }
         }
@@ -127,7 +123,7 @@ class DialogEditUser : DialogFragment(), View.OnClickListener {
         etName?.post( { etName?.setSelection(user.name.length) })
         spinnerRole?.isClickable = true
         spinnerRole?.isFocusable = true
-        spinnerRole?.adapter = ArrayAdapter<UserType>(context!!, R.layout.spinner_item, UserType.values())
+        spinnerRole?.adapter = ArrayAdapter<OrganizationRole>(context!!, R.layout.spinner_item, OrganizationRole.values())
         spinnerRole?.setSelection(user.userType.ordinal)
     }
 
@@ -141,12 +137,12 @@ class DialogEditUser : DialogFragment(), View.OnClickListener {
         return true
     }
 
-    private fun editUser(userId : Long, name: String, userType : UserType) {
+    private fun editUser(userId : Long, name: String, organizationRole : OrganizationRole) {
         tvResult?.visibility = View.INVISIBLE
         editButton?.visibility = View.GONE
         loadingSpinner?.visibility = View.VISIBLE
 
-        val user = User(userId, "blabla", "blabla", name, UserType.fromUserTypeToRole(userType), null,0,0)
+        val user = User(userId, "blabla", "blabla", name, OrganizationRole.fromUserTypeToRole(organizationRole), null,0,0)
         val call = ServiceManager.getUserService().editUser(userId, user)
         call.enqueue(editCallback)
     }

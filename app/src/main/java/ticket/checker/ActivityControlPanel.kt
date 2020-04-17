@@ -12,14 +12,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import kotlinx.android.synthetic.main.activity_control.*
-import ticket.checker.AppTicketChecker.Companion.pretendedUserType
+import ticket.checker.AppTicketChecker.Companion.pretendedOrganizationRole
 import ticket.checker.admin.tickets.DialogAddTicket
 import ticket.checker.admin.tickets.TicketsFragment
 import ticket.checker.admin.users.DialogAddUser
 import ticket.checker.admin.users.UsersFragment
 import ticket.checker.beans.Ticket
 import ticket.checker.beans.User
-import ticket.checker.extras.UserType
+import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util.POSITION
 
 class ActivityControlPanel : AppCompatActivity() {
@@ -64,7 +64,7 @@ class ActivityControlPanel : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         btnBack.setOnClickListener { finish() }
 
-        if(pretendedUserType == UserType.ADMIN) {
+        if(pretendedOrganizationRole == OrganizationRole.ADMIN) {
             navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         }
         else {
@@ -132,28 +132,28 @@ class ActivityControlPanel : AppCompatActivity() {
                 }
                 R.id.action_admins -> {
                     usersFilterType = FILTER_ROLE
-                    usersFilterValue = UserType.ADMIN.role
+                    usersFilterValue = OrganizationRole.ADMIN.role
                     checkMenuItem(item.itemId)
                     updateFilter(usersFilterType, usersFilterValue)
                     currentUsersMenuItemId = R.id.action_admins
                 }
                 R.id.action_publishers -> {
                     usersFilterType = FILTER_ROLE
-                    usersFilterValue = UserType.PUBLISHER.role
+                    usersFilterValue = OrganizationRole.PUBLISHER.role
                     checkMenuItem(item.itemId)
                     updateFilter(usersFilterType, usersFilterValue)
                     currentUsersMenuItemId = R.id.action_publishers
                 }
                 R.id.action_validators -> {
                     usersFilterType = FILTER_ROLE
-                    usersFilterValue = UserType.VALIDATOR.role
+                    usersFilterValue = OrganizationRole.VALIDATOR.role
                     checkMenuItem(item.itemId)
                     updateFilter(usersFilterType, usersFilterValue)
                     currentUsersMenuItemId = R.id.action_validators
                 }
                 R.id.action_users -> {
                     usersFilterType = FILTER_ROLE
-                    usersFilterValue = UserType.USER.role
+                    usersFilterValue = OrganizationRole.USER.role
                     checkMenuItem(item.itemId)
                     updateFilter(usersFilterType, usersFilterValue)
                     currentUsersMenuItemId = R.id.action_users
@@ -188,7 +188,7 @@ class ActivityControlPanel : AppCompatActivity() {
             else -> {
                 menuInflater.inflate(R.menu.control_panel_menu_tickets, menu)
                 checkMenuItem(currentTicketsMenuItemId)
-                if(pretendedUserType != UserType.ADMIN && pretendedUserType != UserType.PUBLISHER) {
+                if(pretendedOrganizationRole != OrganizationRole.ADMIN && pretendedOrganizationRole != OrganizationRole.PUBLISHER) {
                     menu?.getItem(0)?.isVisible = false
                     toolbarTitle.setPadding(0,0,0,0)
                 }

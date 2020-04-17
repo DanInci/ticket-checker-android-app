@@ -3,27 +3,33 @@ package ticket.checker.services
 import retrofit2.Call
 import retrofit2.http.*
 import ticket.checker.beans.Ticket
+import ticket.checker.beans.TicketDefinition
+import ticket.checker.beans.TicketList
+import ticket.checker.beans.TicketUpdateDefinition
+import ticket.checker.extras.TicketCategory
+import java.util.*
 
-/**
- * Created by Dani on 25.01.2018.
- */
 interface TicketService {
 
-    @GET("/tickets")
-    fun getTickets(@Query("type") type : String?,@Query("value") value : String?, @Query("page") page : Int?, @Query("size") size : Int?) : Call<List<Ticket>>
+    @POST("/organizations/{organizationId}/tickets")
+    fun createTicketForOrganization(@Path("organizationId") id: UUID, @Body definition: TicketDefinition): Call<Ticket>
 
-    @GET("/tickets/{ticketId}")
-    fun getTicketById(@Path("ticketId") ticketId : String) : Call<Ticket>
+    @GET("/organizations/{organizationId}/tickets")
+    fun getTicketsForOrganization(@Path("organizationId") id: UUID, @Query("page") pageNumber: Int?, @Query("pageSize") pageSize: Int?, @Query("category") ticketCategory: TicketCategory?, @Query("userId") userId: UUID?, @Query("search") searchValue: String?): Call<List<TicketList>>
 
-    @POST("/tickets")
-    fun createTicket(@Body ticket : Ticket) : Call<Ticket>
+    @GET("/organizations/{organizationId}/tickets/{ticketId}")
+    fun getTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: UUID): Call<Ticket>
 
-    @POST("/tickets/{ticketId}")
-    fun editTicket(@Path("ticketId") ticketId : String, @Body ticket : Ticket) : Call<Ticket>
+    @PUT("/organizations/{organizationId}/tickets/{ticketId}")
+    fun updateTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: UUID, @Body definition: TicketUpdateDefinition): Call<Ticket>
 
-    @POST("/tickets/validate/{ticketId}")
-    fun validateTicket(@Header("validate") validate : Boolean, @Path("ticketId") ticketId : String) : Call<Ticket>
+    @POST("/organizations/{organizationId}/tickets/{ticketId}/validate")
+    fun validateTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: UUID): Call<Ticket>
 
-    @DELETE("/tickets/{ticketId}")
-    fun deleteTicketById(@Path("ticketId") ticketId : String) : Call<Void>
+    @POST("/organizations/{organizationId}/tickets/{ticketId}/invalidate")
+    fun invalidateTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: UUID): Call<Ticket>
+
+    @DELETE("/organizations/{organizationId}/tickets/{ticketId}")
+    fun deleteTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: UUID): Call<Void>
+
 }

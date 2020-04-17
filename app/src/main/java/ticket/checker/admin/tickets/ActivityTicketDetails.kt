@@ -13,13 +13,13 @@ import retrofit2.Response
 import ticket.checker.ActivityControlPanel.Companion.EDITED_OBJECT
 import ticket.checker.ActivityControlPanel.Companion.ITEM_EDITED
 import ticket.checker.ActivityControlPanel.Companion.ITEM_REMOVED
-import ticket.checker.AppTicketChecker.Companion.pretendedUserType
+import ticket.checker.AppTicketChecker.Companion.pretendedOrganizationRole
 import ticket.checker.R
 import ticket.checker.admin.listeners.EditListener
 import ticket.checker.beans.Ticket
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
-import ticket.checker.extras.UserType
+import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.CURRENT_TICKET
 import ticket.checker.extras.Util.DATE_FORMAT
@@ -102,7 +102,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
                         updateTicketInfo(response.body() as Ticket)
                         if(isFirstLoad) {
                             isFirstLoad = false
-                            if(pretendedUserType==UserType.ADMIN) {
+                            if(pretendedOrganizationRole==OrganizationRole.ADMIN) {
                                 btnRemove.visibility = View.VISIBLE
                             }
                             btnValidate.visibility =  View.VISIBLE
@@ -145,11 +145,11 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
         btnRemove.setOnClickListener(this)
         btnBack.setOnClickListener(this)
 
-        if(pretendedUserType != UserType.ADMIN) {
+        if(pretendedOrganizationRole != OrganizationRole.ADMIN) {
             btnEdit.visibility = View.GONE
             btnRemove.visibility = View.GONE
         }
-        if(pretendedUserType == UserType.PUBLISHER) {
+        if(pretendedOrganizationRole == OrganizationRole.PUBLISHER) {
            findViewById<LinearLayout>(R.id.buttonsContainer).visibility = View.INVISIBLE
         }
     }
@@ -217,7 +217,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
     private fun switchToLoadingView(isLoading: Boolean) {
         loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
         btnValidate.visibility = if (isLoading) View.GONE else View.VISIBLE
-        if(pretendedUserType == UserType.ADMIN) {
+        if(pretendedOrganizationRole == OrganizationRole.ADMIN) {
             btnRemove.visibility = if (isLoading) View.GONE else View.VISIBLE
         }
     }

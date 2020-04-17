@@ -105,7 +105,7 @@ object Util {
             ServiceManager.errorConverter?.convert(errorBody!!)!!
             }
         catch (e : Exception) {
-            ErrorResponse(Date(),"","")
+            ErrorResponse("","")
         }
     }
 

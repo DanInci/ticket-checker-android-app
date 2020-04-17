@@ -2,21 +2,17 @@ package ticket.checker.services
 
 import retrofit2.Call
 import retrofit2.http.GET
-import retrofit2.http.Header
+import retrofit2.http.Path
 import retrofit2.http.Query
-import ticket.checker.beans.Statistic
+import ticket.checker.beans.TicketsStatistic
+import ticket.checker.extras.IntervalType
+import ticket.checker.extras.TicketCategory
+import java.time.LocalDateTime
+import java.util.*
 
-/**
- * Created by Dani on 09.02.2018.
- */
 interface StatisticsService {
 
-    @GET("/statistics/numbers/users")
-    fun getUserNumbers(@Query("type") type : String?, @Query("value") value : String?) : Call<Int>
+    @GET("/statistics/organizations/{organizationId}/tickets")
+    fun getTicketsStatistics(@Path("organizationId") id: UUID, @Query("category") ticketCategory: TicketCategory, @Query("interval") intervalType: IntervalType, @Query("size") size: Int?, @Query("until") until: LocalDateTime?): Call<List<TicketsStatistic>>
 
-    @GET("/statistics/numbers/tickets")
-    fun getTicketNumbers(@Query("type") type : String?, @Query("value") value : String?) : Call<Int>
-
-    @GET("/statistics/tickets")
-    fun getTicketStatisticsForInterval(@Query("type") type : String, @Query("interval") interval : String, @Query("size") size : Int?) : Call<List<Statistic>>
 }

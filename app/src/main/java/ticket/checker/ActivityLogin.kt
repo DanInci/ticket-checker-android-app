@@ -15,9 +15,9 @@ import ticket.checker.AppTicketChecker.Companion.loggedInUserCreatedDate
 import ticket.checker.AppTicketChecker.Companion.loggedInUserId
 import ticket.checker.AppTicketChecker.Companion.loggedInUserName
 import ticket.checker.AppTicketChecker.Companion.loggedInUserSoldTicketsNo
-import ticket.checker.AppTicketChecker.Companion.loggedInUserType
+import ticket.checker.AppTicketChecker.Companion.loggedInOrganizationRole
 import ticket.checker.AppTicketChecker.Companion.loggedInUserValidatedTicketsNo
-import ticket.checker.AppTicketChecker.Companion.pretendedUserType
+import ticket.checker.AppTicketChecker.Companion.pretendedOrganizationRole
 import ticket.checker.beans.User
 import ticket.checker.dialogs.DialogConnectionConfig
 import ticket.checker.dialogs.DialogInfo
@@ -154,11 +154,11 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     private fun login(user : User) {
         loggedInUserId = user.userId
         loggedInUserName = user.name
-        loggedInUserType = user.userType
+        loggedInOrganizationRole = user.userType
         loggedInUserCreatedDate = user.createdAt
         loggedInUserSoldTicketsNo = user.soldTicketsNo
         loggedInUserValidatedTicketsNo = user.validatedTicketsNo
-        pretendedUserType = user.userType
+        pretendedOrganizationRole = user.userType
         isLoggedIn = true
         toMenuActivity()
     }

@@ -24,11 +24,11 @@ import ticket.checker.AppTicketChecker.Companion.loggedInUserCreatedDate
 import ticket.checker.AppTicketChecker.Companion.loggedInUserId
 import ticket.checker.AppTicketChecker.Companion.loggedInUserName
 import ticket.checker.AppTicketChecker.Companion.loggedInUserSoldTicketsNo
-import ticket.checker.AppTicketChecker.Companion.loggedInUserType
+import ticket.checker.AppTicketChecker.Companion.loggedInOrganizationRole
 import ticket.checker.AppTicketChecker.Companion.loggedInUserValidatedTicketsNo
-import ticket.checker.AppTicketChecker.Companion.pretendedUserType
+import ticket.checker.AppTicketChecker.Companion.pretendedOrganizationRole
 import ticket.checker.beans.User
-import ticket.checker.extras.UserType
+import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.services.ServiceManager
@@ -73,12 +73,12 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
                 loggedInUserId = user.userId
                 loggedInUserName = user.name
                 loggedInUserCreatedDate = user.createdAt
-                loggedInUserType = user.userType
+                loggedInOrganizationRole = user.userType
                 loggedInUserSoldTicketsNo = user.soldTicketsNo
                 loggedInUserValidatedTicketsNo = user.validatedTicketsNo
 
                 if (!firstLoadHappen) {
-                    pretendedUserType = user.userType
+                    pretendedOrganizationRole = user.userType
                     firstLoadHappen = true
                     switchViews()
                 }
@@ -167,11 +167,11 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        when (loggedInUserType) {
-            UserType.ADMIN -> menuInflater.inflate(R.menu.menu_admin, menu)
-            UserType.PUBLISHER -> menuInflater.inflate(R.menu.menu_publisher, menu)
-            UserType.VALIDATOR -> menuInflater.inflate(R.menu.menu_validator, menu)
-            UserType.USER -> menuInflater.inflate(R.menu.menu_user, menu)
+        when (loggedInOrganizationRole) {
+            OrganizationRole.ADMIN -> menuInflater.inflate(R.menu.menu_admin, menu)
+            OrganizationRole.PUBLISHER -> menuInflater.inflate(R.menu.menu_publisher, menu)
+            OrganizationRole.VALIDATOR -> menuInflater.inflate(R.menu.menu_validator, menu)
+            OrganizationRole.USER -> menuInflater.inflate(R.menu.menu_user, menu)
         }
         if (!menuIsShown) {
             for (i in 0 until menu.size()) {
@@ -195,27 +195,27 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         var validSelection = true
         when (item.itemId) {
             R.id.action_admin_mode -> {
-                pretendedUserType = UserType.ADMIN
+                pretendedOrganizationRole = OrganizationRole.ADMIN
                 switchViews()
-                tvCurrentRole.text = pretendedUserType.name
+                tvCurrentRole.text = pretendedOrganizationRole.name
                 currentMenuItemId = R.id.action_admin_mode
             }
             R.id.action_publisher_mode -> {
-                pretendedUserType = UserType.PUBLISHER
+                pretendedOrganizationRole = OrganizationRole.PUBLISHER
                 switchViews()
-                tvCurrentRole.text = pretendedUserType.name
+                tvCurrentRole.text = pretendedOrganizationRole.name
                 currentMenuItemId = R.id.action_publisher_mode
             }
             R.id.action_validator_mode -> {
-                pretendedUserType = UserType.VALIDATOR
+                pretendedOrganizationRole = OrganizationRole.VALIDATOR
                 switchViews()
-                tvCurrentRole.text = pretendedUserType.name
+                tvCurrentRole.text = pretendedOrganizationRole.name
                 currentMenuItemId = R.id.action_validator_mode
             }
             R.id.action_user_mode -> {
-                pretendedUserType = UserType.USER
+                pretendedOrganizationRole = OrganizationRole.USER
                 switchViews()
-                tvCurrentRole.text = pretendedUserType.name
+                tvCurrentRole.text = pretendedOrganizationRole.name
                 currentMenuItemId = R.id.action_user_mode
             }
             R.id.action_logout -> logout()
@@ -247,29 +247,29 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun switchViews() {
-        when (pretendedUserType) {
-            UserType.ADMIN -> {
+        when (pretendedOrganizationRole) {
+            OrganizationRole.ADMIN -> {
                 cvScan.visibility = View.VISIBLE
                 cvStatistics.visibility = View.VISIBLE
                 cvControlPanel.visibility = View.VISIBLE
                 findViewById<TextView>(R.id.controlPanelTitle).text = "Administration area"
                 findViewById<TextView>(R.id.controlPanelDescription).text = "Use your administrator priveleges to add, delete tickets or see user information"
             }
-            UserType.PUBLISHER -> {
+            OrganizationRole.PUBLISHER -> {
                 cvScan.visibility = View.VISIBLE
                 cvStatistics.visibility = View.VISIBLE
                 cvControlPanel.visibility = View.VISIBLE
                 findViewById<TextView>(R.id.controlPanelTitle).text = "Publisher area"
                 findViewById<TextView>(R.id.controlPanelDescription).text = "Use your publisher priveleges to add tickets or see information about them"
             }
-            UserType.VALIDATOR -> {
+            OrganizationRole.VALIDATOR -> {
                 cvScan.visibility = View.VISIBLE
                 cvStatistics.visibility = View.VISIBLE
                 cvControlPanel.visibility = View.VISIBLE
                 findViewById<TextView>(R.id.controlPanelTitle).text = "Validator area"
                 findViewById<TextView>(R.id.controlPanelDescription).text = "Use your validator priveleges to validate/invalidate tickets or see information about them"
             }
-            UserType.USER -> {
+            OrganizationRole.USER -> {
                 cvScan.visibility = View.VISIBLE
                 cvStatistics.visibility = View.VISIBLE
                 cvControlPanel.visibility = View.GONE
@@ -288,8 +288,8 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 
             tvName.text = loggedInUserName
             tvCreated.text = DATE_FORMAT.format(loggedInUserCreatedDate)
-            tvHighestRole.text = loggedInUserType.name
-            tvCurrentRole.text = pretendedUserType.name
+            tvHighestRole.text = loggedInOrganizationRole.name
+            tvCurrentRole.text = pretendedOrganizationRole.name
             tvCreatedTickets.text = loggedInUserSoldTicketsNo.toString()
             tvValidatedTickets.text = loggedInUserValidatedTicketsNo.toString()
         }

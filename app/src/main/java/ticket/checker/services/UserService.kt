@@ -2,36 +2,28 @@ package ticket.checker.services
 
 import retrofit2.Call
 import retrofit2.http.*
-import ticket.checker.beans.Ticket
-import ticket.checker.beans.User
+import ticket.checker.beans.*
+import ticket.checker.extras.InviteStatus
+import java.util.*
 
-/**
- * Created by Dani on 24.01.2018.
- */
 interface UserService {
 
-    @GET("/login")
-    fun getUser() : Call<User>
+    @POST("/login")
+    fun login(data: LoginData): Call<LoginResponse>
 
-    @GET("/users")
-    fun getUsers(@Query("type") type : String?,@Query("value") value : String?, @Query("page") page : Int?, @Query("size") size : Int?) : Call<List<User>>
+    @POST("/register")
+    fun register(data: RegistrationData): Call<Void>
 
-    @GET("/users/{loggedInUserId}")
-    fun getUsersById(@Path("loggedInUserId") userId : Long) : Call<User>
+    @GET("/users/{userId}")
+    fun getUserById(@Path("userId") id: UUID): Call<UserProfile>
 
-    @GET("/users/{loggedInUserId}/sold")
-    fun getSoldTicketsByUserId(@Path("loggedInUserId") userId: Long) : Call<List<Ticket>>
+    @GET("/users/{userId}/invites")
+    fun getUserInvites(@Path("userId") id: UUID, @Query("page") pageNumber: Int?, @Query("pageSize") pageSize: Int?, @Query("status") status: InviteStatus?): Call<List<OrganizationInviteList>>
 
-    @GET("/users/{loggedInUserId}/validated")
-    fun getValidatedTicketsByUserId(@Path("loggedInUserId") userId: Long) : Call<List<Ticket>>
+    @PUT("/users/{userId}")
+    fun updateUserById(@Path("userId") id: UUID, @Body definition: UserDefinition): Call<UserProfile>
 
-    @POST("/users")
-    fun createUser(@Body user: User) : Call<User>
-
-    @POST("/users/{loggedInUserId}")
-    fun editUser(@Path("loggedInUserId") userId : Long, @Body user: User) : Call<User>
-
-    @DELETE("/users/{loggedInUserId}")
-    fun deleteUserById(@Path("loggedInUserId") userId: Long) : Call<Void>
+    @DELETE("/users/{userId}")
+    fun deleteUserById(@Path("userId") id: UUID): Call<Void>
 
 }

@@ -8,7 +8,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ticket.checker.AppTicketChecker
 import ticket.checker.beans.ErrorResponse
-import ticket.checker.extras.Util.hashString
 
 /**
  * Created by Dani on 24.01.2018.
@@ -16,31 +15,25 @@ import ticket.checker.extras.Util.hashString
 object ServiceManager {
     private const val GSON_SERIALIZER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
 
-    lateinit var baseUrl : String
-    lateinit var currentUsername : String
-    lateinit var currentPassword : String
-
     private var retrofit: Retrofit? = null
 
     private var userService: UserService? = null
     private var ticketService: TicketService? = null
+    private var organizationService: OrganizationService? = null
     private var statisticsService: StatisticsService? = null
 
     val errorConverter: Converter<ResponseBody, ErrorResponse>? by lazy {
-        retrofit?.responseBodyConverter<ErrorResponse>(ErrorResponse::class.java, emptyArray())
+        retrofit?.responseBodyConverter(ErrorResponse::class.java, emptyArray())
     }
 
-    fun createSession(username: String, password: String, hashRequired: Boolean) {
-        currentUsername = username
-        currentPassword = password
+    fun createSession(email: String, password: String) {
 
-        if (hashRequired) {
-            currentPassword = hashString("SHA-256", password)
-        }
+    }
 
-        val interceptor = AuthInterceptor(username, currentPassword)
+    fun createSession(token: String) {
+        val interceptor = AuthInterceptor(token)
         val httpClient = OkHttpClient.Builder().addInterceptor(interceptor).build()
-        baseUrl = if(AppTicketChecker.port != "") "http://${AppTicketChecker.address}:${AppTicketChecker.port}" else "http://${AppTicketChecker.address}"
+        val baseUrl = if(AppTicketChecker.port != "") "http://${AppTicketChecker.address}:${AppTicketChecker.port}" else "http://${AppTicketChecker.address}"
         val builder = Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setDateFormat(GSON_SERIALIZER_DATE_FORMAT).create()))
@@ -62,6 +55,13 @@ object ServiceManager {
         return ticketService as TicketService
     }
 
+    fun getOrganizationService(): OrganizationService {
+        if (organizationService == null) {
+            organizationService = getRetrofitClient().create(OrganizationService::class.java)
+        }
+        return organizationService as OrganizationService
+    }
+
     fun getStatisticsService(): StatisticsService {
         if (statisticsService == null) {
             statisticsService = getRetrofitClient().create(StatisticsService::class.java)
@@ -73,10 +73,8 @@ object ServiceManager {
         retrofit = null
         userService = null
         ticketService = null
+        organizationService = null
         statisticsService = null
-
-        currentUsername = ""
-        currentPassword = ""
     }
 
     private fun getRetrofitClient() : Retrofit {

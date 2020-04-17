@@ -22,7 +22,7 @@ import ticket.checker.admin.listeners.EditListener
 import ticket.checker.beans.User
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
-import ticket.checker.extras.UserType
+import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util.CURRENT_USER
 import ticket.checker.extras.Util.DATE_FORMAT_WITH_HOUR
 import ticket.checker.extras.Util.POSITION
@@ -163,7 +163,7 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
                         val dialog = DialogInfo.newInstance("Edit failed", "You can not edit yourself", DialogType.ERROR)
                         dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
                     }
-                    currentUser?.userType == UserType.ADMIN -> {
+                    currentUser?.userType == OrganizationRole.ADMIN -> {
                         val dialog = DialogInfo.newInstance("Edit failed", "You are not allowed to edit another admin", DialogType.ERROR)
                         dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
                     }
@@ -181,7 +181,7 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
                         dialog = DialogInfo.newInstance("Delete failed", "You can not delete yourself", DialogType.ERROR)
                         dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
                     }
-                    currentUser?.userType == UserType.ADMIN -> {
+                    currentUser?.userType == OrganizationRole.ADMIN -> {
                         dialog = DialogInfo.newInstance("Delete failed", "You are not allowed to delete another admin", DialogType.ERROR)
                         dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
                     }

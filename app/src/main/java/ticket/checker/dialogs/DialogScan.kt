@@ -14,12 +14,12 @@ import android.widget.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ticket.checker.AppTicketChecker.Companion.pretendedUserType
+import ticket.checker.AppTicketChecker.Companion.pretendedOrganizationRole
 import ticket.checker.R
 import ticket.checker.beans.Ticket
 import ticket.checker.extras.BirthDateFormatException
 import ticket.checker.extras.BirthDateIncorrectException
-import ticket.checker.extras.UserType
+import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.extras.Util.ERROR_TICKET_EXISTS
@@ -195,8 +195,8 @@ class DialogScan : DialogFragment(), View.OnClickListener {
             tvOwnerBirthDate?.text = if (ticket.soldToBirthdate == null) "~not specified~" else DATE_FORMAT.format(ticket.soldToBirthdate)
             tvOwnerTelephone?.text = if (ticket.telephone == null) "~not specified~" else ticket.telephone
 
-            when(pretendedUserType) {
-                UserType.ADMIN -> {
+            when(pretendedOrganizationRole) {
+                OrganizationRole.ADMIN -> {
                     viewDeleteTicket?.visibility = View.VISIBLE
                     viewValidateTicket?.visibility = View.VISIBLE
                     if(ticket.validatedAt != null) {
@@ -211,7 +211,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                         isTicketValidated = false
                     }
                 }
-                UserType.PUBLISHER -> {
+                OrganizationRole.PUBLISHER -> {
                     viewDeleteTicket?.visibility = View.GONE
                     viewValidateTicket?.visibility = View.GONE
                     if(ticket.validatedAt != null) {
@@ -221,7 +221,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                         errorResult("This ticket hasn't been validated!")
                     }
                 }
-                UserType.VALIDATOR -> {
+                OrganizationRole.VALIDATOR -> {
                     viewDeleteTicket?.visibility = View.GONE
                     viewValidateTicket?.visibility = View.VISIBLE
                     if(ticket.validatedAt != null) {
@@ -236,7 +236,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                         isTicketValidated = false
                     }
                 }
-                UserType.USER -> {
+                OrganizationRole.USER -> {
                     viewDeleteTicket?.visibility = View.GONE
                     viewValidateTicket?.visibility = View.GONE
                     if(ticket.validatedAt != null) {
@@ -255,18 +255,18 @@ class DialogScan : DialogFragment(), View.OnClickListener {
             viewValidateTicket?.visibility = View.GONE
             viewDeleteTicket?.visibility = View.GONE
 
-            when(pretendedUserType) {
-                UserType.ADMIN -> {
+            when(pretendedOrganizationRole) {
+                OrganizationRole.ADMIN -> {
                     viewSellTicket?.visibility = View.VISIBLE
                 }
-                UserType.PUBLISHER -> {
+                OrganizationRole.PUBLISHER -> {
                     viewSellTicket?.visibility = View.VISIBLE
                 }
-                UserType.VALIDATOR -> {
+                OrganizationRole.VALIDATOR -> {
                     viewSellTicket?.visibility = View.GONE
                     errorResult("A ticket with this id was not found!")
                 }
-                UserType.USER -> {
+                OrganizationRole.USER -> {
                     viewSellTicket?.visibility = View.GONE
                     errorResult("A ticket with this id was not found!")
                 }

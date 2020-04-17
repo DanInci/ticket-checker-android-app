@@ -3,7 +3,7 @@ package ticket.checker
 import android.app.Application
 import android.preference.PreferenceManager
 
-import ticket.checker.extras.UserType
+import ticket.checker.extras.OrganizationRole
 import ticket.checker.services.ServiceManager
 import java.util.*
 
@@ -29,12 +29,12 @@ class AppTicketChecker : Application() {
 
         var loggedInUserId: Long? = null
         var loggedInUserName: String? = null
-        var loggedInUserType: UserType = UserType.USER
+        var loggedInOrganizationRole: OrganizationRole = OrganizationRole.USER
         var loggedInUserCreatedDate: Date? = null
         var loggedInUserSoldTicketsNo: Int? = null
         var loggedInUserValidatedTicketsNo: Int? = null
 
-        var pretendedUserType: UserType = UserType.USER
+        var pretendedOrganizationRole: OrganizationRole = OrganizationRole.USER
 
         fun clearSession() {
             ServiceManager.invalidateSession()
@@ -42,11 +42,11 @@ class AppTicketChecker : Application() {
             isLoggedIn = false
             loggedInUserId = null
             loggedInUserName = null
-            loggedInUserType = UserType.USER
+            loggedInOrganizationRole = OrganizationRole.USER
             loggedInUserCreatedDate = null
             loggedInUserSoldTicketsNo = null
             loggedInUserValidatedTicketsNo = null
-            pretendedUserType = UserType.USER
+            pretendedOrganizationRole = OrganizationRole.USER
         }
 
         fun saveConnectionConfig(appName: String, address: String, port: String) {
@@ -71,7 +71,7 @@ class AppTicketChecker : Application() {
             val username = pref.getString(SAVED_USERNAME, NOT_FOUND)
             val password = pref.getString(SAVED_PASSWORD, NOT_FOUND)
             if (username != NOT_FOUND && password != NOT_FOUND) {
-                ServiceManager.createSession(username!!, password!!, false)
+                ServiceManager.createSession(username!!, password!!)
                 isLoggedIn = true
             }
         }

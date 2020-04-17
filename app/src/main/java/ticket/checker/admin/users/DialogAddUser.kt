@@ -16,7 +16,7 @@ import retrofit2.Response
 import ticket.checker.R
 import ticket.checker.admin.listeners.ListChangeListener
 import ticket.checker.beans.User
-import ticket.checker.extras.UserType
+import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.hashString
 import ticket.checker.services.ServiceManager
@@ -86,14 +86,14 @@ class DialogAddUser : DialogFragment(), View.OnClickListener {
             }
             R.id.btnSubmit -> {
                 if(validate()) {
-                    submitUser(etUsername?.text.toString(), etPassword?.text.toString(), etName?.text.toString(), spinnerRole?.selectedItem as UserType)
+                    submitUser(etUsername?.text.toString(), etPassword?.text.toString(), etName?.text.toString(), spinnerRole?.selectedItem as OrganizationRole)
                 }
             }
         }
     }
 
     private fun setupLoadingSpinner() {
-        val adapter = ArrayAdapter<UserType>(context!!, R.layout.spinner_item, UserType.values())
+        val adapter = ArrayAdapter<OrganizationRole>(context!!, R.layout.spinner_item, OrganizationRole.values())
         spinnerRole?.adapter = adapter
     }
 
@@ -145,13 +145,13 @@ class DialogAddUser : DialogFragment(), View.OnClickListener {
         return isValid
     }
 
-    private fun submitUser(username : String, password : String, name : String, userType : UserType) {
+    private fun submitUser(username : String, password : String, name : String, organizationRole : OrganizationRole) {
         tvResult?.visibility = View.INVISIBLE
         submitButton?.visibility = View.GONE
         loadingSpinner?.visibility = View.VISIBLE
 
         val encryptedPassword = hashString("SHA-256", password)
-        val user = User(username, encryptedPassword, name , userType)
+        val user = User(username, encryptedPassword, name , organizationRole)
         val call = ServiceManager.getUserService().createUser(user)
         call.enqueue(submitCallback)
     }

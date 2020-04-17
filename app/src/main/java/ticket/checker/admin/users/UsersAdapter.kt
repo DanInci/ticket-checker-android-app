@@ -15,7 +15,7 @@ import ticket.checker.ActivityControlPanel.Companion.FILTER_ROLE
 import ticket.checker.R
 import ticket.checker.admin.AItemsAdapter
 import ticket.checker.beans.User
-import ticket.checker.extras.UserType
+import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util.CURRENT_USER
 import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.extras.Util.POSITION
@@ -104,9 +104,9 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
             tvName.text = name
         }
 
-        private fun setUserType(userType : UserType) {
+        private fun setUserType(userType : OrganizationRole) {
             tvRole.text = userType.name
-            if(userType == UserType.USER) {
+            if(userType == OrganizationRole.USER) {
                 tvRole.visibility = View.GONE
             }
             else {
@@ -114,7 +114,7 @@ class UsersAdapter(val context : Context) : AItemsAdapter<User, Int>(context) {
                 tvRole.setTextColor(ContextCompat.getColor(itemView.context, userType.colorResource))
             }
 
-            if(userType ==  UserType.ADMIN) {
+            if(userType ==  OrganizationRole.ADMIN) {
                 icPerson.background = ContextCompat.getDrawable(itemView.context, R.drawable.ic_admin)
             }
             else {
