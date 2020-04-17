@@ -4,8 +4,8 @@ import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.content.ContextCompat
+import androidx.fragment.app.DialogFragment
+import androidx.core.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -103,7 +103,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         return view
     }
 
-    override fun onDismiss(dialog: DialogInterface?) {
+    override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
         scanDialogListener?.dismiss()
     }
@@ -310,7 +310,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
     }
 
     private fun <T> onErrorResponse(call: Call<T>, response: Response<T>?) {
-        val wasHandled = Util.treatBasicError(call, response, fragmentManager)
+        val wasHandled = Util.treatBasicError(call, response, fragmentManager!!)
         if (!wasHandled) {
             when (response?.code()) {
                 400 -> {

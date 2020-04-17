@@ -1,6 +1,6 @@
 package ticket.checker.extras
 
-import android.support.v4.app.FragmentManager
+import androidx.fragment.app.FragmentManager
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
@@ -102,7 +102,7 @@ object Util {
 
     fun convertError(errorBody : ResponseBody?) : ErrorResponse {
         return try {
-            ServiceManager.errorConverter!!.convert(errorBody)
+            ServiceManager.errorConverter?.convert(errorBody!!)!!
             }
         catch (e : Exception) {
             ErrorResponse(Date(),"","")
@@ -125,7 +125,7 @@ object Util {
         return result.toString()
     }
 
-    fun <T> treatBasicError(call : Call<T>, response : Response<T>?, fragmentManager : FragmentManager?) : Boolean {
+    fun <T> treatBasicError(call : Call<T>, response : Response<T>?, fragmentManager : FragmentManager) : Boolean {
         var hasResponded = false
         if(response == null) {
             val dialogConnectionError = DialogInfo.newInstance("Connection error", "There was an error connecting to the server", DialogType.ERROR)

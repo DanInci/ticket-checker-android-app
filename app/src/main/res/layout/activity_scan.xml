@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@drawable/barcode_toolbar_style"
@@ -31,7 +31,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 app:srcCompat="@drawable/ic_navigate_before" />
-        </android.support.v7.widget.Toolbar>
+        </androidx.appcompat.widget.Toolbar>
 
         <TextView
             android:id="@+id/toolbarTitle"

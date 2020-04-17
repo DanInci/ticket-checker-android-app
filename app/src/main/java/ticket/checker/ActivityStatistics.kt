@@ -1,11 +1,11 @@
 package ticket.checker
 
 import android.content.res.Configuration
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.appcompat.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.formatter.IValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.utils.ViewPortHandler
 
 
@@ -253,7 +254,7 @@ class ActivityStatistics : AppCompatActivity() {
                 .forEach { it.isChecked = it.itemId == menuItemId }
     }
 
-    private class CustomXAxisFormat(private val dates : List<Date>, private val type : String) : IAxisValueFormatter {
+    private class CustomXAxisFormat(private val dates : List<Date>, private val type : String) : ValueFormatter() {
         override fun getFormattedValue(value: Float, axis: AxisBase): String {
             val intFormat = value.toInt()
              when(type) {
@@ -285,7 +286,7 @@ class ActivityStatistics : AppCompatActivity() {
 
         }
     }
-    private class CustomValueFormatter : IValueFormatter {
+    private class CustomValueFormatter : ValueFormatter() {
         override fun getFormattedValue(value: Float, entry: Entry?, dataSetIndex: Int, viewPortHandler: ViewPortHandler?): String {
             return value.toInt().toString()
         }

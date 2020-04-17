@@ -6,8 +6,8 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.content.ContextCompat
+import androidx.fragment.app.DialogFragment
+import androidx.core.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -86,7 +86,7 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
                 dismiss()
             }
             R.id.btnToLogin -> {
-                val i = context?.packageManager?.getLaunchIntentForPackage(context?.packageName)
+                val i = context?.packageManager?.getLaunchIntentForPackage(context!!.packageName)
                 i?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 startActivity(i)
             }
@@ -101,7 +101,7 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
         }
     }
 
-    override fun onDismiss(dialog: DialogInterface?) {
+    override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
         dialogExitListener?.onItemRemoved()
     }
@@ -118,16 +118,16 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
     private fun switchViews() {
         when(dialogType) {
             DialogType.LOADING -> {
-                dialog.setCancelable(false)
-                dialog.setCanceledOnTouchOutside(false)
+                dialog?.setCancelable(false)
+                dialog?.setCanceledOnTouchOutside(false)
                 btnClose?.visibility = View.GONE
                 yesNoButtons?.visibility = View.GONE
                 btnToLogin?.visibility = View.GONE
                 ivDialogIcon?.visibility = View.GONE
             }
             DialogType.SUCCESS -> {
-                dialog.setCancelable(true)
-                dialog.setCanceledOnTouchOutside(true)
+                dialog?.setCancelable(true)
+                dialog?.setCanceledOnTouchOutside(true)
                 loadingSpinner?.visibility = View.GONE
                 yesNoButtons?.visibility = View.GONE
                 btnToLogin?.visibility = View.GONE
@@ -141,8 +141,8 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
                 }
             }
             DialogType.ERROR -> {
-                dialog.setCancelable(true)
-                dialog.setCanceledOnTouchOutside(true)
+                dialog?.setCancelable(true)
+                dialog?.setCanceledOnTouchOutside(true)
                 loadingSpinner?.visibility = View.GONE
                 yesNoButtons?.visibility = View.GONE
                 btnToLogin?.visibility = View.GONE
@@ -150,8 +150,8 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
                 tvDesc?.setTextColor(ContextCompat.getColor(context!!, R.color.materialYellow))
             }
             DialogType.AUTH_ERROR -> {
-                dialog.setCancelable(false)
-                dialog.setCanceledOnTouchOutside(false)
+                dialog?.setCancelable(false)
+                dialog?.setCanceledOnTouchOutside(false)
                 btnClose?.visibility = View.GONE
                 loadingSpinner?.visibility = View.GONE
                 yesNoButtons?.visibility = View.GONE
@@ -165,8 +165,8 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
                 }
             }
             DialogType.YES_NO -> {
-                dialog.setCancelable(true)
-                dialog.setCanceledOnTouchOutside(true)
+                dialog?.setCancelable(true)
+                dialog?.setCanceledOnTouchOutside(true)
                 loadingSpinner?.visibility = View.GONE
                 btnToLogin?.visibility = View.GONE
                 tvDesc?.textAlignment = View.TEXT_ALIGNMENT_CENTER

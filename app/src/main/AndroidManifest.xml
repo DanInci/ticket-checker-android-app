@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="ticket.checker">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -38,7 +39,8 @@
             android:name=".ActivityScan"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan"/>
+            android:windowSoftInputMode="adjustPan"
+            tools:ignore="LockedOrientationActivity" />
         <activity android:name=".ActivityControlPanel"
             android:windowSoftInputMode="adjustPan"/>
         <activity android:name=".admin.tickets.ActivityTicketDetails"/>

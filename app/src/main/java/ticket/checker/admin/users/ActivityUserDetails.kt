@@ -2,9 +2,9 @@ package ticket.checker.admin.users
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
@@ -147,9 +147,9 @@ class ActivityUserDetails : AppCompatActivity(), View.OnClickListener, DialogExi
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState?.putSerializable(CURRENT_USER, currentUser)
+        outState.putSerializable(CURRENT_USER, currentUser)
     }
 
     override fun onClick(v: View) {

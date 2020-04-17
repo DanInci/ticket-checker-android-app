@@ -3,8 +3,8 @@ package ticket.checker.admin.users
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.content.ContextCompat
+import androidx.fragment.app.DialogFragment
+import androidx.core.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -93,7 +93,7 @@ class DialogAddUser : DialogFragment(), View.OnClickListener {
     }
 
     private fun setupLoadingSpinner() {
-        val adapter = ArrayAdapter<UserType>(context, R.layout.spinner_item, UserType.values())
+        val adapter = ArrayAdapter<UserType>(context!!, R.layout.spinner_item, UserType.values())
         spinnerRole?.adapter = adapter
     }
 
@@ -157,7 +157,7 @@ class DialogAddUser : DialogFragment(), View.OnClickListener {
     }
 
     private fun onErrorResponse(call : Call<User>, response : Response<User>?) {
-        val wasHandled = Util.treatBasicError(call, response, fragmentManager)
+        val wasHandled = Util.treatBasicError(call, response, fragmentManager!!)
         if(!wasHandled){
             if(response?.code() == 400) {
                 etUsername?.error = "This username already exists!"

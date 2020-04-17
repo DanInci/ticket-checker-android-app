@@ -2,9 +2,9 @@ package ticket.checker
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.BottomNavigationView
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -295,12 +295,12 @@ class ActivityControlPanel : AppCompatActivity() {
         }
         when(fragmentId) {
             R.id.navigation_users -> {
-                fragmentTransaction.replace(R.id.fragmentHolder, usersFragment).commit()
+                fragmentTransaction.replace(R.id.fragmentHolder, usersFragment!!).commit()
                 toolbarTitle.text= "Users"
                 currentFragmentId = R.id.navigation_users
             }
             else -> { // should be the tickets fragment
-                fragmentTransaction.replace(R.id.fragmentHolder, ticketsFragment).commit()
+                fragmentTransaction.replace(R.id.fragmentHolder, ticketsFragment!!).commit()
                 toolbarTitle.text = "Tickets"
                 currentFragmentId = R.id.navigation_tickets
             }

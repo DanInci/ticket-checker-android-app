@@ -1,7 +1,7 @@
 package ticket.checker.admin.listeners
 
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * Created by Dani on 08.02.2018.

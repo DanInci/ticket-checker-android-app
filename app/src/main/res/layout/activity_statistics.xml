@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <android.support.v7.widget.Toolbar
+            <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
@@ -32,7 +32,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     app:srcCompat="@drawable/ic_navigate_before" />
-            </android.support.v7.widget.Toolbar>
+            </androidx.appcompat.widget.Toolbar>
 
             <TextView
                 android:id="@+id/toolbarTitle"
@@ -47,7 +47,7 @@
 
         </FrameLayout>
 
-        <android.support.v4.widget.SwipeRefreshLayout
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/refreshLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -67,7 +67,7 @@
                     android:orientation="horizontal"
                     android:weightSum="100">
 
-                    <android.support.v7.widget.CardView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
                         android:layout_height="220dp"
                         android:layout_weight="90"
@@ -89,7 +89,7 @@
                             android:visibility="invisible">
 
                         </com.github.mikephil.charting.charts.BarChart>
-                    </android.support.v7.widget.CardView>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
                 <LinearLayout
@@ -101,7 +101,7 @@
                     android:orientation="horizontal"
                     android:weightSum="100">
 
-                    <android.support.v7.widget.CardView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
                         android:layout_height="220dp"
                         android:layout_marginBottom="30dp"
@@ -124,9 +124,9 @@
                             android:visibility="invisible">
 
                         </com.github.mikephil.charting.charts.BarChart>
-                    </android.support.v7.widget.CardView>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
             </LinearLayout>
-        </android.support.v4.widget.SwipeRefreshLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </LinearLayout>
 </ScrollView>

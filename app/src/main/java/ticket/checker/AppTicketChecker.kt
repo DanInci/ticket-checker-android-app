@@ -84,7 +84,7 @@ class AppTicketChecker : Application() {
             val username = pref.getString(SAVED_USERNAME, NOT_FOUND)
             val password = pref.getString(SAVED_PASSWORD, NOT_FOUND)
             if (username != NOT_FOUND && password != NOT_FOUND) {
-                ServiceManager.createSession(username, password, false)
+                ServiceManager.createSession(username!!, password!!, false)
                 isLoggedIn = true
             }
         }
@@ -95,9 +95,9 @@ class AppTicketChecker : Application() {
             val address = pref.getString(SAVED_ADDRESS, NOT_FOUND)
             val port = pref.getString(SAVED_PORT, NOT_FOUND)
             if (appName != NOT_FOUND && address != NOT_FOUND && port != NOT_FOUND) {
-                this.address = address
-                this.port = port
-                this.appName = appName
+                this.address = address!!
+                this.port = port!!
+                this.appName = appName!!
             }
         }
 
