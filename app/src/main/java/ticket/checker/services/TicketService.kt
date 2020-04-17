@@ -18,18 +18,18 @@ interface TicketService {
     fun getTicketsForOrganization(@Path("organizationId") id: UUID, @Query("page") pageNumber: Int?, @Query("pageSize") pageSize: Int?, @Query("category") ticketCategory: TicketCategory?, @Query("userId") userId: UUID?, @Query("search") searchValue: String?): Call<List<TicketList>>
 
     @GET("/organizations/{organizationId}/tickets/{ticketId}")
-    fun getTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: UUID): Call<Ticket>
+    fun getTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: String): Call<Ticket>
 
     @PUT("/organizations/{organizationId}/tickets/{ticketId}")
-    fun updateTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: UUID, @Body definition: TicketUpdateDefinition): Call<Ticket>
+    fun updateTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: String, @Body definition: TicketUpdateDefinition): Call<Ticket>
 
     @POST("/organizations/{organizationId}/tickets/{ticketId}/validate")
-    fun validateTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: UUID): Call<Ticket>
+    fun validateTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: String): Call<Ticket>
 
     @POST("/organizations/{organizationId}/tickets/{ticketId}/invalidate")
-    fun invalidateTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: UUID): Call<Ticket>
+    fun invalidateTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: String): Call<Ticket>
 
     @DELETE("/organizations/{organizationId}/tickets/{ticketId}")
-    fun deleteTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: UUID): Call<Void>
+    fun deleteTicketById(@Path("organizationId") id: UUID, @Path("ticketId") ticketId: String): Call<Void>
 
 }

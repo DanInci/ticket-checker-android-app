@@ -10,15 +10,8 @@ import com.bumptech.glide.request.RequestOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ticket.checker.AppTicketChecker.Companion.isLoggedIn
-import ticket.checker.AppTicketChecker.Companion.loggedInUserCreatedDate
-import ticket.checker.AppTicketChecker.Companion.loggedInUserId
-import ticket.checker.AppTicketChecker.Companion.loggedInUserName
-import ticket.checker.AppTicketChecker.Companion.loggedInUserSoldTicketsNo
-import ticket.checker.AppTicketChecker.Companion.loggedInOrganizationRole
-import ticket.checker.AppTicketChecker.Companion.loggedInUserValidatedTicketsNo
-import ticket.checker.AppTicketChecker.Companion.pretendedOrganizationRole
-import ticket.checker.beans.User
+import ticket.checker.beans.LoginData
+import ticket.checker.beans.LoginResponse
 import ticket.checker.dialogs.DialogConnectionConfig
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
@@ -26,37 +19,37 @@ import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
 
 class ActivityLogin : AppCompatActivity(), View.OnClickListener {
-    private var savedUser : String = ""
-    private var savedPass : String = ""
 
-    private val etUsername : EditText by lazy { findViewById<EditText>(R.id.etUsername)}
-    private val etPassword : EditText by lazy { findViewById<EditText>(R.id.etPassword)}
-    private val btnLogin : Button by lazy { findViewById<Button>(R.id.btnLogin)}
-    private val btnSettings : ImageButton by lazy { findViewById<ImageButton>(R.id.btnSettings)}
-    private val autoLoginCheckBox : CheckBox by lazy { findViewById<CheckBox>(R.id.autoLoginCheckBox)}
+    private var savedEmail : String = ""
+    private var savedPassword : String = ""
+
+    private val etEmail by lazy { findViewById<EditText>(R.id.etEmail)}
+    private val etPassword by lazy { findViewById<EditText>(R.id.etPassword)}
+    private val btnLogin by lazy { findViewById<Button>(R.id.btnLogin)}
+    private val btnSettings by lazy { findViewById<ImageButton>(R.id.btnSettings)}
+    private val autoLoginCheckBox by lazy { findViewById<CheckBox>(R.id.autoLoginCheckBox)}
 
     private val loggingInDialog : DialogInfo by lazy {
         DialogInfo.newInstance("Logging in","Retrieving user info...",DialogType.LOADING)
     }
 
-    private val loginCallback : Callback<User> = object : Callback<User> {
-        override fun onResponse(call: Call<User>, response: Response<User>) {
+    private val loginCallback : Callback<LoginResponse> = object : Callback<LoginResponse> {
+        override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
             loggingInDialog.dismiss()
             btnLogin.isClickable = true
             if(response.isSuccessful) {
                 if(autoLoginCheckBox.isChecked) {
-                    val encryptedPass = Util.hashString("SHA-256",savedPass)
-                    AppTicketChecker.saveSession(savedUser, encryptedPass)
-                    savedUser = ""
-                    savedPass = ""
+                    AppTicketChecker.saveSession(savedEmail, savedPassword)
+                    savedEmail = ""
+                    savedPassword = ""
                 }
-                login(response.body() as User)
+                loggedIn(response.body() as LoginResponse)
             }
             else {
                 ServiceManager.invalidateSession()
                 when(response.code()) {
                     401,403 -> {
-                        val loginFailedDialog = DialogInfo.newInstance("Login failed","The username or password you entered was incorrect!",DialogType.ERROR)
+                        val loginFailedDialog = DialogInfo.newInstance("Login failed","The email or password you entered was incorrect!", DialogType.ERROR)
                         loginFailedDialog.show(supportFragmentManager,"DIALOG_LOGIN_FAILED")
                     }
                     else -> {
@@ -65,7 +58,8 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
                 }
             }
         }
-        override fun onFailure(call: Call<User>, t: Throwable?) {
+
+        override fun onFailure(call: Call<LoginResponse>, t: Throwable?) {
             loggingInDialog.dismiss()
             btnLogin.isClickable = true
             Util.treatBasicError(call, null, supportFragmentManager)
@@ -75,10 +69,8 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        if(AppTicketChecker.address != "") {
-            if(AppTicketChecker.isLoggedIn) {
-                toMenuActivity()
-            }
+        if(AppTicketChecker.host.isNotEmpty() && AppTicketChecker.isLoggedIn) {
+            toMenuActivity()
         }
         loadBgnImage()
     }
@@ -91,19 +83,17 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View) {
         when(v.id) {
             R.id.btnSettings -> {
-                val connectionConfigureDialog = DialogConnectionConfig.newInstance(AppTicketChecker.address,AppTicketChecker.port)
-                connectionConfigureDialog.show(supportFragmentManager, "DIALOG_CONNECTION_CONFIGURE")
+                showConnectionConfigDialog()
             }
             R.id.btnLogin -> {
-                if(validate(etUsername,etPassword)) {
-                    if(AppTicketChecker.address != "") {
+                if(validate(etEmail, etPassword)) {
+                    if(AppTicketChecker.host.isNotEmpty()) {
                         loggingInDialog.show(supportFragmentManager, "DIALOG_LOGGING_IN")
-                        doLogin(etUsername.text.toString(), etPassword.text.toString())
+                        doLogin(etEmail.text.toString(), etPassword.text.toString())
                         btnLogin.isClickable = false
                     }
                     else {
-                        val connectionConfigureDialog = DialogConnectionConfig.newInstance(AppTicketChecker.address,AppTicketChecker.port)
-                        connectionConfigureDialog.show(supportFragmentManager, "DIALOG_CONNECTION_CONFIGURE")
+                        showConnectionConfigDialog()
                     }
                 }
             }
@@ -131,9 +121,9 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun initialize() {
-        etUsername.setText("")
-        etUsername.error = null
-        etUsername.requestFocus()
+        etEmail.setText("")
+        etEmail.error = null
+        etEmail.requestFocus()
         etPassword.setText("")
         etPassword.error = null
         btnLogin.setOnClickListener(this)
@@ -141,25 +131,20 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
         autoLoginCheckBox.isChecked = false
     }
 
-    private fun doLogin(username: String, password: String) {
-        ServiceManager.createSession(username, password, true)
+    private fun doLogin(email: String, password: String) {
         if(autoLoginCheckBox.isChecked) {
-            savedUser = username
-            savedPass = password
+            savedEmail = email
+            savedPassword = password
         }
-        val call : Call<User> = ServiceManager.getUserService().getUser()
+
+        val call : Call<LoginResponse> = ServiceManager.getAuthService().login(LoginData(email, password))
         call.enqueue(loginCallback)
     }
 
-    private fun login(user : User) {
-        loggedInUserId = user.userId
-        loggedInUserName = user.name
-        loggedInOrganizationRole = user.userType
-        loggedInUserCreatedDate = user.createdAt
-        loggedInUserSoldTicketsNo = user.soldTicketsNo
-        loggedInUserValidatedTicketsNo = user.validatedTicketsNo
-        pretendedOrganizationRole = user.userType
-        isLoggedIn = true
+    private fun loggedIn(response : LoginResponse) {
+        ServiceManager.createSession(response.token)
+        AppTicketChecker.loggedInUser = response.profile
+        AppTicketChecker.isLoggedIn = true
         toMenuActivity()
     }
 
@@ -173,23 +158,28 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString(USER_TEXT,etUsername.text.toString())
-        outState.putString(PASS_TEXT,etPassword.text.toString())
+        outState.putString(EMAIL_TEXT, etEmail.text.toString())
+        outState.putString(PASS_TEXT, etPassword.text.toString())
         outState.putBoolean(AUTO_LOGIN, autoLoginCheckBox.isChecked)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        val lastEtUser = savedInstanceState.getString(USER_TEXT)
+        val lastEtUser = savedInstanceState.getString(EMAIL_TEXT)
         val lastEtPass = savedInstanceState.getString(PASS_TEXT)
         val isChecked = savedInstanceState.getBoolean(AUTO_LOGIN, false)
-        etUsername.setText(lastEtUser)
+        etEmail.setText(lastEtUser)
         etPassword.setText(lastEtPass)
         autoLoginCheckBox.isChecked = isChecked
     }
 
+    private fun showConnectionConfigDialog() {
+        val connectionConfigureDialog = DialogConnectionConfig.newInstance(AppTicketChecker.host, AppTicketChecker.port)
+        connectionConfigureDialog.show(supportFragmentManager, "DIALOG_CONNECTION_CONFIGURE")
+    }
+
     companion object {
-        private const val USER_TEXT = "userEtText"
+        private const val EMAIL_TEXT = "emailEtText"
         private const val PASS_TEXT = "passEtText"
         private const val AUTO_LOGIN = "autoLogin"
     }

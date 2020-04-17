@@ -41,10 +41,10 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"
             tools:ignore="LockedOrientationActivity" />
-        <activity android:name=".ActivityControlPanel"
-            android:windowSoftInputMode="adjustPan"/>
-        <activity android:name=".admin.tickets.ActivityTicketDetails"/>
-        <activity android:name=".admin.users.ActivityUserDetails"/>
+<!--        <activity android:name=".ActivityControlPanel"-->
+<!--            android:windowSoftInputMode="adjustPan"/>-->
+<!--        <activity android:name=".admin.tickets.ActivityTicketDetails"/>-->
+<!--        <activity android:name=".admin.users.ActivityUserDetails"/>-->
         <activity android:name=".ActivityStatistics" />
     </application>
 

@@ -2,10 +2,10 @@ package ticket.checker.extras
 
 import java.io.Serializable
 
-enum class IntervalType : Serializable {
-    HOURLY,
-    DAILY,
-    WEEKLY;
+enum class IntervalType(val type: String) : Serializable {
+    HOURLY("Hourly"),
+    DAILY("Daily"),
+    WEEKLY("Weekly");
 
     companion object {
         fun from(interval : String) : IntervalType? = when(interval) {

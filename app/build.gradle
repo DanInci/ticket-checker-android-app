@@ -12,7 +12,7 @@ android {
     compileSdkVersion 29
     defaultConfig {
         applicationId "ticket.checker"
-        minSdkVersion 21
+        minSdkVersion 26
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -46,6 +46,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
+    implementation "androidx.security:security-crypto:1.0.0-rc01"
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'com.squareup.retrofit2:retrofit:2.8.1'

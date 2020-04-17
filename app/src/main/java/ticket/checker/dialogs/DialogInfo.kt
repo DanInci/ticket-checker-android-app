@@ -4,7 +4,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.core.content.ContextCompat
@@ -106,15 +105,6 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
         dialogExitListener?.onItemRemoved()
     }
 
-//    fun showHeader(showHeader : Boolean) {
-//        if(showHeader) {
-//            header?.visibility = View.VISIBLE
-//        }
-//        else {
-//            header?.visibility = View.GONE
-//        }
-//    }
-
     private fun switchViews() {
         when(dialogType) {
             DialogType.LOADING -> {
@@ -133,12 +123,7 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
                 btnToLogin?.visibility = View.GONE
                 tvDesc?.textAlignment = View.TEXT_ALIGNMENT_CENTER
                 tvDesc?.setTextColor(ContextCompat.getColor(context!!,R.color.textBlack))
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_check_green, context?.theme))
-                }
-                else {
-                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_check_green, context?.theme))
-                }
+                ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_check_green, context?.theme))
             }
             DialogType.ERROR -> {
                 dialog?.setCancelable(true)
@@ -157,12 +142,7 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
                 yesNoButtons?.visibility = View.GONE
                 tvDesc?.textAlignment = View.TEXT_ALIGNMENT_CENTER
                 tvDesc?.setTextColor(ContextCompat.getColor(context!!, R.color.materialYellow))
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_no_persons, context?.theme))
-                }
-                else {
-                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_no_persons, context?.theme))
-                }
+                ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_no_persons, context?.theme))
             }
             DialogType.YES_NO -> {
                 dialog?.setCancelable(true)
@@ -170,12 +150,7 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
                 loadingSpinner?.visibility = View.GONE
                 btnToLogin?.visibility = View.GONE
                 tvDesc?.textAlignment = View.TEXT_ALIGNMENT_CENTER
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_question_mark, context?.theme))
-                }
-                else {
-                    ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_question_mark, context?.theme))
-                }
+                ivDialogIcon?.setImageDrawable(resources.getDrawable(R.drawable.ic_question_mark, context?.theme))
             }
         }
     }

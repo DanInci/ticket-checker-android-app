@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.hardware.Camera
 import android.os.Bundle
 import android.os.Vibrator
-import android.preference.PreferenceManager
 import androidx.core.app.ActivityCompat
 import androidx.appcompat.app.AppCompatActivity
 import android.util.DisplayMetrics
@@ -69,7 +68,7 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener, BarcodeTypeChang
                 val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                 vibrator.vibrate(300)
                 val code = qrCodes.get(qrCodes.keyAt(0))
-                val dialogScan = DialogScan.newInstance(code.rawValue)
+                val dialogScan = DialogScan.newInstance(code.rawValue, AppTicketChecker.selectedOrganization!!.id, AppTicketChecker.selectedOrganization!!.pretendedRole)
                 dialogScan.scanDialogListener = scanDialogListener
                 dialogScan.show(supportFragmentManager, "DIALOG_SCAN")
             }
@@ -193,14 +192,12 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener, BarcodeTypeChang
     }
 
     private fun getSavedBarcodeType() : BarcodeType {
-        val pref = PreferenceManager.getDefaultSharedPreferences(AppTicketChecker.appContext)
-        val barcodeTypeId = pref.getInt(CURRENT_BARCODE_TYPE, BarcodeType.ALL_FORMATS.id)
+        val barcodeTypeId = AppTicketChecker.sharedPreferences.getInt(CURRENT_BARCODE_TYPE, BarcodeType.ALL_FORMATS.id)
         return BarcodeType.fromIdToBarcodeType(barcodeTypeId)
     }
 
     private fun saveBarcodeType(barcodeType : BarcodeType) {
-        val pref = PreferenceManager.getDefaultSharedPreferences(AppTicketChecker.appContext)
-        val editor = pref.edit()
+        val editor = AppTicketChecker.sharedPreferences.edit()
         editor.putInt(CURRENT_BARCODE_TYPE, barcodeType.id)
         editor.apply()
     }

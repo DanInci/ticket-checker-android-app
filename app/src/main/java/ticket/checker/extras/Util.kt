@@ -9,17 +9,18 @@ import ticket.checker.beans.ErrorResponse
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
 import ticket.checker.services.ServiceManager
-import java.security.MessageDigest
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 /**
  * Created by Dani on 25.01.2018.
  */
 object Util {
-    val DATE_FORMAT = SimpleDateFormat("dd MMM yyyy")
-    val DATE_FORMAT_FORM = SimpleDateFormat("dd.MM.yyyy")
-    val DATE_FORMAT_WITH_HOUR = SimpleDateFormat("dd MMM yyyy HH:mm")
+    val DATE_FORMAT_MONTH_NAME: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
+    val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    val DATE_TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm")
 
     const val ERROR_TICKET_VALIDATION = "TicketValidationException"
     const val ERROR_TICKET_EXISTS = "TicketExistsException"
@@ -29,26 +30,25 @@ object Util {
     const val CURRENT_TICKET = "currentTicket"
     const val POSITION = "adapterPosition"
 
-    fun formatDate(date : Date, shortFormat : Boolean) : String {
-        val then = date.time
-        val now = Date().time
-        val diff = now - then
+    fun formatDate(then : OffsetDateTime, shortFormat : Boolean) : String {
+        val now = LocalDateTime.now()
+        val diff = Duration.between(now, then).seconds
 
         return when(diff) {
-            in 0..59999 -> {
+            in 0..59 -> {
                 if(shortFormat) "few seconds ago"  else "Validated a few seconds ago"
             }
-            in 60000..3599999 -> {
-                if(shortFormat) "${diff/60000} minutes ago"  else "Validated ${diff/60000} minutes ago"
+            in 60..3599 -> {
+                if(shortFormat) "${diff/60} minutes ago"  else "Validated ${diff/60} minutes ago"
             }
-            in 3600000..86399999 -> {
-                if(shortFormat) "${diff/3600000} hours ago"  else "Validated ${diff/3600000} hours ago"
+            in 3600..86399 -> {
+                if(shortFormat) "${diff/3600} hours ago"  else "Validated ${diff/3600} hours ago"
             }
-            in 86400000..604799999 -> {
-                if(shortFormat) "${diff/86400000} days ago"  else "Validated ${diff/86400000} days ago"
+            in 86400..604799 -> {
+                if(shortFormat) "${diff/86400} days ago"  else "Validated ${diff/86400} days ago"
             }
             else -> {
-                if(shortFormat) DATE_FORMAT.format(date)  else "Validated at " + DATE_FORMAT.format(date)
+                if(shortFormat) DATE_FORMAT_MONTH_NAME.format(then)  else "Validated at " + DATE_FORMAT_MONTH_NAME.format(then)
             }
         }
     }
@@ -63,43 +63,6 @@ object Util {
         return isValid
     }
 
-    fun getBirthdateFromText(birthString : String) : Date {
-        try {
-            val splitBirthString = birthString.split(".")
-            var validFormat = true
-            if (splitBirthString[0].toInt() !in 1..31) {
-                validFormat = false
-            }
-            if (splitBirthString[1].toInt() !in 1..12) {
-                validFormat = false
-            }
-            if (splitBirthString[2].toInt() !in 1000..2100) {
-                validFormat = false
-            }
-
-            if (!validFormat) {
-                throw throw BirthDateFormatException()
-            }
-
-            val calendar = Calendar.getInstance()
-            calendar.set(Calendar.DAY_OF_MONTH, splitBirthString[0].toInt())
-            calendar.set(Calendar.MONTH, splitBirthString[1].toInt() - 1)
-            calendar.set(Calendar.YEAR, splitBirthString[2].toInt())
-            calendar.set(Calendar.HOUR,0)
-            calendar.set(Calendar.MINUTE,0)
-            calendar.set(Calendar.SECOND,0)
-            calendar.set(Calendar.HOUR_OF_DAY,0)
-            if (calendar.after(Date())) {
-                throw BirthDateIncorrectException()
-            } else {
-                return calendar.time
-            }
-        }
-        catch (e : RuntimeException) {
-            throw BirthDateFormatException()
-        }
-    }
-
     fun convertError(errorBody : ResponseBody?) : ErrorResponse {
         return try {
             ServiceManager.errorConverter?.convert(errorBody!!)!!
@@ -107,22 +70,6 @@ object Util {
         catch (e : Exception) {
             ErrorResponse("","")
         }
-    }
-
-    fun hashString(type: String, input: String): String {
-        val HEX_CHARS = "0123456789ABCDEF"
-        val bytes = MessageDigest
-                .getInstance(type)
-                .digest(input.toByteArray())
-        val result = StringBuilder(bytes.size * 2)
-
-        bytes.forEach {
-            val i = it.toInt()
-            result.append(HEX_CHARS[i shr 4 and 0x0f])
-            result.append(HEX_CHARS[i and 0x0f])
-        }
-
-        return result.toString()
     }
 
     fun <T> treatBasicError(call : Call<T>, response : Response<T>?, fragmentManager : FragmentManager) : Boolean {
@@ -147,7 +94,7 @@ object Util {
                     hasResponded = true
                 }
                 500 -> {
-                    val dialogServerError = DialogInfo.newInstance("Server error", "Ooups, there was a server error", DialogType.ERROR)
+                    val dialogServerError = DialogInfo.newInstance("Server error", "Oops, there was a server error", DialogType.ERROR)
                     dialogServerError.show(fragmentManager, "DIALOG_SERVER_ERROR")
                     hasResponded = true
                 }
@@ -156,5 +103,3 @@ object Util {
         return hasResponded
     }
 }
-class BirthDateFormatException : Exception()
-class BirthDateIncorrectException : Exception()

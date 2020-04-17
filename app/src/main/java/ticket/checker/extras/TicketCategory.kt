@@ -3,9 +3,9 @@ package ticket.checker.extras
 import java.io.Serializable
 
 
-enum class TicketCategory : Serializable {
-    SOLD,
-    VALIDATED;
+enum class TicketCategory(val category: String) : Serializable {
+    SOLD("Sold"),
+    VALIDATED("Validated");
 
     companion object {
         fun from(category : String) : TicketCategory? = when(category) {

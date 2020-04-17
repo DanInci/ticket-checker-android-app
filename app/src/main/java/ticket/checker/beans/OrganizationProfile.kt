@@ -8,7 +8,9 @@ import java.util.*
 
 data class OrganizationDefinition(val name: String): Serializable
 data class OrganizationList(val id: UUID, val name: String, val createdAt: OffsetDateTime): Serializable
-data class Organization(val id: UUID, val name: String, val createdAt: OffsetDateTime): Serializable
+data class OrganizationProfile(val id: UUID, val name: String, val createdAt: OffsetDateTime): Serializable
+
+data class OrganizationMembership(val id: UUID, val name: String, val role: OrganizationRole, val pretendedRole: OrganizationRole, val joinedAt: OffsetDateTime)
 
 data class OrganizationInviteDefinition(val email: String): Serializable
 data class OrganizationInviteList(val id: UUID, val status: InviteStatus, val invitedAt: OffsetDateTime): Serializable

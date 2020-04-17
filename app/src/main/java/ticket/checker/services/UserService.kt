@@ -8,12 +8,6 @@ import java.util.*
 
 interface UserService {
 
-    @POST("/login")
-    fun login(data: LoginData): Call<LoginResponse>
-
-    @POST("/register")
-    fun register(data: RegistrationData): Call<Void>
-
     @GET("/users/{userId}")
     fun getUserById(@Path("userId") id: UUID): Call<UserProfile>
 

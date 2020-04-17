@@ -18,38 +18,38 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.formatter.IAxisValueFormatter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ticket.checker.beans.Statistic
 import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
-import java.text.SimpleDateFormat
-import java.util.*
 import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.formatter.IValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.utils.ViewPortHandler
+import ticket.checker.beans.TicketsStatistic
+import ticket.checker.extras.IntervalType
+import ticket.checker.extras.TicketCategory
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 
 class ActivityStatistics : AppCompatActivity() {
 
-    private val refreshLayout : SwipeRefreshLayout by lazy {
+    private var currentMenuItemId = -1
+    private var currentInterval = IntervalType.HOURLY
+
+    private val refreshLayout by lazy {
         findViewById<SwipeRefreshLayout>(R.id.refreshLayout)
     }
-    private val btnBack : ImageView by lazy {
+    private val btnBack by lazy {
         findViewById<ImageView>(R.id.btnBack)
     }
-    private val toolbar: Toolbar by lazy {
+    private val toolbar by lazy {
         findViewById<Toolbar>(R.id.toolbar)
     }
-    private val toolbarTitle: TextView by lazy {
+    private val toolbarTitle by lazy {
         findViewById<TextView>(R.id.toolbarTitle)
     }
-    private var currentMenuItemId = -1
-    private var currentInterval = INTERVAL_HOURLY
-
     private val lsValidated by lazy {
         findViewById<ProgressBar>(R.id.lsValidated)
     }
@@ -63,11 +63,11 @@ class ActivityStatistics : AppCompatActivity() {
         findViewById<BarChart>(R.id.soldChart)
     }
 
-    private val statisticsCallback = object : Callback<List<Statistic>> {
-        override fun onResponse(call: Call<List<Statistic>>, response: Response<List<Statistic>>) {
+    private val statisticsCallback = object : Callback<List<TicketsStatistic>> {
+        override fun onResponse(call: Call<List<TicketsStatistic>>, response: Response<List<TicketsStatistic>>) {
             if (response.isSuccessful) {
                 refreshLayout.isEnabled = true
-                updateGraph(call.request().url().queryParameter("type"), response.body() as List<Statistic>)
+                updateGraph(TicketCategory.from(call.request().url().queryParameter("category")!!)!!, response.body() as List<TicketsStatistic>)
             }
             else {
                 Util.treatBasicError(call, null, supportFragmentManager)
@@ -81,7 +81,7 @@ class ActivityStatistics : AppCompatActivity() {
                 }
             }
         }
-        override fun onFailure(call: Call<List<Statistic>>, t: Throwable?) {
+        override fun onFailure(call: Call<List<TicketsStatistic>>, t: Throwable?) {
             Util.treatBasicError(call, null, supportFragmentManager)
             if(lsValidated.visibility == View.VISIBLE) {
                 lsValidated.visibility = View.GONE
@@ -101,7 +101,7 @@ class ActivityStatistics : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         btnBack.setOnClickListener { finish() }
         currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM) ?: R.id.action_hourly
-        currentInterval = savedInstanceState?.getString(CURRENT_INTERVAL) ?: INTERVAL_HOURLY
+        currentInterval = savedInstanceState?.getSerializable(CURRENT_INTERVAL) as IntervalType
         refreshLayout.setOnRefreshListener { onRefresh() }
         refreshLayout.setColorSchemeColors(ContextCompat.getColor(applicationContext, R.color.colorPrimary))
         customizeChartStyle(validatedChart)
@@ -126,15 +126,15 @@ class ActivityStatistics : AppCompatActivity() {
             when (item.itemId) {
                 R.id.action_hourly -> {
                     currentMenuItemId = R.id.action_hourly
-                    currentInterval = INTERVAL_HOURLY
+                    currentInterval = IntervalType.HOURLY
                 }
                 R.id.action_daily -> {
                     currentMenuItemId = R.id.action_daily
-                    currentInterval = INTERVAL_DAILY
+                    currentInterval = IntervalType.DAILY
                 }
                 R.id.action_weekly -> {
                     currentMenuItemId = R.id.action_weekly
-                    currentInterval = INTERVAL_WEEKLY
+                    currentInterval = IntervalType.WEEKLY
                 }
                 else -> {
                     validSelection = false
@@ -152,7 +152,7 @@ class ActivityStatistics : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt(CURRENT_MENU_ITEM, currentMenuItemId)
-        outState.putString(CURRENT_INTERVAL, currentInterval)
+        outState.putSerializable(CURRENT_INTERVAL, currentInterval)
     }
 
     private fun onRefresh() {
@@ -168,32 +168,31 @@ class ActivityStatistics : AppCompatActivity() {
     private fun reloadData() {
         refreshLayout.isEnabled = false
         val limit : Int = if(resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) { STATS_LIMIT_LANDSCAPE } else { STATS_LIMIT_PORTRAIT }
-        val callValidated = ServiceManager.getStatisticsService().getTicketStatisticsForInterval(TYPE_VALIDATED, currentInterval, limit)
+        val callValidated = ServiceManager.getStatisticsService().getTicketsStatistics(AppTicketChecker.selectedOrganization!!.id, TicketCategory.VALIDATED, currentInterval, limit, null)
         callValidated.enqueue(statisticsCallback)
-        val callSold = ServiceManager.getStatisticsService().getTicketStatisticsForInterval(TYPE_SOLD, currentInterval, limit)
+        val callSold = ServiceManager.getStatisticsService().getTicketsStatistics(AppTicketChecker.selectedOrganization!!.id, TicketCategory.SOLD, currentInterval, limit, null)
         callSold.enqueue(statisticsCallback)
     }
 
-    private fun updateGraph(type : String?, statistics : List<Statistic>) {
+    private fun updateGraph(category: TicketCategory, statistics : List<TicketsStatistic>) {
         val entries : MutableList<BarEntry> = mutableListOf()
-        val dates : MutableList<Date> = mutableListOf()
-        val typeTitle = type?.capitalize()
+        val dates : MutableList<Pair<OffsetDateTime, OffsetDateTime>> = mutableListOf()
         for((index, stats) in statistics.withIndex()) {
-            dates.add(stats.date)
+            dates.add(Pair(stats.startDate, stats.endDate))
             entries.add(BarEntry(index.toFloat(), stats.count.toFloat()))
         }
-        val barDataSet = BarDataSet(entries,"$typeTitle Tickets")
+        val barDataSet = BarDataSet(entries,"${category.category} Tickets")
         barDataSet.color = ContextCompat.getColor(applicationContext, R.color.materialYellow)
         barDataSet.valueTextColor = ContextCompat.getColor(applicationContext, R.color.darkerGrey)
         barDataSet.valueTextSize = 12f
         barDataSet.valueFormatter = CustomValueFormatter()
         val barData = BarData(barDataSet)
-        refreshBarData(type, barData, dates)
+        refreshBarData(category, barData, dates)
     }
 
-    private fun refreshBarData(type : String?, data : BarData, dates: List<Date>) {
-        when(type) {
-            TYPE_VALIDATED -> {
+    private fun refreshBarData(category : TicketCategory, data : BarData, dates: List<Pair<OffsetDateTime, OffsetDateTime>>) {
+        when(category) {
+            TicketCategory.VALIDATED -> {
                 if(lsValidated.visibility == View.VISIBLE) {
                     lsValidated.visibility = View.GONE
                     validatedChart.visibility = View.VISIBLE
@@ -205,7 +204,7 @@ class ActivityStatistics : AppCompatActivity() {
                 validatedChart.animateY(3000)
                 validatedChart.refreshDrawableState()
             }
-            TYPE_SOLD -> {
+            TicketCategory.SOLD -> {
                 if(lsSold.visibility == View.VISIBLE) {
                     lsSold.visibility = View.GONE
                     soldChart.visibility = View.VISIBLE
@@ -243,8 +242,8 @@ class ActivityStatistics : AppCompatActivity() {
         bottom.textColor = ContextCompat.getColor(applicationContext, R.color.textBlack)
     }
 
-    private fun updateTitle(interval : String) {
-        toolbarTitle.text = "${interval.capitalize()} Statistics"
+    private fun updateTitle(interval : IntervalType) {
+        toolbarTitle.text = "${interval.type} Statistics"
     }
 
     private fun checkMenuItem(menuItemId: Int) {
@@ -254,34 +253,27 @@ class ActivityStatistics : AppCompatActivity() {
                 .forEach { it.isChecked = it.itemId == menuItemId }
     }
 
-    private class CustomXAxisFormat(private val dates : List<Date>, private val type : String) : ValueFormatter() {
+    private class CustomXAxisFormat(private val dates : List<Pair<OffsetDateTime, OffsetDateTime>>, private val type : IntervalType) : ValueFormatter() {
         override fun getFormattedValue(value: Float, axis: AxisBase): String {
             val intFormat = value.toInt()
-             when(type) {
-                INTERVAL_HOURLY -> {
-                    return HOUR_FORMAT.format(dates[intFormat])
+            return when(type) {
+                IntervalType.HOURLY -> {
+                    HOUR_FORMAT.format(dates[intFormat].first)
                 }
-                INTERVAL_DAILY -> {
-                    return DAILY_FORMAT.format(dates[intFormat])
+                IntervalType.DAILY -> {
+                    DAY_MONTH_FORMAT.format(dates[intFormat].first)
                 }
-                INTERVAL_WEEKLY -> {
-                    return formatWeek(dates[intFormat])
+                IntervalType.WEEKLY -> {
+                    formatWeek(dates[intFormat].first, dates[intFormat].second)
                 }
             }
-            return "MISSED"
         }
 
-        private fun formatWeek(startDate : Date) : String {
-            val endDate = Date(startDate.time + 518400000)
-            val calendar1 = Calendar.getInstance()
-            calendar1.time = startDate
-            val calendar2 = Calendar.getInstance()
-            calendar2.time = endDate
-            if(calendar1.get(Calendar.MONTH) == calendar2.get(Calendar.MONTH)) {
-                return SimpleDateFormat("dd").format(startDate) + " - " + DAILY_FORMAT.format(endDate)
-            }
-            else {
-                return " " + DAILY_FORMAT.format(startDate) + " - " + DAILY_FORMAT.format(endDate) + " "
+        private fun formatWeek(startDate : OffsetDateTime, endDate: OffsetDateTime) : String {
+            return if(startDate.month == endDate.month) {
+                DAY_FORMAT.format(startDate) + " - " + DAY_MONTH_FORMAT.format(endDate)
+            } else {
+                " " + DAY_MONTH_FORMAT.format(startDate) + " - " + DAY_MONTH_FORMAT.format(endDate) + " "
             }
 
         }
@@ -293,16 +285,12 @@ class ActivityStatistics : AppCompatActivity() {
     }
 
     companion object {
-        val HOUR_FORMAT = SimpleDateFormat("HH:mm")
-        val DAILY_FORMAT = SimpleDateFormat("dd MMM")
+        private val HOUR_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+        private val DAY_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd")
+        private val DAY_MONTH_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM")
 
         const val CURRENT_MENU_ITEM = "currentMenuItem"
         const val CURRENT_INTERVAL = "currentInterval"
-        const val TYPE_VALIDATED = "validated"
-        const val TYPE_SOLD = "sold"
-        const val INTERVAL_HOURLY = "hourly"
-        const val INTERVAL_DAILY = "daily"
-        const val INTERVAL_WEEKLY = "weekly"
         const val STATS_LIMIT_PORTRAIT = 5
         const val STATS_LIMIT_LANDSCAPE = 7
     }

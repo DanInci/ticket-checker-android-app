@@ -32,33 +32,31 @@ class DialogConnectionConfig : DialogFragment(), View.OnClickListener {
     private var loadingSpinner : ProgressBar? = null
     private var tvResult : TextView? = null
 
-    private var address : String = ""
+    private var host : String = ""
     private var port : String = ""
 
-    private val callback = object : Callback<String>{
-        override fun onResponse(call: Call<String>, response: Response<String>) {
+    private val callback = object : Callback<Void> {
+        override fun onResponse(call: Call<Void>, response: Response<Void>) {
             loadingSpinner?.visibility = View.GONE
             btnSubmit?.visibility = View.VISIBLE
-           tvResult?.visibility = View.VISIBLE
-           when(response.code()) {
-               202 -> {
-                   val appName = response.body() as String
-                   AppTicketChecker.saveConnectionConfig(appName, address, port)
-                   AppTicketChecker.appName = appName
-                   AppTicketChecker.address = address
-                   AppTicketChecker.port = port
-                   tvResult?.text = "Connection established successfully"
-                   tvResult?.setTextColor(ContextCompat.getColor(context!!, R.color.yesGreen))
-               }
-               else -> {
-                   etAddress?.setText("")
-                   etPort?.setText("")
-                   tvResult?.text = "Connection has failed"
-                   tvResult?.setTextColor(ContextCompat.getColor(context!!, R.color.noRed))
-               }
-           }
+            tvResult?.visibility = View.VISIBLE
+            when(response.code()) {
+                200 -> {
+                    AppTicketChecker.saveConnectionConfig(host, port)
+                    AppTicketChecker.host = host
+                    AppTicketChecker.port = port
+                    tvResult?.text = "Connection established successfully"
+                    tvResult?.setTextColor(ContextCompat.getColor(context!!, R.color.yesGreen))
+                }
+                else -> {
+                    etAddress?.setText("")
+                    etPort?.setText("")
+                    tvResult?.text = "Connection has failed"
+                    tvResult?.setTextColor(ContextCompat.getColor(context!!, R.color.noRed))
+                }
+            }
         }
-        override fun onFailure(call: Call<String>, t: Throwable?) {
+        override fun onFailure(call: Call<Void>, t: Throwable?) {
             etAddress?.setText("")
             etPort?.setText("")
             loadingSpinner?.visibility = View.GONE
@@ -71,9 +69,9 @@ class DialogConnectionConfig : DialogFragment(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (arguments != null) {
-            address = arguments?.getString(CURRENT_ADDRESS, "")!!
-            port = arguments?.getString(CURRENT_PORT, "")!!
+        arguments.let {
+            host = it!!.getString(CURRENT_HOST, "")
+            port = it.getString(CURRENT_PORT, "")!!
         }
     }
 
@@ -88,7 +86,7 @@ class DialogConnectionConfig : DialogFragment(), View.OnClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         etAddress = view.findViewById(R.id.etAddress)
-        etAddress?.setText(address)
+        etAddress?.setText(host)
         etPort = view.findViewById(R.id.etPortNumber)
         etPort?.setText(port)
         btnClose = view.findViewById(R.id.btnClose)
@@ -123,32 +121,32 @@ class DialogConnectionConfig : DialogFragment(), View.OnClickListener {
     }
 
     private fun getConnectionDetails() {
-        address = etAddress?.text.toString()
+        host = etAddress?.text.toString()
         port = etPort?.text.toString()
         val builder =  Retrofit.Builder()
-                .baseUrl("http://$address:$port/")
+                .baseUrl("http://$host:$port/")
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .client(OkHttpClient.Builder().build())
         val retrofit = builder.build()
         val connectionService = retrofit.create(ConnectionService::class.java)
-        val call : Call<String> = connectionService.getAppName()
+        val call : Call<Void> = connectionService.healthCheck()
         call.enqueue(callback)
     }
 
 
     private interface ConnectionService {
-        @GET("/")
-        fun getAppName() : Call<String>
+        @GET("/health")
+        fun healthCheck() : Call<Void>
     }
 
     companion object {
-        private const val CURRENT_ADDRESS = "currentAddress"
+        private const val CURRENT_HOST = "currentHost"
         private const val CURRENT_PORT = "currentPort"
 
-        fun newInstance(currentAddress: String, currentPort: String): DialogConnectionConfig {
+        fun newInstance(currentHost: String, currentPort: String): DialogConnectionConfig {
             val fragment = DialogConnectionConfig()
             val args = Bundle()
-            args.putString(CURRENT_ADDRESS, currentAddress)
+            args.putString(CURRENT_HOST, currentHost)
             args.putString(CURRENT_PORT, currentPort)
             fragment.arguments = args
             return fragment

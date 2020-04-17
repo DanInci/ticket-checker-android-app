@@ -12,6 +12,10 @@ import java.util.*
 
 interface StatisticsService {
 
+    @GET("/organizations/{organizationId}/tickets")
+    fun getTicketsNumbers(@Path("organizationId") id: UUID, @Query("category") ticketCategory: TicketCategory?, @Query("search") searchValue: String?): Call<Int>
+
+
     @GET("/statistics/organizations/{organizationId}/tickets")
     fun getTicketsStatistics(@Path("organizationId") id: UUID, @Query("category") ticketCategory: TicketCategory, @Query("interval") intervalType: IntervalType, @Query("size") size: Int?, @Query("until") until: LocalDateTime?): Call<List<TicketsStatistic>>
 

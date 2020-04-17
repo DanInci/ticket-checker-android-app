@@ -41,15 +41,15 @@
             android:layout_weight="50">
 
             <EditText
-                android:id="@+id/etUsername"
+                android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:background="@drawable/et_style"
-                android:drawableLeft="@drawable/ic_person_outline"
+                android:drawableStart="@drawable/ic_person_outline"
                 android:drawablePadding="15dp"
-                android:hint="USERNAME"
-                android:inputType="textVisiblePassword"
+                android:hint="EMAIL"
+                android:inputType="textEmailAddress"
                 android:maxLength="100"
                 android:maxWidth="100dp"
                 android:padding="10dp"
@@ -62,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 android:background="@drawable/et_style"
-                android:drawableLeft="@drawable/ic_lock_outline"
+                android:drawableStart="@drawable/ic_lock_outline"
                 android:drawablePadding="15dp"
                 android:hint="PASSWORD"
                 android:inputType="textPassword"

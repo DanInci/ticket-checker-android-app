@@ -17,28 +17,28 @@ object ServiceManager {
 
     private var retrofit: Retrofit? = null
 
+    private var authService: AuthService? = null
     private var userService: UserService? = null
     private var ticketService: TicketService? = null
     private var organizationService: OrganizationService? = null
     private var statisticsService: StatisticsService? = null
 
-    val errorConverter: Converter<ResponseBody, ErrorResponse>? by lazy {
-        retrofit?.responseBodyConverter(ErrorResponse::class.java, emptyArray())
-    }
-
-    fun createSession(email: String, password: String) {
-
+    val errorConverter by lazy {
+        retrofit?.responseBodyConverter<ErrorResponse>(ErrorResponse::class.java, emptyArray())
     }
 
     fun createSession(token: String) {
         val interceptor = AuthInterceptor(token)
         val httpClient = OkHttpClient.Builder().addInterceptor(interceptor).build()
-        val baseUrl = if(AppTicketChecker.port != "") "http://${AppTicketChecker.address}:${AppTicketChecker.port}" else "http://${AppTicketChecker.address}"
-        val builder = Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setDateFormat(GSON_SERIALIZER_DATE_FORMAT).create()))
-                .client(httpClient)
-        retrofit = builder.build()
+        retrofit = createRetrofitInstance(getBaseURL(), httpClient)
+        invalidateSession()
+    }
+
+    fun getAuthService(): AuthService {
+        if (authService == null) {
+            authService = getRetrofitClient().create(AuthService::class.java)
+        }
+        return authService as AuthService
     }
 
     fun getUserService(): UserService {
@@ -71,6 +71,7 @@ object ServiceManager {
 
     fun invalidateSession() {
         retrofit = null
+        authService = null
         userService = null
         ticketService = null
         organizationService = null
@@ -79,8 +80,21 @@ object ServiceManager {
 
     private fun getRetrofitClient() : Retrofit {
         if(retrofit == null) {
-            AppTicketChecker.loadSession()
+            val httpClient = OkHttpClient.Builder().build()
+            retrofit = createRetrofitInstance(getBaseURL(), httpClient)
         }
         return retrofit as Retrofit
+    }
+
+    private fun createRetrofitInstance(baseURL: String, httpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+                .baseUrl(baseURL)
+                .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setDateFormat(GSON_SERIALIZER_DATE_FORMAT).create()))
+                .client(httpClient)
+                .build()
+    }
+
+    private fun getBaseURL(): String {
+        return if(AppTicketChecker.port != "") "http://${AppTicketChecker.host}:${AppTicketChecker.port}" else "http://${AppTicketChecker.host}"
     }
 }

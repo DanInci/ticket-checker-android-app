@@ -1,7 +1,6 @@
 package ticket.checker
 
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -11,26 +10,15 @@ import androidx.appcompat.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.transition.Transition
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ticket.checker.AppTicketChecker.Companion.loggedInUserCreatedDate
-import ticket.checker.AppTicketChecker.Companion.loggedInUserId
-import ticket.checker.AppTicketChecker.Companion.loggedInUserName
-import ticket.checker.AppTicketChecker.Companion.loggedInUserSoldTicketsNo
-import ticket.checker.AppTicketChecker.Companion.loggedInOrganizationRole
-import ticket.checker.AppTicketChecker.Companion.loggedInUserValidatedTicketsNo
-import ticket.checker.AppTicketChecker.Companion.pretendedOrganizationRole
-import ticket.checker.beans.User
+import ticket.checker.beans.UserProfile
 import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util
-import ticket.checker.extras.Util.DATE_FORMAT
+import ticket.checker.extras.Util.DATE_FORMAT_MONTH_NAME
 import ticket.checker.services.ServiceManager
 
 class ActivityMenu : AppCompatActivity(), View.OnClickListener {
@@ -55,7 +43,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
             }
             if (scrollRange + verticalOffset == 0) {
                 menuIsShown = true
-                collapsingToolbar.title = AppTicketChecker.appName
+                collapsingToolbar.title = R.string.app_name.toString()
                 invalidateOptionsMenu()
             } else if (menuIsShown) {
                 menuIsShown = false
@@ -66,19 +54,14 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
             }
         }
     }
-    private val updateUserInfoCallback: Callback<User> = object : Callback<User> {
-        override fun onResponse(call: Call<User>, response: Response<User>) {
+
+    private val updateUserInfoCallback: Callback<UserProfile> = object : Callback<UserProfile> {
+        override fun onResponse(call: Call<UserProfile>, response: Response<UserProfile>) {
             if (response.isSuccessful) {
-                val user = response.body() as User
-                loggedInUserId = user.userId
-                loggedInUserName = user.name
-                loggedInUserCreatedDate = user.createdAt
-                loggedInOrganizationRole = user.userType
-                loggedInUserSoldTicketsNo = user.soldTicketsNo
-                loggedInUserValidatedTicketsNo = user.validatedTicketsNo
+                AppTicketChecker.loggedInUser = response.body() as UserProfile
 
                 if (!firstLoadHappen) {
-                    pretendedOrganizationRole = user.userType
+                    AppTicketChecker.selectedOrganization = AppTicketChecker.selectedOrganization?.copy(role = OrganizationRole.USER)
                     firstLoadHappen = true
                     switchViews()
                 }
@@ -88,10 +71,11 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
             }
         }
 
-        override fun onFailure(call: Call<User>, t: Throwable?) {
+        override fun onFailure(call: Call<UserProfile>, t: Throwable?) {
             Util.treatBasicError(call, null, supportFragmentManager)
         }
     }
+
     private val tvName by lazy {
         findViewById<TextView>(R.id.name)
     }
@@ -130,14 +114,14 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM_ID) ?: -1
 
         setContentView(R.layout.activity_menu)
-        loadCollapsingToolbarImg()
+//        loadCollapsingToolbarImg()
         setSupportActionBar(toolbar)
         appBarLayout.addOnOffsetChangedListener(appBarOffsetChangeListener)
         cvControlPanel.setOnClickListener(this)
         cvScan.setOnClickListener(this)
         cvStatistics.setOnClickListener(this)
 
-        if (loggedInUserId != null) {
+        if (AppTicketChecker.loggedInUser != null) {
             firstLoadHappen = true
             switchViews()
         }
@@ -146,29 +130,29 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     override fun onStart() {
         super.onStart()
         updateProfileInfo()
-        val call: Call<User> = ServiceManager.getUserService().getUser()
+        val call: Call<UserProfile> = ServiceManager.getUserService().getUserById(AppTicketChecker.loggedInUser!!.id)
         call.enqueue(updateUserInfoCallback)
     }
 
-    private fun loadCollapsingToolbarImg() {
-        val collapsingToolbarBackground = findViewById<ImageView>(R.id.bg_collapsingToolbar)
-        val baseUrl = if(AppTicketChecker.port != "") "http://${AppTicketChecker.address}:${AppTicketChecker.port}" else "http://${AppTicketChecker.address}"
-        Glide.with(applicationContext)
-                .asBitmap()
-                .load("$baseUrl/images/header.png")
-                .into(object : SimpleTarget<Bitmap>() {
-                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                        headerHasLoaded=true
-                        collapsingToolbar.title = " "
-                        collapsingToolbarBackground.setImageBitmap(resource)
-                        collapsingToolbarBackground.scaleType = ImageView.ScaleType.CENTER_CROP
-                    }
-                })
-    }
+//    private fun loadCollapsingToolbarImg() {
+//        val collapsingToolbarBackground = findViewById<ImageView>(R.id.bg_collapsingToolbar)
+//        val baseUrl = if(AppTicketChecker.port != "") "http://${AppTicketChecker.address}:${AppTicketChecker.port}" else "http://${AppTicketChecker.address}"
+//        Glide.with(applicationContext)
+//                .asBitmap()
+//                .load("$baseUrl/images/header.png")
+//                .into(object : SimpleTarget<Bitmap>() {
+//                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+//                        headerHasLoaded=true
+//                        collapsingToolbar.title = " "
+//                        collapsingToolbarBackground.setImageBitmap(resource)
+//                        collapsingToolbarBackground.scaleType = ImageView.ScaleType.CENTER_CROP
+//                    }
+//                })
+//    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        when (loggedInOrganizationRole) {
-            OrganizationRole.ADMIN -> menuInflater.inflate(R.menu.menu_admin, menu)
+        when (AppTicketChecker.selectedOrganization!!.role) {
+            OrganizationRole.OWNER, OrganizationRole.ADMIN -> menuInflater.inflate(R.menu.menu_admin, menu)
             OrganizationRole.PUBLISHER -> menuInflater.inflate(R.menu.menu_publisher, menu)
             OrganizationRole.VALIDATOR -> menuInflater.inflate(R.menu.menu_validator, menu)
             OrganizationRole.USER -> menuInflater.inflate(R.menu.menu_user, menu)
@@ -195,27 +179,27 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         var validSelection = true
         when (item.itemId) {
             R.id.action_admin_mode -> {
-                pretendedOrganizationRole = OrganizationRole.ADMIN
+                AppTicketChecker.selectedOrganization = AppTicketChecker.selectedOrganization?.copy(pretendedRole = OrganizationRole.ADMIN)
                 switchViews()
-                tvCurrentRole.text = pretendedOrganizationRole.name
+                tvCurrentRole.text = AppTicketChecker.selectedOrganization!!.pretendedRole.name
                 currentMenuItemId = R.id.action_admin_mode
             }
             R.id.action_publisher_mode -> {
-                pretendedOrganizationRole = OrganizationRole.PUBLISHER
+                AppTicketChecker.selectedOrganization = AppTicketChecker.selectedOrganization?.copy(pretendedRole = OrganizationRole.PUBLISHER)
                 switchViews()
-                tvCurrentRole.text = pretendedOrganizationRole.name
+                tvCurrentRole.text = AppTicketChecker.selectedOrganization!!.pretendedRole.name
                 currentMenuItemId = R.id.action_publisher_mode
             }
             R.id.action_validator_mode -> {
-                pretendedOrganizationRole = OrganizationRole.VALIDATOR
+                AppTicketChecker.selectedOrganization = AppTicketChecker.selectedOrganization?.copy(pretendedRole = OrganizationRole.VALIDATOR)
                 switchViews()
-                tvCurrentRole.text = pretendedOrganizationRole.name
+                tvCurrentRole.text = AppTicketChecker.selectedOrganization!!.pretendedRole.name
                 currentMenuItemId = R.id.action_validator_mode
             }
             R.id.action_user_mode -> {
-                pretendedOrganizationRole = OrganizationRole.USER
+                AppTicketChecker.selectedOrganization = AppTicketChecker.selectedOrganization?.copy(pretendedRole = OrganizationRole.USER)
                 switchViews()
-                tvCurrentRole.text = pretendedOrganizationRole.name
+                tvCurrentRole.text = AppTicketChecker.selectedOrganization!!.pretendedRole.name
                 currentMenuItemId = R.id.action_user_mode
             }
             R.id.action_logout -> logout()
@@ -232,8 +216,8 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View) {
         when (v.id) {
             R.id.controlPanel -> {
-                val intent = Intent(this, ActivityControlPanel::class.java)
-                startActivity(intent)
+//                val intent = Intent(this, ActivityControlPanel::class.java)
+//                startActivity(intent)
             }
             R.id.scan -> {
                 val intent = Intent(this, ActivityScan::class.java)
@@ -247,8 +231,8 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun switchViews() {
-        when (pretendedOrganizationRole) {
-            OrganizationRole.ADMIN -> {
+        when (AppTicketChecker.selectedOrganization!!.pretendedRole) {
+            OrganizationRole.OWNER, OrganizationRole.ADMIN -> {
                 cvScan.visibility = View.VISIBLE
                 cvStatistics.visibility = View.VISIBLE
                 cvControlPanel.visibility = View.VISIBLE
@@ -286,12 +270,12 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
             findViewById<ProgressBar>(R.id.lsCreatedTickets).visibility = View.GONE
             findViewById<ProgressBar>(R.id.lsValidatedTickets).visibility = View.GONE
 
-            tvName.text = loggedInUserName
-            tvCreated.text = DATE_FORMAT.format(loggedInUserCreatedDate)
-            tvHighestRole.text = loggedInOrganizationRole.name
-            tvCurrentRole.text = pretendedOrganizationRole.name
-            tvCreatedTickets.text = loggedInUserSoldTicketsNo.toString()
-            tvValidatedTickets.text = loggedInUserValidatedTicketsNo.toString()
+            tvName.text = AppTicketChecker.loggedInUser?.name
+            tvCreated.text = DATE_FORMAT_MONTH_NAME.format(AppTicketChecker.loggedInUser?.createdAt)
+            tvHighestRole.text = AppTicketChecker.selectedOrganization!!.role.role
+            tvCurrentRole.text = AppTicketChecker.selectedOrganization!!.pretendedRole.role
+            tvCreatedTickets.text = "0"
+            tvValidatedTickets.text = "0"
         }
     }
 
