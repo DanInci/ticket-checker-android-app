@@ -2,17 +2,15 @@ package ticket.checker.services
 
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
-import okhttp3.ResponseBody
-import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import ticket.checker.AppTicketChecker
 import ticket.checker.beans.ErrorResponse
 
 /**
  * Created by Dani on 24.01.2018.
  */
 object ServiceManager {
+    private const val API_BASE_URL = "http://10.0.2.2:8080/api/"
     private const val GSON_SERIALIZER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
 
     private var retrofit: Retrofit? = null
@@ -30,7 +28,7 @@ object ServiceManager {
     fun createSession(token: String) {
         val interceptor = AuthInterceptor(token)
         val httpClient = OkHttpClient.Builder().addInterceptor(interceptor).build()
-        retrofit = createRetrofitInstance(getBaseURL(), httpClient)
+        retrofit = createRetrofitInstance(httpClient)
         invalidateSession()
     }
 
@@ -81,20 +79,16 @@ object ServiceManager {
     private fun getRetrofitClient() : Retrofit {
         if(retrofit == null) {
             val httpClient = OkHttpClient.Builder().build()
-            retrofit = createRetrofitInstance(getBaseURL(), httpClient)
+            retrofit = createRetrofitInstance(httpClient)
         }
         return retrofit as Retrofit
     }
 
-    private fun createRetrofitInstance(baseURL: String, httpClient: OkHttpClient): Retrofit {
+    private fun createRetrofitInstance(httpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-                .baseUrl(baseURL)
+                .baseUrl(API_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setDateFormat(GSON_SERIALIZER_DATE_FORMAT).create()))
                 .client(httpClient)
                 .build()
-    }
-
-    private fun getBaseURL(): String {
-        return if(AppTicketChecker.port != "") "http://${AppTicketChecker.host}:${AppTicketChecker.port}" else "http://${AppTicketChecker.host}"
     }
 }

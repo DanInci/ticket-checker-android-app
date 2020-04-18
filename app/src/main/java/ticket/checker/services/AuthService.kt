@@ -6,10 +6,10 @@ import ticket.checker.beans.*
 
 interface AuthService {
 
-    @POST("/login")
-    fun login(data: LoginData): Call<LoginResponse>
+    @POST("login")
+    fun login(@Body data: LoginData): Call<LoginResponse>
 
-    @POST("/register")
-    fun register(data: RegistrationData): Call<Void>
+    @POST("register")
+    fun register(@Body data: RegistrationData): Call<Void>
 
 }

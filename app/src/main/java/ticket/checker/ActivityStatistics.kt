@@ -29,8 +29,8 @@ import com.github.mikephil.charting.utils.ViewPortHandler
 import ticket.checker.beans.TicketsStatistic
 import ticket.checker.extras.IntervalType
 import ticket.checker.extras.TicketCategory
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class ActivityStatistics : AppCompatActivity() {
@@ -176,7 +176,7 @@ class ActivityStatistics : AppCompatActivity() {
 
     private fun updateGraph(category: TicketCategory, statistics : List<TicketsStatistic>) {
         val entries : MutableList<BarEntry> = mutableListOf()
-        val dates : MutableList<Pair<OffsetDateTime, OffsetDateTime>> = mutableListOf()
+        val dates : MutableList<Pair<Date, Date>> = mutableListOf()
         for((index, stats) in statistics.withIndex()) {
             dates.add(Pair(stats.startDate, stats.endDate))
             entries.add(BarEntry(index.toFloat(), stats.count.toFloat()))
@@ -190,7 +190,7 @@ class ActivityStatistics : AppCompatActivity() {
         refreshBarData(category, barData, dates)
     }
 
-    private fun refreshBarData(category : TicketCategory, data : BarData, dates: List<Pair<OffsetDateTime, OffsetDateTime>>) {
+    private fun refreshBarData(category : TicketCategory, data : BarData, dates: List<Pair<Date, Date>>) {
         when(category) {
             TicketCategory.VALIDATED -> {
                 if(lsValidated.visibility == View.VISIBLE) {
@@ -253,7 +253,7 @@ class ActivityStatistics : AppCompatActivity() {
                 .forEach { it.isChecked = it.itemId == menuItemId }
     }
 
-    private class CustomXAxisFormat(private val dates : List<Pair<OffsetDateTime, OffsetDateTime>>, private val type : IntervalType) : ValueFormatter() {
+    private class CustomXAxisFormat(private val dates : List<Pair<Date, Date>>, private val type : IntervalType) : ValueFormatter() {
         override fun getFormattedValue(value: Float, axis: AxisBase): String {
             val intFormat = value.toInt()
             return when(type) {
@@ -269,7 +269,7 @@ class ActivityStatistics : AppCompatActivity() {
             }
         }
 
-        private fun formatWeek(startDate : OffsetDateTime, endDate: OffsetDateTime) : String {
+        private fun formatWeek(startDate : Date, endDate: Date) : String {
             return if(startDate.month == endDate.month) {
                 DAY_FORMAT.format(startDate) + " - " + DAY_MONTH_FORMAT.format(endDate)
             } else {
@@ -285,9 +285,9 @@ class ActivityStatistics : AppCompatActivity() {
     }
 
     companion object {
-        private val HOUR_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-        private val DAY_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd")
-        private val DAY_MONTH_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM")
+        private val HOUR_FORMAT = SimpleDateFormat("HH:mm")
+        private val DAY_FORMAT = SimpleDateFormat("dd")
+        private val DAY_MONTH_FORMAT = SimpleDateFormat("dd MMM")
 
         const val CURRENT_MENU_ITEM = "currentMenuItem"
         const val CURRENT_INTERVAL = "currentInterval"

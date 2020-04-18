@@ -25,6 +25,7 @@ import ticket.checker.extras.Util.ERROR_TICKET_EXISTS
 import ticket.checker.extras.Util.ERROR_TICKET_VALIDATION
 import ticket.checker.listeners.IScanDialogListener
 import ticket.checker.services.ServiceManager
+import java.text.ParseException
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import java.util.*
@@ -57,7 +58,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
     private lateinit var btnDelete: Button
 
     private var isTicketValidated : Boolean = false
-    private lateinit var soldToBirthday : LocalDate
+    private lateinit var soldToBirthday : Date
 
     private val ticketCallback = object : Callback<Ticket> {
         override fun onResponse(call: Call<Ticket>, response: Response<Ticket>) {
@@ -297,15 +298,15 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         val birthDayString = etSoldToBirthDate.text.toString()
         if(birthDayString.isNotEmpty()) {
             try {
-                this.soldToBirthday = LocalDate.parse(birthDayString, DATE_FORMAT)
+                this.soldToBirthday = DATE_FORMAT.parse(birthDayString)
             }
-            catch(e : DateTimeParseException) {
+            catch(e : ParseException) {
                 etSoldToBirthDate.error =  "Not valid date format. (dd.mm.yyyy)"
                 isValid = false
             }
         }
-        val now = LocalDate.now()
-        if(this.soldToBirthday.isAfter(now)) {
+        val now = Date()
+        if(this.soldToBirthday.after(now)) {
             etSoldToBirthDate.error = "The birth date cannot be in the future"
             isValid = false
         }

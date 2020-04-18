@@ -1,10 +1,11 @@
 package ticket.checker
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import retrofit2.Call
@@ -12,11 +13,11 @@ import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.beans.LoginData
 import ticket.checker.beans.LoginResponse
-import ticket.checker.dialogs.DialogConnectionConfig
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
 import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
+
 
 class ActivityLogin : AppCompatActivity(), View.OnClickListener {
 
@@ -26,17 +27,18 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     private val etEmail by lazy { findViewById<EditText>(R.id.etEmail)}
     private val etPassword by lazy { findViewById<EditText>(R.id.etPassword)}
     private val btnLogin by lazy { findViewById<Button>(R.id.btnLogin)}
-    private val btnSettings by lazy { findViewById<ImageButton>(R.id.btnSettings)}
+    private val btnToRegister by lazy { findViewById<Button>(R.id.btnToRegister)}
     private val autoLoginCheckBox by lazy { findViewById<CheckBox>(R.id.autoLoginCheckBox)}
 
     private val loggingInDialog : DialogInfo by lazy {
-        DialogInfo.newInstance("Logging in","Retrieving user info...",DialogType.LOADING)
+        DialogInfo.newInstance("Logging in","Retrieving user info...", DialogType.LOADING)
     }
 
     private val loginCallback : Callback<LoginResponse> = object : Callback<LoginResponse> {
         override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
             loggingInDialog.dismiss()
             btnLogin.isClickable = true
+            btnToRegister.isClickable = true
             if(response.isSuccessful) {
                 if(autoLoginCheckBox.isChecked) {
                     AppTicketChecker.saveSession(savedEmail, savedPassword)
@@ -62,6 +64,7 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
         override fun onFailure(call: Call<LoginResponse>, t: Throwable?) {
             loggingInDialog.dismiss()
             btnLogin.isClickable = true
+            btnToRegister.isClickable = true
             Util.treatBasicError(call, null, supportFragmentManager)
         }
     }
@@ -69,7 +72,7 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        if(AppTicketChecker.host.isNotEmpty() && AppTicketChecker.isLoggedIn) {
+        if(AppTicketChecker.isLoggedIn) {
             toMenuActivity()
         }
         loadBgnImage()
@@ -82,22 +85,30 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
 
     override fun onClick(v: View) {
         when(v.id) {
-            R.id.btnSettings -> {
-                showConnectionConfigDialog()
-            }
             R.id.btnLogin -> {
                 if(validate(etEmail, etPassword)) {
-                    if(AppTicketChecker.host.isNotEmpty()) {
-                        loggingInDialog.show(supportFragmentManager, "DIALOG_LOGGING_IN")
-                        doLogin(etEmail.text.toString(), etPassword.text.toString())
-                        btnLogin.isClickable = false
-                    }
-                    else {
-                        showConnectionConfigDialog()
-                    }
+                    loggingInDialog.show(supportFragmentManager, "DIALOG_LOGGING_IN")
+                    doLogin(etEmail.text.toString(), etPassword.text.toString())
+                    btnLogin.isClickable = false
+                    btnToRegister.isClickable = false
+                }
+            }
+            R.id.btnToRegister -> {
+                toRegisterActivity()
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when(requestCode) {
+            REGISTER_ACTIVITY -> {
+                if(resultCode == Activity.RESULT_OK && data != null) {
+                    savedEmail = data.getStringExtra("result")
                 }
             }
         }
+
     }
 
     private fun validate(vararg ets : EditText) : Boolean {
@@ -106,6 +117,16 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
             if(et.text.isEmpty()) {
                 isValid = false
                 et.error = "This field can not be empty!"
+            }
+            else {
+                when(et.id) {
+                    R.id.etEmail -> {
+                        if(!Util.isEmailValid(et.text.toString())) {
+                            isValid = false
+                            et.error = "Email format is not correct"
+                        }
+                    }
+                }
             }
         }
         return isValid
@@ -121,13 +142,13 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun initialize() {
-        etEmail.setText("")
+        etEmail.setText(savedEmail)
         etEmail.error = null
         etEmail.requestFocus()
         etPassword.setText("")
         etPassword.error = null
         btnLogin.setOnClickListener(this)
-        btnSettings.setOnClickListener(this)
+        btnToRegister.setOnClickListener(this)
         autoLoginCheckBox.isChecked = false
     }
 
@@ -156,6 +177,11 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
         finish()
     }
 
+    private fun toRegisterActivity() {
+        val intent = Intent(this, ActivityRegister::class.java)
+        startActivityForResult(intent, REGISTER_ACTIVITY)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(EMAIL_TEXT, etEmail.text.toString())
@@ -173,12 +199,8 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
         autoLoginCheckBox.isChecked = isChecked
     }
 
-    private fun showConnectionConfigDialog() {
-        val connectionConfigureDialog = DialogConnectionConfig.newInstance(AppTicketChecker.host, AppTicketChecker.port)
-        connectionConfigureDialog.show(supportFragmentManager, "DIALOG_CONNECTION_CONFIGURE")
-    }
-
     companion object {
+        private const val REGISTER_ACTIVITY = 1
         private const val EMAIL_TEXT = "emailEtText"
         private const val PASS_TEXT = "passEtText"
         private const val AUTO_LOGIN = "autoLogin"

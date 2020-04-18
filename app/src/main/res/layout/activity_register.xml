@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:id="@+id/imgBgn"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@drawable/barcode_toolbar_style"
+        android:theme="@style/AppTheme.ToolbarStyle"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:titleTextColor="@android:color/white">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            app:srcCompat="@drawable/ic_navigate_before" />
+
+        <TextView
+            android:id="@+id/toolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Register"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+    </androidx.appcompat.widget.Toolbar>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:weightSum="100">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/et_style"
+                android:drawableStart="@drawable/ic_person_outline"
+                android:drawablePadding="15dp"
+                android:hint="EMAIL *"
+                android:inputType="textEmailAddress"
+                android:maxLength="100"
+                android:maxWidth="100dp"
+                android:padding="10dp"
+                android:textColor="@color/text_style"
+                android:textColorHint="@color/transparentGrey" />
+
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/et_style"
+                android:drawableStart="@drawable/ic_lock_outline"
+                android:drawablePadding="15dp"
+                android:hint="PASSWORD *"
+                android:inputType="textPassword"
+                android:maxLength="100"
+                android:maxWidth="100dp"
+                android:padding="10dp"
+                android:textColor="@color/text_style"
+                android:textColorHint="@color/transparentGrey" />
+
+            <EditText
+                android:id="@+id/etPasswordRepeat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/et_style"
+                android:drawableStart="@drawable/ic_lock_outline"
+                android:drawablePadding="15dp"
+                android:hint="REPEAT PASSWORD *"
+                android:inputType="textPassword"
+                android:maxLength="100"
+                android:maxWidth="100dp"
+                android:padding="10dp"
+                android:textColor="@color/text_style"
+                android:textColorHint="@color/transparentGrey" />
+
+            <EditText
+                android:id="@+id/etName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/et_style"
+                android:drawableStart="@drawable/ic_name"
+                android:drawablePadding="15dp"
+                android:hint="NAME *"
+                android:inputType="textPersonName"
+                android:maxLength="100"
+                android:maxWidth="100dp"
+                android:padding="10dp"
+                android:textColor="@color/text_style"
+                android:textColorHint="@color/transparentGrey" />
+
+            <Button
+                android:id="@+id/btnRegister"
+                android:layout_width="150dp"
+                android:layout_height="35dp"
+                android:background="@drawable/btn_style"
+                android:text="REGISTER"
+                android:textAlignment="center"
+                android:textColor="@drawable/btn_text_color"
+                android:layout_marginBottom="20dp"/>
+
+            <ProgressBar
+                android:id="@+id/loadingSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvResult"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textColor="@color/yesGreen"
+                android:textSize="16sp"
+                android:visibility="visible"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
+

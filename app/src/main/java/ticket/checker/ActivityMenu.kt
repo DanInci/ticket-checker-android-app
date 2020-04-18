@@ -18,7 +18,6 @@ import retrofit2.Response
 import ticket.checker.beans.UserProfile
 import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util
-import ticket.checker.extras.Util.DATE_FORMAT_MONTH_NAME
 import ticket.checker.services.ServiceManager
 
 class ActivityMenu : AppCompatActivity(), View.OnClickListener {
@@ -271,7 +270,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
             findViewById<ProgressBar>(R.id.lsValidatedTickets).visibility = View.GONE
 
             tvName.text = AppTicketChecker.loggedInUser?.name
-            tvCreated.text = DATE_FORMAT_MONTH_NAME.format(AppTicketChecker.loggedInUser?.createdAt)
+//            tvCreated.text = DATE_FORMAT_MONTH_NAME.format(AppTicketChecker.loggedInUser?.createdAt)
             tvHighestRole.text = AppTicketChecker.selectedOrganization!!.role.role
             tvCurrentRole.text = AppTicketChecker.selectedOrganization!!.pretendedRole.role
             tvCreatedTickets.text = "0"

@@ -19,15 +19,12 @@ class AppTicketChecker : Application() {
     override fun onCreate() {
         super.onCreate()
         appContext = this
-        loadConnectionConfig()
         loadSession()
     }
 
     companion object {
         lateinit var appContext: Application
 
-        var host: String = ""
-        var port: String = ""
         var isLoggedIn = false
         var loggedInUser: UserProfile? = null
         var selectedOrganization: OrganizationMembership? = null
@@ -71,13 +68,6 @@ class AppTicketChecker : Application() {
             this.loggedInUser = null
         }
 
-        fun saveConnectionConfig(host: String, port: String) {
-            val editor = sharedPreferences.edit()
-            editor.putString(PREF_HOST, host)
-            editor.putString(PREF_PORT, port)
-            editor.apply()
-        }
-
         fun saveSession(email: String, password: String) {
             val editor = sharedPreferences.edit()
             editor.putString(PREF_LOGGED_IN_EMAIL, email)
@@ -94,15 +84,6 @@ class AppTicketChecker : Application() {
                }
         }
 
-        private fun loadConnectionConfig() {
-            val host = sharedPreferences.getString(PREF_HOST, null)
-            val port = sharedPreferences.getString(PREF_PORT,  null)
-            safeLet(host, port) { h, p ->
-                this.host = h
-                this.port = p
-            }
-        }
-
         private fun deleteSessionPreferences() {
             val editor = sharedPreferences.edit()
             editor.remove(PREF_LOGGED_IN_EMAIL)
@@ -110,8 +91,6 @@ class AppTicketChecker : Application() {
             editor.apply()
         }
 
-        private const val PREF_HOST = "ticket.checker.host"
-        private const val PREF_PORT = "ticket.checker.post"
         private const val PREF_LOGGED_IN_EMAIL = "ticket.checker.loggedInEmail"
         private const val PREF_LOGGED_IN_PASSWORD = "ticket.checker.loggedInPassword"
     }

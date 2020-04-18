@@ -9,18 +9,17 @@ import ticket.checker.beans.ErrorResponse
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
 import ticket.checker.services.ServiceManager
-import java.time.Duration
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.regex.Pattern
 
 /**
  * Created by Dani on 25.01.2018.
  */
 object Util {
-    val DATE_FORMAT_MONTH_NAME: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
-    val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-    val DATE_TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm")
+    val DATE_FORMAT_MONTH_NAME = SimpleDateFormat("dd MMM yyyy")
+    val DATE_FORMAT = SimpleDateFormat("dd.MM.yyyy")
+    val DATE_TIME_FORMAT = SimpleDateFormat("dd MMM yyyy HH:mm")
 
     const val ERROR_TICKET_VALIDATION = "TicketValidationException"
     const val ERROR_TICKET_EXISTS = "TicketExistsException"
@@ -30,9 +29,9 @@ object Util {
     const val CURRENT_TICKET = "currentTicket"
     const val POSITION = "adapterPosition"
 
-    fun formatDate(then : OffsetDateTime, shortFormat : Boolean) : String {
-        val now = LocalDateTime.now()
-        val diff = Duration.between(now, then).seconds
+    fun formatDate(then : Date, shortFormat : Boolean) : String {
+        val now = Date()
+        val diff = (now.time - then.time) / 1000
 
         return when(diff) {
             in 0..59 -> {
@@ -61,6 +60,21 @@ object Util {
             }
         }
         return isValid
+    }
+
+    fun isPasswordValid(pass: String): Boolean {
+        return Pattern.compile("(?=^.{6,}$)(?=.*[A-Z])(?=.*[a-z]).*$").matcher(pass).matches()
+    }
+
+    fun isEmailValid(email: String): Boolean {
+        return Pattern.compile(
+                "^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]|[\\w-]{2,}))@"
+                        + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                        + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+                        + "([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                        + "[0-9]{1,2}|25[0-5]|2[0-4][0-9]))|"
+                        + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$"
+        ).matcher(email).matches()
     }
 
     fun convertError(errorBody : ResponseBody?) : ErrorResponse {

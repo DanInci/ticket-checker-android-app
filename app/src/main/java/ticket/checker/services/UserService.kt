@@ -8,16 +8,16 @@ import java.util.*
 
 interface UserService {
 
-    @GET("/users/{userId}")
+    @GET("users/{userId}")
     fun getUserById(@Path("userId") id: UUID): Call<UserProfile>
 
-    @GET("/users/{userId}/invites")
+    @GET("users/{userId}/invites")
     fun getUserInvites(@Path("userId") id: UUID, @Query("page") pageNumber: Int?, @Query("pageSize") pageSize: Int?, @Query("status") status: InviteStatus?): Call<List<OrganizationInviteList>>
 
-    @PUT("/users/{userId}")
+    @PUT("users/{userId}")
     fun updateUserById(@Path("userId") id: UUID, @Body definition: UserDefinition): Call<UserProfile>
 
-    @DELETE("/users/{userId}")
+    @DELETE("users/{userId}")
     fun deleteUserById(@Path("userId") id: UUID): Call<Void>
 
 }
