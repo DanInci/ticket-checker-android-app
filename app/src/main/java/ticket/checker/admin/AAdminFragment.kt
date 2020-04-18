@@ -35,7 +35,7 @@ abstract class AAdminFragment<T, Y> : Fragment(), FilterChangeListener, ListChan
     private var recyclerView: RecyclerView? = null
     protected var layoutManager: LinearLayoutManager? = null
 
-    protected val itemsAdapter: AItemsAdapter<T, Y> by lazy {
+    protected val itemsAdapter: AItemsAdapterWithHeader<T, Y> by lazy {
         setupItemsAdapter()
     }
     private var scrollListener: EndlessScrollListener? = null
@@ -154,7 +154,7 @@ abstract class AAdminFragment<T, Y> : Fragment(), FilterChangeListener, ListChan
     }
 
     override fun onItemClick(view: View, position: Int) {
-        itemsAdapter.launchInfoActivity(view, position)
+//        itemsAdapter.launchInfoActivity(view, position)
     }
 
     override fun onLongItemClick(view: View?, position: Int) {}
@@ -171,7 +171,7 @@ abstract class AAdminFragment<T, Y> : Fragment(), FilterChangeListener, ListChan
         Util.treatBasicError(call, response, fragmentManager!!)
     }
 
-    abstract fun setupItemsAdapter(): AItemsAdapter<T, Y>
+    abstract fun setupItemsAdapter(): AItemsAdapterWithHeader<T, Y>
 
     abstract fun loadHeader(filterType: String?, filterValue: String)
 

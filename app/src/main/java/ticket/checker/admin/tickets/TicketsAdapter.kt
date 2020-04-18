@@ -87,7 +87,7 @@
 //            notifyItemRemoved(position)
 //            updateHeaderInfo(filterType, filterValue, newItemStats)
 //        }
-//    }
+////    }
 //
 //    private class TicketHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
 //        private val leftBar = itemView.findViewById<View>(R.id.leftBar)

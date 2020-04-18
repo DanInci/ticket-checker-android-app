@@ -1,10 +1,17 @@
 package ticket.checker.extras
 
+import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
 enum class InviteStatus : Serializable {
+
+    @SerializedName("PENDING")
     PENDING,
+
+    @SerializedName("ACCEPTED")
     ACCEPTED,
+
+    @SerializedName("DECLINED")
     DECLINED;
 
     companion object {

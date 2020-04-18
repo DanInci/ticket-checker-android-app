@@ -32,20 +32,26 @@
             android:textSize="22sp"
             android:textStyle="bold"
             android:layout_gravity="center"/>
-
-
-        <com.miguelcatalan.materialsearchview.MaterialSearchView
-            android:id="@+id/search_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
     </FrameLayout>
 
-    <FrameLayout
-        android:id="@+id/fragmentHolder"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar_container"
-        android:layout_above="@+id/navigation"
-        android:background="@color/backgroundGrey"/>
+        android:background="@color/backgroundGrey">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvItems"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <ProgressBar
+        android:id="@+id/rvLoadingSpinner"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
 
 </RelativeLayout>

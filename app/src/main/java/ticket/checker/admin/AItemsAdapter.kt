@@ -8,37 +8,22 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import ticket.checker.R
 
-/**
- * Created by Dani on 09.02.2018.
- */
-abstract class AItemsAdapter<T, Y>(context : Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+abstract class AItemsAdapter<T>(context : Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
-        private const val ITEM = 0
-        private const val HEADER = 1
-        private const val COUNT_HEADER = 1
-        private const val FOOTER = 2
-        private const val COUNT_FOOTER = 1
+        const val ADAPTER_ITEM_ID = 0
+        const val ADAPTER_FOOTER_ID = 2
+        const val ADAPTER_COUNT_FOOTER = 1
     }
 
     protected val inflater: LayoutInflater = LayoutInflater.from(context)
 
-    private var headerHolder : RecyclerView.ViewHolder? = null
-    private var footerHolder : RecyclerView.ViewHolder? = null
-
-    protected var filterType : String? = null
-    protected var filterValue : String = ""
-
     protected var items: MutableList<T> = mutableListOf()
-    protected var itemStats : Y? = null
+    protected var footerHolder : RecyclerView.ViewHolder? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            HEADER -> {
-                headerHolder = inflateHeaderHolder(parent)
-                headerHolder as RecyclerView.ViewHolder
-            }
-            ITEM -> {
+            ADAPTER_ITEM_ID -> {
                 inflateItemHolder(parent)
             }
             else -> {
@@ -51,29 +36,24 @@ abstract class AItemsAdapter<T, Y>(context : Context) : RecyclerView.Adapter<Rec
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when(holder.itemViewType) {
-            ITEM -> {
-                val item = items[position - COUNT_HEADER]
+            ADAPTER_ITEM_ID -> {
+                val item = items[position]
                 updateItemInfo(holder, item)
             }
-            HEADER -> {
-                headerHolder = holder
-                updateHeaderInfo(holder, filterType, filterValue, itemStats)
-            }
-            FOOTER -> {
+            ADAPTER_FOOTER_ID -> {
                 footerHolder = holder
             }
         }
     }
 
     override fun getItemCount(): Int {
-        return items.size + COUNT_HEADER + COUNT_FOOTER
+        return items.size + ADAPTER_COUNT_FOOTER
     }
 
     override fun getItemViewType(position: Int): Int {
         return when {
-            position == 0 -> HEADER
-            position < items.size + COUNT_HEADER -> ITEM
-            else -> FOOTER
+            position < items.size -> ADAPTER_ITEM_ID
+            else -> ADAPTER_FOOTER_ID
         }
     }
 
@@ -84,56 +64,60 @@ abstract class AItemsAdapter<T, Y>(context : Context) : RecyclerView.Adapter<Rec
     }
 
     fun updateItemsList(updatedItems: List<T>) {
-        val startItemsIndex = items.size + COUNT_HEADER
-        val endItemsIndex = startItemsIndex + updatedItems.size - COUNT_HEADER
+        val startItemsIndex = items.size
+        val endItemsIndex = startItemsIndex + updatedItems.size
         items.addAll(updatedItems)
         notifyItemRemoved(startItemsIndex) // footer is removed
         notifyItemRangeInserted(startItemsIndex, endItemsIndex)
     }
 
     fun resetItemsList() {
-        val endItemsIndex = items.size + COUNT_HEADER + COUNT_FOOTER
+        val endItemsIndex = items.size + ADAPTER_COUNT_FOOTER
         items = mutableListOf()
-        setHeaderVisibility(headerHolder as RecyclerView.ViewHolder, false)
-        notifyItemRangeRemoved(COUNT_HEADER, endItemsIndex)
+        notifyItemRangeRemoved(0, endItemsIndex)
     }
 
-    fun updateHeaderInfo(filterT: String?, filterV : String, itemStats: Y) {
-        this.filterType = filterT
-        this.filterValue = filterV
-        this.itemStats = itemStats
+    fun itemAdded(addedItem : T) {
+        items.add(0, addedItem)
+        notifyItemInserted(1)
+    }
 
-        if(headerHolder != null) {
-            updateHeaderInfo(headerHolder as RecyclerView.ViewHolder, filterType, filterValue, itemStats)
+    fun itemEdited(editedItem : T, position : Int) {
+        if(isItemPosition(position)) {
+            items.removeAt(position -1)
+            items.add(position - 1, editedItem)
+            notifyItemChanged(position)
         }
     }
 
-    protected fun isItemPosition(position : Int) : Boolean {
-        if(getItemViewType(position) == ITEM) {
+    fun itemRemoved(position : Int) {
+        if(isItemPosition(position)) {
+            items.removeAt(position - 1)
+            notifyItemRemoved(position)
+        }
+    }
+
+    override fun getItemId(position: Int): Long {
+        return when(position) {
+            items.size -> RecyclerView.NO_ID
+            else -> getItemId(items[position])
+        }
+    }
+
+    private fun isItemPosition(position : Int) : Boolean {
+        if(getItemViewType(position) == ADAPTER_ITEM_ID) {
             return true
         }
         return false
     }
 
-    abstract fun itemAdded(addedItem : T)
-
-    abstract fun itemEdited(editedItem : T, position : Int)
-
-    abstract fun itemRemoved(position : Int)
-
-    abstract fun launchInfoActivity(view : View, position : Int)
-
     protected abstract fun inflateItemHolder(parent: ViewGroup) : RecyclerView.ViewHolder
-
-    protected abstract fun inflateHeaderHolder(parent: ViewGroup) : RecyclerView.ViewHolder
 
     protected abstract fun updateItemInfo(holder : RecyclerView.ViewHolder, item : T)
 
-    protected abstract fun setHeaderVisibility(holder : RecyclerView.ViewHolder, isVisible : Boolean)
+    protected abstract fun getItemId(item: T): Long
 
-    protected abstract fun updateHeaderInfo(holder: RecyclerView.ViewHolder, filterType : String?, filterValue : String, itemStats : Y?)
-
-    private class FooterHolder(viewItem : View) : RecyclerView.ViewHolder(viewItem) {
+    protected class FooterHolder(viewItem : View) : RecyclerView.ViewHolder(viewItem) {
         private val loadingSpinner : ProgressBar = viewItem.findViewById(R.id.loadingSpinner)
 
         init {

@@ -26,10 +26,10 @@ object ServiceManager {
     }
 
     fun createSession(token: String) {
+        invalidateSession()
         val interceptor = AuthInterceptor(token)
         val httpClient = OkHttpClient.Builder().addInterceptor(interceptor).build()
         retrofit = createRetrofitInstance(httpClient)
-        invalidateSession()
     }
 
     fun getAuthService(): AuthService {
