@@ -46,6 +46,9 @@ class AppTicketChecker : Application() {
 
         fun clearSession() {
             this.loggedInUser = null
+            this.selectedOrganization = null
+            this.savedSessionEmail = null
+            this.savedSessionPassword = null
             ServiceManager.invalidateSession()
             deleteSessionPreferences()
         }
