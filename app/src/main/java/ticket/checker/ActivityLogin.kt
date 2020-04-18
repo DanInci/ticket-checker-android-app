@@ -16,6 +16,7 @@ import ticket.checker.beans.LoginResponse
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
 import ticket.checker.extras.Util
+import ticket.checker.extras.safeLet
 import ticket.checker.services.ServiceManager
 
 
@@ -72,10 +73,16 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        if(AppTicketChecker.isLoggedIn) {
-            toMenuActivity()
-        }
         loadBgnImage()
+        safeLet(AppTicketChecker.savedSessionEmail, AppTicketChecker.savedSessionPassword) { e, p ->
+            this.etEmail.setText(AppTicketChecker.savedSessionEmail)
+            this.etPassword.setText(AppTicketChecker.savedSessionPassword)
+            this.autoLoginCheckBox.isChecked = true
+            loggingInDialog.show(supportFragmentManager, "DIALOG_LOGGING_IN")
+            doLogin(etEmail.text.toString(), etPassword.text.toString())
+            btnLogin.isClickable = false
+            btnToRegister.isClickable = false
+        }
     }
 
     override fun onStart() {
@@ -163,14 +170,13 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun loggedIn(response : LoginResponse) {
-        ServiceManager.createSession(response.token)
         AppTicketChecker.loggedInUser = response.profile
-        AppTicketChecker.isLoggedIn = true
-        toMenuActivity()
+        ServiceManager.createSession(response.token)
+        toOrganizationsActivity()
     }
 
-    private fun toMenuActivity() {
-        val intent = Intent(this, ActivityMenu::class.java)
+    private fun toOrganizationsActivity() {
+        val intent = Intent(this, ActivityOrganizations::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(intent)

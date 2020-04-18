@@ -25,7 +25,10 @@ class AppTicketChecker : Application() {
     companion object {
         lateinit var appContext: Application
 
-        var isLoggedIn = false
+        var savedSessionEmail: String? = null
+        var savedSessionPassword: String? = null
+
+        fun isLoggedIn(): Boolean { return loggedInUser != null }
         var loggedInUser: UserProfile? = null
         var selectedOrganization: OrganizationMembership? = null
 
@@ -41,31 +44,10 @@ class AppTicketChecker : Application() {
             )
         }
 
-        private val loginCallback : Callback<LoginResponse> = object : Callback<LoginResponse> {
-            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
-                if(response.isSuccessful && response.body() != null) {
-                    isLoggedIn = true
-                    loggedInUser = response.body()!!.profile
-                    ServiceManager.createSession(response.body()!!.token)
-
-                }
-                else {
-                    ServiceManager.invalidateSession()
-                    isLoggedIn = false
-                }
-            }
-            override fun onFailure(call: Call<LoginResponse>, t: Throwable?) {
-                ServiceManager.invalidateSession()
-                isLoggedIn = false
-            }
-        }
-
-
         fun clearSession() {
+            this.loggedInUser = null
             ServiceManager.invalidateSession()
             deleteSessionPreferences()
-            this.isLoggedIn = false
-            this.loggedInUser = null
         }
 
         fun saveSession(email: String, password: String) {
@@ -79,8 +61,8 @@ class AppTicketChecker : Application() {
             val email = sharedPreferences.getString(PREF_LOGGED_IN_EMAIL, null)
             val password = sharedPreferences.getString(PREF_LOGGED_IN_PASSWORD, null)
                safeLet(email, password) { e, p ->
-                   val call : Call<LoginResponse> = ServiceManager.getAuthService().login(LoginData(e, p))
-                   call.enqueue(loginCallback)
+                   this.savedSessionEmail = e
+                   this.savedSessionPassword = p
                }
         }
 
