@@ -63,7 +63,7 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
         findViewById<ProgressBar>(R.id.loadingSpinner)
     }
 
-    private val userCallback = object <T> : Callback<T> {
+    private val callback = object <T> : Callback<T> {
         override fun onResponse(call: Call<T>, response: Response<T>) {
             val method = call.request().method()
             if (response.isSuccessful) {
@@ -103,6 +103,12 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
         btnDelete.setOnClickListener(this)
         btnBack.setOnClickListener(this)
         btnEdit.setOnClickListener(this)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val call = ServiceManager.getOrganizationService().getOrganizationById(currentOrganization.id)
+        call.enqueue(callback as Callback<OrganizationProfile>)
     }
 
     override fun onClick(v: View?) {
@@ -145,7 +151,7 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
         if (response) {
             switchToLoadingView(true)
             val call = ServiceManager.getOrganizationService().deleteOrganizationById(currentOrganization.id)
-            call.enqueue(userCallback as Callback<Void>)
+            call.enqueue(callback as Callback<Void>)
         }
     }
 
@@ -182,10 +188,17 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
     private fun <T> onErrorResponse(call: Call<T>, response: Response<T>?) {
         val wasHandled = Util.treatBasicError(call, response, supportFragmentManager)
         if (!wasHandled) {
-            if (response?.code() == 400) {
-                val dialogNoOrganization = DialogInfo.newInstance("Organization not found", "The organization you are trying to access no longer exists", DialogType.ERROR)
-                dialogNoOrganization.dialogExitListener = this@ActivityOrganizationDetails
-                dialogNoOrganization.show(supportFragmentManager, "DIALOG_ERROR")
+            when(response?.code()) {
+                404 -> {
+                    val dialogNoOrganization = DialogInfo.newInstance("Organization not found", "The organization you are trying to access no longer exists", DialogType.ERROR)
+                    dialogNoOrganization.dialogExitListener = this@ActivityOrganizationDetails
+                    dialogNoOrganization.show(supportFragmentManager, "DIALOG_ERROR")
+                }
+                else -> {
+                    val dialogNoOrganization = DialogInfo.newInstance("Unknown error", "An unknown error has happened", DialogType.ERROR)
+                    dialogNoOrganization.dialogExitListener = this@ActivityOrganizationDetails
+                    dialogNoOrganization.show(supportFragmentManager, "DIALOG_ERROR")
+                }
             }
         }
     }

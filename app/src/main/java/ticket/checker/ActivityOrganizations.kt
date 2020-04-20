@@ -16,6 +16,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.ActivityOrganizationDetails.Companion.CURRENT_ORGANIZATION
+import ticket.checker.ActivityProfile.Companion.USER_ID
 import ticket.checker.admin.listeners.EndlessScrollListener
 import ticket.checker.admin.listeners.ListChangeListener
 import ticket.checker.admin.listeners.RecyclerItemClickListener
@@ -112,6 +113,10 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
                 true
             }
             R.id.action_my_profile -> {
+                val intent  = Intent(this@ActivityOrganizations, ActivityProfile::class.java)
+                intent.putExtra(USER_ID, AppTicketChecker.loggedInUser?.id)
+                startActivity(intent)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 true
             }
             R.id.action_logout -> {
