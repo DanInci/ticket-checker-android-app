@@ -135,6 +135,7 @@ class ActivityProfile : AppCompatActivity(), View.OnClickListener, DialogExitLis
 
     override fun onBackPressed() {
         if (itemWasRemoved) {
+            AppTicketChecker.clearSession()
             val intent = Intent(this, ActivityLogin::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
