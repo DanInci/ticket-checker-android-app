@@ -15,14 +15,19 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import ticket.checker.ActivityOrganizationDetails.Companion.CURRENT_ORGANIZATION
 import ticket.checker.admin.listeners.EndlessScrollListener
+import ticket.checker.admin.listeners.ListChangeListener
 import ticket.checker.admin.listeners.RecyclerItemClickListener
 import ticket.checker.admin.organizations.OrganizationsAdapter
 import ticket.checker.beans.OrganizationList
+import ticket.checker.beans.OrganizationProfile
+import ticket.checker.dialogs.DialogCreateOrganization
 import ticket.checker.extras.Util
+import ticket.checker.extras.Util.POSITION
 import ticket.checker.services.ServiceManager
 
-class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnItemClickListener {
+class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnItemClickListener, ListChangeListener<OrganizationList> {
 
     private var firstLoad = true
 
@@ -101,6 +106,9 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.action_organization_create -> {
+                val dialogCreateOrganization = DialogCreateOrganization()
+                dialogCreateOrganization.listChangeListener = this
+                dialogCreateOrganization.show(supportFragmentManager, "DIALOG_CREATE_ORG")
                 true
             }
             R.id.action_my_profile -> {
@@ -116,9 +124,49 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == CHANGES_TO_ORGANIZATION_ITEM) {
+            val position = data?.getIntExtra(POSITION, -1)
+            if (position != null && position != -1) {
+                when (resultCode) {
+                    ITEM_REMOVED -> {
+                        onRemove(position)
+                    }
+                    ITEM_EDITED -> {
+                        val editedOrganization = data.getSerializableExtra(EDITED_ORGANIZATION) as OrganizationProfile
+                        onEdit(editedOrganization.toOrganizationList(), position)
+                    }
+                }
+            }
+        }
+    }
+
+
+    override fun onAdd(addedObject: OrganizationList) {
+        itemsAdapter.itemAdded(addedObject)
+    }
+
+    override fun onEdit(editedObject: OrganizationList, editedObjectPosition: Int) {
+        itemsAdapter.itemEdited(editedObject, editedObjectPosition)
+    }
+
+    override fun onRemove(removedItemPosition: Int) {
+        itemsAdapter.itemRemoved(removedItemPosition)
+    }
+
     override fun onItemClick(view: View, position: Int) {}
 
-    override fun onLongItemClick(view: View?, position: Int) {}
+    override fun onLongItemClick(view: View?, position: Int) {
+        val item = itemsAdapter.getItemByPosition(position)
+        if(item != null ) {
+            val intent  = Intent(this@ActivityOrganizations, ActivityOrganizationDetails::class.java)
+            intent.putExtra(POSITION, position)
+            intent.putExtra(CURRENT_ORGANIZATION, item.toOrganizationProfile())
+            startActivityForResult(intent, CHANGES_TO_ORGANIZATION_ITEM)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        }
+    }
 
     private fun loadMyOrganizations(page: Int, pageSize: Int) {
         val call = ServiceManager.getOrganizationService().getOrganizations(page, pageSize)
@@ -175,10 +223,15 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
     }
 
     companion object {
+        const val ITEM_REMOVED = 0
+        const val ITEM_EDITED = 1
+        const val EDITED_ORGANIZATION = "editedOrganization"
+
         private const val PAGE_SIZE = 20
         private const val LOAD_CURRENT_PAGE = "lastLoadPage"
         private const val LOAD_PREVIOUS_ITEM_COUNT = "previousItemCount"
         private const val LOAD_LOADING = "loading"
+        private const val CHANGES_TO_ORGANIZATION_ITEM = 32
     }
 
 }

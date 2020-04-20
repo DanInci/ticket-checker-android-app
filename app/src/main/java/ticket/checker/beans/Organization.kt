@@ -6,8 +6,12 @@ import java.io.Serializable
 import java.util.*
 
 data class OrganizationDefinition(val name: String): Serializable
-data class OrganizationList(val id: UUID, val name: String, val membership: Membership, val createdAt: Date): Serializable
-data class OrganizationProfile(val id: UUID, val name: String, val createdAt: Date): Serializable
+data class OrganizationList(val id: UUID, val name: String, val membership: Membership, val createdAt: Date): Serializable {
+    fun toOrganizationProfile(): OrganizationProfile = OrganizationProfile(id, name, membership, createdAt)
+}
+data class OrganizationProfile(val id: UUID, val name: String,  val membership: Membership, val createdAt: Date): Serializable {
+    fun toOrganizationList(): OrganizationList = OrganizationList(id, name, membership, createdAt)
+}
 
 data class OrganizationMembership(val id: UUID, val name: String, val role: OrganizationRole, val pretendedRole: OrganizationRole, val joinedAt: Date)
 

@@ -57,6 +57,13 @@ abstract class AItemsAdapter<T>(context : Context) : RecyclerView.Adapter<Recycl
         }
     }
 
+    fun getItemByPosition(position: Int): T? {
+        if(isItemPosition(position)) {
+            return items[position]
+        }
+        return null
+    }
+
     fun setLoading(isLoading : Boolean) {
         if(footerHolder != null) {
             (footerHolder as FooterHolder).showLoadingSpinner(isLoading)
@@ -77,22 +84,22 @@ abstract class AItemsAdapter<T>(context : Context) : RecyclerView.Adapter<Recycl
         notifyItemRangeRemoved(0, endItemsIndex)
     }
 
-    fun itemAdded(addedItem : T) {
+    open fun itemAdded(addedItem : T) {
         items.add(0, addedItem)
-        notifyItemInserted(1)
+        notifyItemInserted(0)
     }
 
-    fun itemEdited(editedItem : T, position : Int) {
+    open fun itemEdited(editedItem : T, position : Int) {
         if(isItemPosition(position)) {
-            items.removeAt(position -1)
-            items.add(position - 1, editedItem)
+            items.removeAt(position)
+            items.add(position, editedItem)
             notifyItemChanged(position)
         }
     }
 
-    fun itemRemoved(position : Int) {
+    open fun itemRemoved(position : Int) {
         if(isItemPosition(position)) {
-            items.removeAt(position - 1)
+            items.removeAt(position)
             notifyItemRemoved(position)
         }
     }
@@ -104,7 +111,7 @@ abstract class AItemsAdapter<T>(context : Context) : RecyclerView.Adapter<Recycl
         }
     }
 
-    private fun isItemPosition(position : Int) : Boolean {
+    protected fun isItemPosition(position : Int) : Boolean {
         if(getItemViewType(position) == ADAPTER_ITEM_ID) {
             return true
         }

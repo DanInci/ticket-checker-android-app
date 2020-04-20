@@ -63,6 +63,26 @@ abstract class AItemsAdapterWithHeader<T, Y>(context : Context) : AItemsAdapter<
         }
     }
 
+    override fun itemAdded(addedItem : T) {
+        items.add(0, addedItem)
+        notifyItemInserted(1)
+    }
+
+    override fun itemEdited(editedItem : T, position : Int) {
+        if(isItemPosition(position)) {
+            items.removeAt(position-1)
+            items.add(position-1, editedItem)
+            notifyItemChanged(position-1)
+        }
+    }
+
+    override fun itemRemoved(position : Int) {
+        if(isItemPosition(position)) {
+            items.removeAt(position-1)
+            notifyItemRemoved(position-1)
+        }
+    }
+
     fun updateHeaderInfo(filterT: String?, filterV : String, headerItem: Y) {
         this.filterType = filterT
         this.filterValue = filterV
