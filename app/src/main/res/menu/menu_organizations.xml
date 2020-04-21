@@ -7,6 +7,9 @@
         android:title="Create"
         app:showAsAction="always" />
     <item
+        android:id="@+id/action_invitations"
+        android:title="My Invitations"/>
+    <item
         android:id="@+id/action_my_profile"
         android:title="My Profile" />
     <item

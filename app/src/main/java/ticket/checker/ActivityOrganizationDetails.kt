@@ -21,6 +21,7 @@ import ticket.checker.beans.OrganizationProfile
 import ticket.checker.dialogs.DialogEditOrganization
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.dialogs.DialogType
+import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util
 import ticket.checker.listeners.DialogExitListener
 import ticket.checker.listeners.DialogResponseListener
@@ -59,9 +60,6 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
     private val btnBack by lazy {
         findViewById<ImageButton>(R.id.btnBack)
     }
-    private val loadingSpinner by lazy {
-        findViewById<ProgressBar>(R.id.loadingSpinner)
-    }
 
     private val callback = object <T> : Callback<T> {
         override fun onResponse(call: Call<T>, response: Response<T>) {
@@ -69,11 +67,17 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
             if (response.isSuccessful) {
                 when(method) {
                     "GET" -> {
-                        updateOrganizationInfo(response.body() as OrganizationProfile)
-                        btnDelete.visibility = View.VISIBLE
+                        val organization = response.body() as OrganizationProfile
+                        updateOrganizationInfo(organization)
+                        if(organization.membership.role == OrganizationRole.OWNER) {
+                            btnDelete.visibility = View.VISIBLE
+                            btnEdit.visibility = View.VISIBLE
+                        } else {
+                            btnDelete.visibility = View.GONE
+                            btnEdit.visibility = View.GONE
+                        }
                     }
                     "DELETE" -> {
-                        loadingSpinner.visibility = View.GONE
                         val dialogDeleteSuccessful = DialogInfo.newInstance("Deletion successful", "Organization '${currentOrganization.name}' was successfully deleted", DialogType.SUCCESS)
                         dialogDeleteSuccessful.dialogExitListener = this@ActivityOrganizationDetails
                         dialogDeleteSuccessful.show(supportFragmentManager, "DIALOG_DELETE_SUCCESSFUL")
@@ -81,12 +85,14 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
                 }
             }
             else {
-                switchToLoadingView(false)
+                btnDelete.visibility = View.GONE
+                btnEdit.visibility = View.GONE
                 onErrorResponse(call, response)
             }
         }
         override fun onFailure(call: Call<T>, t: Throwable?) {
-            switchToLoadingView(false)
+            btnDelete.visibility = View.GONE
+            btnEdit.visibility = View.GONE
             onErrorResponse(call, null)
         }
     }
@@ -149,7 +155,8 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
 
     override fun onResponse(response: Boolean) {
         if (response) {
-            switchToLoadingView(true)
+            btnDelete.visibility = View.GONE
+            btnEdit.visibility = View.GONE
             val call = ServiceManager.getOrganizationService().deleteOrganizationById(currentOrganization.id)
             call.enqueue(callback as Callback<Void>)
         }
@@ -165,9 +172,9 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
         onBackPressed()
     }
 
-    private fun switchToLoadingView(isLoading: Boolean) {
-        loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
-        btnDelete.visibility = if (isLoading) View.GONE else View.VISIBLE
+    private fun switchToLoadingView(isLoading: Boolean, role: OrganizationRole) {
+        btnDelete.visibility = if (isLoading || role != OrganizationRole.OWNER) View.GONE else View.VISIBLE
+        btnEdit.visibility = if (isLoading || role != OrganizationRole.OWNER) View.GONE else View.VISIBLE
     }
 
     private fun updateOrganizationInfo(organization: OrganizationProfile) {

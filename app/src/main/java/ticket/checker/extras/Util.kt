@@ -29,6 +29,8 @@ object Util {
     const val CURRENT_TICKET = "currentTicket"
     const val POSITION = "adapterPosition"
 
+    private const val PAGE_SIZE = 20
+
     fun formatDate(then : Date, shortFormat : Boolean) : String {
         val now = Date()
         val diff = (now.time - then.time) / 1000

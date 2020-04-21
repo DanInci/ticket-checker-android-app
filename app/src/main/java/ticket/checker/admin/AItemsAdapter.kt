@@ -57,6 +57,14 @@ abstract class AItemsAdapter<T>(context : Context) : RecyclerView.Adapter<Recycl
         }
     }
 
+    fun getPositionByItem(item: T): Int? {
+        val foundItem = items.withIndex().find { (_, t) -> t == item }
+        if(foundItem != null) {
+            return foundItem.index
+        }
+        return null
+    }
+
     fun getItemByPosition(position: Int): T? {
         if(isItemPosition(position)) {
             return items[position]

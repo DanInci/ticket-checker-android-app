@@ -1,6 +1,7 @@
 package ticket.checker
 
 import android.content.Intent
+import android.nfc.tech.MifareUltralight.PAGE_SIZE
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
@@ -24,6 +25,7 @@ import ticket.checker.admin.organizations.OrganizationsAdapter
 import ticket.checker.beans.OrganizationList
 import ticket.checker.beans.OrganizationProfile
 import ticket.checker.dialogs.DialogCreateOrganization
+import ticket.checker.dialogs.DialogInvitations
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.POSITION
 import ticket.checker.services.ServiceManager
@@ -112,9 +114,15 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
                 dialogCreateOrganization.show(supportFragmentManager, "DIALOG_CREATE_ORG")
                 true
             }
+            R.id.action_invitations -> {
+                val dialogMyInvitations = DialogInvitations.newInstance(AppTicketChecker.loggedInUser!!.id)
+                dialogMyInvitations.listChangeListener = this
+                dialogMyInvitations.show(supportFragmentManager, "DIALOG_INVITATIONS")
+                true
+            }
             R.id.action_my_profile -> {
                 val intent  = Intent(this@ActivityOrganizations, ActivityProfile::class.java)
-                intent.putExtra(USER_ID, AppTicketChecker.loggedInUser?.id)
+                intent.putExtra(USER_ID, AppTicketChecker.loggedInUser!!.id)
                 startActivity(intent)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 true
@@ -232,10 +240,9 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
         const val ITEM_EDITED = 1
         const val EDITED_ORGANIZATION = "editedOrganization"
 
-        private const val PAGE_SIZE = 20
-        private const val LOAD_CURRENT_PAGE = "lastLoadPage"
-        private const val LOAD_PREVIOUS_ITEM_COUNT = "previousItemCount"
-        private const val LOAD_LOADING = "loading"
+        private const val LOAD_CURRENT_PAGE = "organizationsLastLoadPage"
+        private const val LOAD_PREVIOUS_ITEM_COUNT = "organizationsPreviousItemCount"
+        private const val LOAD_LOADING = "organizationsLoading"
         private const val CHANGES_TO_ORGANIZATION_ITEM = 32
     }
 

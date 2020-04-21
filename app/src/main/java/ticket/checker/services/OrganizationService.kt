@@ -40,7 +40,7 @@ interface OrganizationService {
     fun joinOrganizationByInviteCode(@Query("code") inviteCode: String): Call<OrganizationProfile>
 
     @POST("organizations/{organizationId}/invites/{inviteId}/accept")
-    fun acceptInvite(@Path("organizationId") id: UUID, @Path("inviteId") inviteId: UUID): Call<Void>
+    fun acceptInvite(@Path("organizationId") id: UUID, @Path("inviteId") inviteId: UUID): Call<OrganizationProfile>
 
     @POST("organizations/{organizationId}/invites/{inviteId}/decline")
     fun declineInvite(@Path("organizationId") id: UUID, @Path("inviteId") inviteId: UUID): Call<Void>

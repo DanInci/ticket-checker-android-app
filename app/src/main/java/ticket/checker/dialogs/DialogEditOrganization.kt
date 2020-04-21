@@ -21,7 +21,7 @@ import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
 import java.util.*
 
-class DialogEditOrganization : DialogFragment(), View.OnClickListener {
+class DialogEditOrganization internal constructor(): DialogFragment(), View.OnClickListener {
 
     lateinit var editListener: EditListener<OrganizationProfile>
     lateinit var organizationId: UUID

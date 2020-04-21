@@ -17,7 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ActivityProfile"></activity>
+        <activity android:name=".dialogs.DialogInvitations"></activity>
+        <activity android:name=".ActivityProfile" />
         <activity android:name=".ActivityOrganizationDetails" />
         <activity android:name=".dialogs.DialogCreateOrganization" />
         <activity android:name=".ActivityOrganizations" />

@@ -61,9 +61,10 @@
                     android:clickable="true"
                     android:focusable="true"
                     app:srcCompat="@drawable/ic_edit"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginRight="15dp"/>
+                    android:layout_marginEnd="15dp"
+                    android:visibility="gone"/>
             </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>
 
@@ -235,38 +236,21 @@
         </LinearLayout>
 
 
-        <LinearLayout
-            android:id="@+id/buttonsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginBottom="20dp"
-            android:layout_marginTop="10dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnDelete"
-                android:layout_width="150dp"
-                android:layout_height="35dp"
-                android:layout_gravity="center"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="5dp"
-                android:background="@drawable/btn_no_style"
-                android:drawableEnd="@drawable/ic_delete"
-                android:paddingEnd="10dp"
-                android:paddingStart="10dp"
-                android:text="Delete"
-                android:textAllCaps="false"
-                android:textColor="@drawable/btn_no_text_color"
-                android:textSize="20sp"
-                android:visibility="visible"/>
-
-            <ProgressBar
-                android:id="@+id/loadingSpinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:visibility="gone" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/btnDelete"
+            android:layout_width="150dp"
+            android:layout_height="35dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/btn_no_style"
+            android:drawableEnd="@drawable/ic_delete"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
+            android:text="Delete"
+            android:textAllCaps="false"
+            android:textColor="@drawable/btn_no_text_color"
+            android:textSize="20sp"
+            android:visibility="gone"/>
     </LinearLayout>
 </ScrollView>
