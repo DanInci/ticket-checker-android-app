@@ -121,10 +121,7 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
                 true
             }
             R.id.action_my_profile -> {
-                val intent  = Intent(this@ActivityOrganizations, ActivityProfile::class.java)
-                intent.putExtra(USER_ID, AppTicketChecker.loggedInUser!!.id)
-                startActivity(intent)
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                toMyProfile()
                 true
             }
             R.id.action_logout -> {
@@ -168,7 +165,16 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
         itemsAdapter.itemRemoved(removedItemPosition)
     }
 
-    override fun onItemClick(view: View, position: Int) {}
+    override fun onItemClick(view: View, position: Int) {
+        val organization = itemsAdapter.getItemByPosition(position)
+        if(organization != null) {
+            val intent = Intent(this, ActivityMenu::class.java)
+            intent.putExtra(ActivityMenu.ORGANIZATION_ID, organization.id)
+            intent.putExtra(ActivityMenu.ORGANIZATION_NAME, organization.name)
+            intent.putExtra(ActivityMenu.ORGANIZATION_ROLE, organization.membership.role)
+            startActivity(intent)
+        }
+    }
 
     override fun onLongItemClick(view: View?, position: Int) {
         val item = itemsAdapter.getItemByPosition(position)
@@ -220,12 +226,20 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
         refreshLayout.isEnabled = true
     }
 
+    private fun toMyProfile() {
+        val intent  = Intent(this@ActivityOrganizations, ActivityProfile::class.java)
+        intent.putExtra(USER_ID, AppTicketChecker.loggedInUser!!.id)
+        startActivity(intent)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+    }
+
     private fun logout() {
         AppTicketChecker.clearSession()
         val intent = Intent(this, ActivityLogin::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(intent)
+        finish()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

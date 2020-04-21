@@ -15,12 +15,19 @@ import android.widget.TextView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ticket.checker.beans.UserProfile
+import ticket.checker.beans.OrganizationMember
+import ticket.checker.beans.OrganizationMemberWithPretendedRole
 import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util
+import ticket.checker.extras.Util.DATE_FORMAT_MONTH_NAME
 import ticket.checker.services.ServiceManager
+import java.util.*
 
 class ActivityMenu : AppCompatActivity(), View.OnClickListener {
+
+    private lateinit var organizationId: UUID
+    private lateinit var organizationName: String
+    private lateinit var organizationRole: OrganizationRole
 
     private var headerHasLoaded = false
 
@@ -42,35 +49,35 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
             }
             if (scrollRange + verticalOffset == 0) {
                 menuIsShown = true
-                collapsingToolbar.title = R.string.app_name.toString()
+                collapsingToolbar.title = if(AppTicketChecker.selectedOrganizationMembership != null) AppTicketChecker.selectedOrganizationMembership!!.organizationName else organizationName
                 invalidateOptionsMenu()
             } else if (menuIsShown) {
                 menuIsShown = false
                 if (headerHasLoaded) {
-                    collapsingToolbar.title = " "
+                    collapsingToolbar.title = ""
                 }
                 invalidateOptionsMenu()
             }
         }
     }
 
-    private val updateUserInfoCallback: Callback<UserProfile> = object : Callback<UserProfile> {
-        override fun onResponse(call: Call<UserProfile>, response: Response<UserProfile>) {
+    private val organizationMemberCallback: Callback<OrganizationMember> = object : Callback<OrganizationMember> {
+        override fun onResponse(call: Call<OrganizationMember>, response: Response<OrganizationMember>) {
             if (response.isSuccessful) {
-                AppTicketChecker.loggedInUser = response.body() as UserProfile
-
-                if (!firstLoadHappen) {
-                    AppTicketChecker.selectedOrganization = AppTicketChecker.selectedOrganization?.copy(role = OrganizationRole.USER)
-                    firstLoadHappen = true
-                    switchViews()
+                val organizationMember = response.body() as OrganizationMember
+                if(AppTicketChecker.selectedOrganizationMembership != null) {
+                    AppTicketChecker.selectedOrganizationMembership =  organizationMember.withPretendedRole(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole)
+                } else {
+                    AppTicketChecker.selectedOrganizationMembership = organizationMember.withPretendedRole(organizationMember.role)
                 }
-                updateProfileInfo()
+                switchViews(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole)
+                updateOrganizationMemberInfo(AppTicketChecker.selectedOrganizationMembership!!)
             } else {
                 Util.treatBasicError(call, response, supportFragmentManager)
             }
         }
 
-        override fun onFailure(call: Call<UserProfile>, t: Throwable?) {
+        override fun onFailure(call: Call<OrganizationMember>, t: Throwable?) {
             Util.treatBasicError(call, null, supportFragmentManager)
         }
     }
@@ -78,8 +85,8 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     private val tvName by lazy {
         findViewById<TextView>(R.id.name)
     }
-    private val tvCreated by lazy {
-        findViewById<TextView>(R.id.created)
+    private val tvJoined by lazy {
+        findViewById<TextView>(R.id.joined)
     }
     private val tvHighestRole by lazy {
         findViewById<TextView>(R.id.highestRole)
@@ -103,34 +110,38 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         findViewById<CardView>(R.id.controlPanel)
     }
 
-    var menuIsShown = false
-    var firstLoadHappen = false
-
+    private var menuIsShown = false
     private var currentMenuItemId = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM_ID) ?: -1
-
         setContentView(R.layout.activity_menu)
+
+        this.organizationId = if(AppTicketChecker.selectedOrganizationMembership != null) AppTicketChecker.selectedOrganizationMembership!!.organizationId else intent.getSerializableExtra(ORGANIZATION_ID) as UUID
+        this.organizationName = if(AppTicketChecker.selectedOrganizationMembership != null) AppTicketChecker.selectedOrganizationMembership!!.organizationName else intent.getStringExtra(ORGANIZATION_NAME)
+        this.organizationRole = if(AppTicketChecker.selectedOrganizationMembership != null) AppTicketChecker.selectedOrganizationMembership!!.role else intent.getSerializableExtra(ORGANIZATION_ROLE) as OrganizationRole
+        this.currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM_ID) ?: -1
+
 //        loadCollapsingToolbarImg()
         setSupportActionBar(toolbar)
+        collapsingToolbar.title = organizationName
         appBarLayout.addOnOffsetChangedListener(appBarOffsetChangeListener)
         cvControlPanel.setOnClickListener(this)
         cvScan.setOnClickListener(this)
         cvStatistics.setOnClickListener(this)
-
-        if (AppTicketChecker.loggedInUser != null) {
-            firstLoadHappen = true
-            switchViews()
-        }
     }
 
     override fun onStart() {
         super.onStart()
-        updateProfileInfo()
-        val call: Call<UserProfile> = ServiceManager.getUserService().getUserById(AppTicketChecker.loggedInUser!!.id)
-        call.enqueue(updateUserInfoCallback)
+        if(AppTicketChecker.selectedOrganizationMembership != null) {
+            switchViews(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole)
+            updateOrganizationMemberInfo(AppTicketChecker.selectedOrganizationMembership!!)
+        } else {
+            switchViews(organizationRole)
+        }
+
+        val call: Call<OrganizationMember> = ServiceManager.getOrganizationService().getMyOrganizationMembership(organizationId)
+        call.enqueue(organizationMemberCallback)
     }
 
 //    private fun loadCollapsingToolbarImg() {
@@ -150,12 +161,22 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 //    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        when (AppTicketChecker.selectedOrganization!!.role) {
-            OrganizationRole.OWNER, OrganizationRole.ADMIN -> menuInflater.inflate(R.menu.menu_admin, menu)
-            OrganizationRole.PUBLISHER -> menuInflater.inflate(R.menu.menu_publisher, menu)
-            OrganizationRole.VALIDATOR -> menuInflater.inflate(R.menu.menu_validator, menu)
-            OrganizationRole.USER -> menuInflater.inflate(R.menu.menu_user, menu)
+        if(AppTicketChecker.selectedOrganizationMembership != null) {
+            when (AppTicketChecker.selectedOrganizationMembership!!.role) {
+                OrganizationRole.OWNER, OrganizationRole.ADMIN -> menuInflater.inflate(R.menu.menu_admin, menu)
+                OrganizationRole.PUBLISHER -> menuInflater.inflate(R.menu.menu_publisher, menu)
+                OrganizationRole.VALIDATOR -> menuInflater.inflate(R.menu.menu_validator, menu)
+                OrganizationRole.USER -> menuInflater.inflate(R.menu.menu_user, menu)
+            }
+        } else {
+            when (organizationRole) {
+                OrganizationRole.OWNER, OrganizationRole.ADMIN -> menuInflater.inflate(R.menu.menu_admin, menu)
+                OrganizationRole.PUBLISHER -> menuInflater.inflate(R.menu.menu_publisher, menu)
+                OrganizationRole.VALIDATOR -> menuInflater.inflate(R.menu.menu_validator, menu)
+                OrganizationRole.USER -> menuInflater.inflate(R.menu.menu_user, menu)
+            }
         }
+
         if (!menuIsShown) {
             for (i in 0 until menu.size()) {
                 menu.getItem(i).isVisible = false
@@ -178,29 +199,35 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         var validSelection = true
         when (item.itemId) {
             R.id.action_admin_mode -> {
-                AppTicketChecker.selectedOrganization = AppTicketChecker.selectedOrganization?.copy(pretendedRole = OrganizationRole.ADMIN)
-                switchViews()
-                tvCurrentRole.text = AppTicketChecker.selectedOrganization!!.pretendedRole.name
+                val pretendedRole = OrganizationRole.ADMIN
+                switchViews(pretendedRole)
+                tvCurrentRole.text = pretendedRole.name
                 currentMenuItemId = R.id.action_admin_mode
+                AppTicketChecker.selectedOrganizationMembership = AppTicketChecker.selectedOrganizationMembership?.copy(pretendedRole = pretendedRole)
             }
             R.id.action_publisher_mode -> {
-                AppTicketChecker.selectedOrganization = AppTicketChecker.selectedOrganization?.copy(pretendedRole = OrganizationRole.PUBLISHER)
-                switchViews()
-                tvCurrentRole.text = AppTicketChecker.selectedOrganization!!.pretendedRole.name
+                val pretendedRole = OrganizationRole.PUBLISHER
+                switchViews(pretendedRole)
+                tvCurrentRole.text = pretendedRole.name
                 currentMenuItemId = R.id.action_publisher_mode
+                AppTicketChecker.selectedOrganizationMembership = AppTicketChecker.selectedOrganizationMembership?.copy(pretendedRole = pretendedRole)
             }
             R.id.action_validator_mode -> {
-                AppTicketChecker.selectedOrganization = AppTicketChecker.selectedOrganization?.copy(pretendedRole = OrganizationRole.VALIDATOR)
-                switchViews()
-                tvCurrentRole.text = AppTicketChecker.selectedOrganization!!.pretendedRole.name
+                val pretendedRole = OrganizationRole.VALIDATOR
+                switchViews(pretendedRole)
+                tvCurrentRole.text = pretendedRole.name
                 currentMenuItemId = R.id.action_validator_mode
+                AppTicketChecker.selectedOrganizationMembership = AppTicketChecker.selectedOrganizationMembership?.copy(pretendedRole = pretendedRole)
             }
             R.id.action_user_mode -> {
-                AppTicketChecker.selectedOrganization = AppTicketChecker.selectedOrganization?.copy(pretendedRole = OrganizationRole.USER)
-                switchViews()
-                tvCurrentRole.text = AppTicketChecker.selectedOrganization!!.pretendedRole.name
+                val pretendedRole = OrganizationRole.USER
+                switchViews(pretendedRole)
+                tvCurrentRole.text = pretendedRole.name
                 currentMenuItemId = R.id.action_user_mode
+                AppTicketChecker.selectedOrganizationMembership = AppTicketChecker.selectedOrganizationMembership?.copy(pretendedRole = pretendedRole)
             }
+            R.id.action_select_organization -> toSelectOrganization()
+            R.id.action_my_profile -> toMyProfile()
             R.id.action_logout -> logout()
             else -> {
                 validSelection = false
@@ -229,8 +256,8 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun switchViews() {
-        when (AppTicketChecker.selectedOrganization!!.pretendedRole) {
+    private fun switchViews(role: OrganizationRole) {
+        when (role) {
             OrganizationRole.OWNER, OrganizationRole.ADMIN -> {
                 cvScan.visibility = View.VISIBLE
                 cvStatistics.visibility = View.VISIBLE
@@ -260,22 +287,20 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun updateProfileInfo() {
-        if (firstLoadHappen) {
-            findViewById<ProgressBar>(R.id.lsName).visibility = View.GONE
-            findViewById<ProgressBar>(R.id.lsCreated).visibility = View.GONE
-            findViewById<ProgressBar>(R.id.lsHighestRole).visibility = View.GONE
-            findViewById<ProgressBar>(R.id.lsCurrentRole).visibility = View.GONE
-            findViewById<ProgressBar>(R.id.lsCreatedTickets).visibility = View.GONE
-            findViewById<ProgressBar>(R.id.lsValidatedTickets).visibility = View.GONE
+    private fun updateOrganizationMemberInfo(member: OrganizationMemberWithPretendedRole) {
+        findViewById<ProgressBar>(R.id.lsName).visibility = View.GONE
+        findViewById<ProgressBar>(R.id.lsJoined).visibility = View.GONE
+        findViewById<ProgressBar>(R.id.lsHighestRole).visibility = View.GONE
+        findViewById<ProgressBar>(R.id.lsCurrentRole).visibility = View.GONE
+        findViewById<ProgressBar>(R.id.lsCreatedTickets).visibility = View.GONE
+        findViewById<ProgressBar>(R.id.lsValidatedTickets).visibility = View.GONE
 
-            tvName.text = AppTicketChecker.loggedInUser?.name
-//            tvCreated.text = DATE_FORMAT_MONTH_NAME.format(AppTicketChecker.loggedInUser?.createdAt)
-            tvHighestRole.text = AppTicketChecker.selectedOrganization!!.role.role
-            tvCurrentRole.text = AppTicketChecker.selectedOrganization!!.pretendedRole.role
-            tvCreatedTickets.text = "0"
-            tvValidatedTickets.text = "0"
-        }
+        tvName.text = member.name
+        tvJoined.text = DATE_FORMAT_MONTH_NAME.format(member.joinedAt)
+        tvHighestRole.text = member.role.role
+        tvCurrentRole.text = member.pretendedRole.role
+        tvCreatedTickets.text = member.soldTicketsNo.toString()
+        tvValidatedTickets.text = member.validatedTicketsNo.toString()
     }
 
     private fun checkMenuItem(menuItemId: Int) {
@@ -287,12 +312,25 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    private fun toSelectOrganization() {
+        AppTicketChecker.selectedOrganizationMembership = null
+        finish()
+    }
+
+    private fun toMyProfile() {
+        val intent  = Intent(this@ActivityMenu, ActivityProfile::class.java)
+        intent.putExtra(ActivityProfile.USER_ID, AppTicketChecker.loggedInUser!!.id)
+        startActivity(intent)
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+    }
+
     private fun logout() {
         AppTicketChecker.clearSession()
         val intent = Intent(this, ActivityLogin::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(intent)
+        finish()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -301,6 +339,9 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     }
 
     companion object {
+        const val ORGANIZATION_ID = "organizationId"
+        const val ORGANIZATION_NAME = "organizationName"
+        const val ORGANIZATION_ROLE = "organizationRole"
         private const val CURRENT_MENU_ITEM_ID = "currentMenuItemId"
     }
 

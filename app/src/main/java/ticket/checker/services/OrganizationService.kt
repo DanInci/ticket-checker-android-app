@@ -47,6 +47,9 @@ interface OrganizationService {
 
     // organization members routes
 
+    @GET("organizations/{organizationId}/users/me")
+    fun getMyOrganizationMembership(@Path("organizationId") id: UUID): Call<OrganizationMember>
+
     @GET("organizations/{organizationId}/users")
     fun getOrganizationMembers(@Path("organizationId") id: UUID, @Query("page") pageNumber: Int?, @Query("pageSize") pageSize: Int?): Call<List<OrganizationMemberList>>
 

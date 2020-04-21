@@ -30,7 +30,7 @@ class AppTicketChecker : Application() {
 
         fun isLoggedIn(): Boolean { return loggedInUser != null }
         var loggedInUser: UserProfile? = null
-        var selectedOrganization: OrganizationMembership? = null
+        var selectedOrganizationMembership: OrganizationMemberWithPretendedRole? = null
 
         private val masterKeyAlias by lazy { MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC) }
 
@@ -46,7 +46,7 @@ class AppTicketChecker : Application() {
 
         fun clearSession() {
             this.loggedInUser = null
-            this.selectedOrganization = null
+            this.selectedOrganizationMembership = null
             this.savedSessionEmail = null
             this.savedSessionPassword = null
             ServiceManager.invalidateSession()

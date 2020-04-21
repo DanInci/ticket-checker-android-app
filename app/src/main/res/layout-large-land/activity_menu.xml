@@ -152,14 +152,14 @@
                                     android:layout_height="wrap_content">
 
                                     <TextView
-                                        android:id="@+id/createdLabel"
+                                        android:id="@+id/joinedLabel"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Created: "
+                                        android:text="Joined: "
                                         android:textStyle="bold" />
 
                                     <TextView
-                                        android:id="@+id/created"
+                                        android:id="@+id/joined"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_alignParentEnd="true"
@@ -168,7 +168,7 @@
                                         android:textStyle="normal" />
 
                                     <ProgressBar
-                                        android:id="@+id/lsCreated"
+                                        android:id="@+id/lsJoined"
                                         android:layout_width="18dp"
                                         android:layout_height="18dp"
                                         android:layout_alignParentEnd="true"

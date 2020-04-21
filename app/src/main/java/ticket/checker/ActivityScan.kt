@@ -68,7 +68,7 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener, BarcodeTypeChang
                 val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                 vibrator.vibrate(300)
                 val code = qrCodes.get(qrCodes.keyAt(0))
-                val dialogScan = DialogScan.newInstance(code.rawValue, AppTicketChecker.selectedOrganization!!.id, AppTicketChecker.selectedOrganization!!.pretendedRole)
+                val dialogScan = DialogScan.newInstance(code.rawValue, AppTicketChecker.selectedOrganizationMembership!!.organizationId, AppTicketChecker.selectedOrganizationMembership!!.pretendedRole)
                 dialogScan.scanDialogListener = scanDialogListener
                 dialogScan.show(supportFragmentManager, "DIALOG_SCAN")
             }

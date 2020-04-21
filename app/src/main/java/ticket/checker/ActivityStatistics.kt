@@ -168,9 +168,9 @@ class ActivityStatistics : AppCompatActivity() {
     private fun reloadData() {
         refreshLayout.isEnabled = false
         val limit : Int = if(resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) { STATS_LIMIT_LANDSCAPE } else { STATS_LIMIT_PORTRAIT }
-        val callValidated = ServiceManager.getStatisticsService().getTicketsStatistics(AppTicketChecker.selectedOrganization!!.id, TicketCategory.VALIDATED, currentInterval, limit, null)
+        val callValidated = ServiceManager.getStatisticsService().getTicketsStatistics(AppTicketChecker.selectedOrganizationMembership!!.organizationId, TicketCategory.VALIDATED, currentInterval, limit, null)
         callValidated.enqueue(statisticsCallback)
-        val callSold = ServiceManager.getStatisticsService().getTicketsStatistics(AppTicketChecker.selectedOrganization!!.id, TicketCategory.SOLD, currentInterval, limit, null)
+        val callSold = ServiceManager.getStatisticsService().getTicketsStatistics(AppTicketChecker.selectedOrganizationMembership!!.organizationId, TicketCategory.SOLD, currentInterval, limit, null)
         callSold.enqueue(statisticsCallback)
     }
 

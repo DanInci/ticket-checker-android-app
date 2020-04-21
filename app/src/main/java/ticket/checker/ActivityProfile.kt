@@ -209,6 +209,8 @@ class ActivityProfile : AppCompatActivity(), View.OnClickListener, DialogExitLis
         tvEmail.text = user.email
         tvName.text = user.name
         tvCreatedAt.text = Util.DATE_TIME_FORMAT.format(user.createdAt)
+
+        AppTicketChecker.loggedInUser = user
     }
 
     private fun <T> onErrorResponse(call: Call<T>, response: Response<T>?) {
