@@ -78,7 +78,7 @@ abstract class AItemsAdapter<T>(context : Context) : RecyclerView.Adapter<Recycl
         }
     }
 
-    fun updateItemsList(updatedItems: List<T>) {
+    open fun updateItemsList(updatedItems: List<T>) {
         val startItemsIndex = items.size
         val endItemsIndex = startItemsIndex + updatedItems.size
         items.addAll(updatedItems)
@@ -86,7 +86,7 @@ abstract class AItemsAdapter<T>(context : Context) : RecyclerView.Adapter<Recycl
         notifyItemRangeInserted(startItemsIndex, endItemsIndex)
     }
 
-    fun resetItemsList() {
+    open fun resetItemsList() {
         val endItemsIndex = items.size + ADAPTER_COUNT_FOOTER
         items = mutableListOf()
         notifyItemRangeRemoved(0, endItemsIndex)

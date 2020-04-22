@@ -118,7 +118,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_menu)
 
         this.organizationId = if(AppTicketChecker.selectedOrganizationMembership != null) AppTicketChecker.selectedOrganizationMembership!!.organizationId else intent.getSerializableExtra(ORGANIZATION_ID) as UUID
-        this.organizationName = if(AppTicketChecker.selectedOrganizationMembership != null) AppTicketChecker.selectedOrganizationMembership!!.organizationName else intent.getStringExtra(ORGANIZATION_NAME)
+        this.organizationName = if(AppTicketChecker.selectedOrganizationMembership != null) AppTicketChecker.selectedOrganizationMembership!!.organizationName else intent.getStringExtra(ORGANIZATION_NAME)!!
         this.organizationRole = if(AppTicketChecker.selectedOrganizationMembership != null) AppTicketChecker.selectedOrganizationMembership!!.role else intent.getSerializableExtra(ORGANIZATION_ROLE) as OrganizationRole
         this.currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM_ID) ?: -1
 
@@ -140,7 +140,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
             switchViews(organizationRole)
         }
 
-        val call: Call<OrganizationMember> = ServiceManager.getOrganizationService().getMyOrganizationMembership(organizationId)
+        val call: Call<OrganizationMember> = ServiceManager.getOrganizationService().getOrganizationMemberById(organizationId, AppTicketChecker.loggedInUser!!.id)
         call.enqueue(organizationMemberCallback)
     }
 
@@ -199,30 +199,30 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         var validSelection = true
         when (item.itemId) {
             R.id.action_admin_mode -> {
-                val pretendedRole = OrganizationRole.ADMIN
+                val pretendedRole = AppTicketChecker.selectedOrganizationMembership!!.role
                 switchViews(pretendedRole)
-                tvCurrentRole.text = pretendedRole.name
+                tvCurrentRole.text = pretendedRole.role.toUpperCase()
                 currentMenuItemId = R.id.action_admin_mode
                 AppTicketChecker.selectedOrganizationMembership = AppTicketChecker.selectedOrganizationMembership?.copy(pretendedRole = pretendedRole)
             }
             R.id.action_publisher_mode -> {
                 val pretendedRole = OrganizationRole.PUBLISHER
                 switchViews(pretendedRole)
-                tvCurrentRole.text = pretendedRole.name
+                tvCurrentRole.text = pretendedRole.role.toUpperCase()
                 currentMenuItemId = R.id.action_publisher_mode
                 AppTicketChecker.selectedOrganizationMembership = AppTicketChecker.selectedOrganizationMembership?.copy(pretendedRole = pretendedRole)
             }
             R.id.action_validator_mode -> {
                 val pretendedRole = OrganizationRole.VALIDATOR
                 switchViews(pretendedRole)
-                tvCurrentRole.text = pretendedRole.name
+                tvCurrentRole.text = pretendedRole.role.toUpperCase()
                 currentMenuItemId = R.id.action_validator_mode
                 AppTicketChecker.selectedOrganizationMembership = AppTicketChecker.selectedOrganizationMembership?.copy(pretendedRole = pretendedRole)
             }
             R.id.action_user_mode -> {
                 val pretendedRole = OrganizationRole.USER
                 switchViews(pretendedRole)
-                tvCurrentRole.text = pretendedRole.name
+                tvCurrentRole.text = pretendedRole.role.toUpperCase()
                 currentMenuItemId = R.id.action_user_mode
                 AppTicketChecker.selectedOrganizationMembership = AppTicketChecker.selectedOrganizationMembership?.copy(pretendedRole = pretendedRole)
             }
@@ -242,8 +242,8 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View) {
         when (v.id) {
             R.id.controlPanel -> {
-//                val intent = Intent(this, ActivityControlPanel::class.java)
-//                startActivity(intent)
+                val intent = Intent(this, ActivityControlPanel::class.java)
+                startActivity(intent)
             }
             R.id.scan -> {
                 val intent = Intent(this, ActivityScan::class.java)
@@ -297,8 +297,8 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
 
         tvName.text = member.name
         tvJoined.text = DATE_FORMAT_MONTH_NAME.format(member.joinedAt)
-        tvHighestRole.text = member.role.role
-        tvCurrentRole.text = member.pretendedRole.role
+        tvHighestRole.text = member.role.role.toUpperCase()
+        tvCurrentRole.text = member.pretendedRole.role.toUpperCase()
         tvCreatedTickets.text = member.soldTicketsNo.toString()
         tvValidatedTickets.text = member.validatedTicketsNo.toString()
     }

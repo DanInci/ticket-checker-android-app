@@ -13,19 +13,23 @@ import android.widget.ProgressBar
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import ticket.checker.ActivityMenu.Companion.ORGANIZATION_ID
 import ticket.checker.R
 import ticket.checker.admin.listeners.ListChangeListener
 import ticket.checker.admin.listeners.EndlessScrollListener
 import ticket.checker.admin.listeners.FilterChangeListener
 import ticket.checker.admin.listeners.RecyclerItemClickListener
 import ticket.checker.extras.Util
+import java.util.*
 
 /**
  * Created by Dani on 09.02.2018.
  */
 abstract class AAdminFragment<T, Y> : Fragment(), FilterChangeListener, ListChangeListener<T>, RecyclerItemClickListener.OnItemClickListener {
-    protected var filterType: String? = "NOT_INITIALISED"
-    protected var filterValue: String = ""
+
+    protected var filterType: String? = null
+    protected lateinit var filterValue: String
+    protected lateinit var organizationId: UUID
 
     abstract val loadLimit: Int
     private var firstLoad = true
@@ -75,8 +79,9 @@ abstract class AAdminFragment<T, Y> : Fragment(), FilterChangeListener, ListChan
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (filterType == "NOT_INITIALISED") {
-            filterType = arguments?.getString(FILTER_TYPE)
+        if (filterType == null) {
+            organizationId = arguments?.getSerializable(ORGANIZATION_ID) as UUID
+            filterType = arguments?.getString(FILTER_TYPE) ?: ""
             filterValue = arguments?.getString(FILTER_VALUE) ?: ""
         }
     }

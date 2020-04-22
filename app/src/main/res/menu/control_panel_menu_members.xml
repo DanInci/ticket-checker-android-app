@@ -16,6 +16,10 @@
         android:checkable="true"
         android:title="All" />
     <item
+        android:id="@+id/action_owner"
+        android:checkable="true"
+        android:title="Owner" />
+    <item
         android:id="@+id/action_admins"
         android:checkable="true"
         android:title="Admins" />

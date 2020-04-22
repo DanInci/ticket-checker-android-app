@@ -59,7 +59,7 @@ class ActivityControlPanel : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         btnBack.setOnClickListener { finish() }
 
-        if(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole == OrganizationRole.ADMIN) {
+        if(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole == OrganizationRole.OWNER || AppTicketChecker.selectedOrganizationMembership!!.pretendedRole == OrganizationRole.ADMIN) {
             navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         }
         else {
@@ -76,10 +76,10 @@ class ActivityControlPanel : AppCompatActivity() {
         membersFilterType = savedInstanceState?.getString(MEMBERS_FILTER_TYPE)
         membersFilterValue = savedInstanceState?.getString(MEMBERS_FILTER_VALUE) ?: ""
 
-        ticketsFragment = if(currentTicketsQuery == null) TicketsFragment.newInstance(ticketsFilterType, ticketsFilterValue)
-                                else TicketsFragment.newInstance(FILTER_SEARCH, currentTicketsQuery as String)
-        membersFragment = if(currentMembersQuery == null) OrganizationMembersFragment.newInstance(membersFilterType, membersFilterValue)
-                                else OrganizationMembersFragment.newInstance(FILTER_SEARCH, currentMembersQuery as String)
+        ticketsFragment = if(currentTicketsQuery == null) TicketsFragment.newInstance(AppTicketChecker.selectedOrganizationMembership!!.organizationId, ticketsFilterType, ticketsFilterValue)
+                                else TicketsFragment.newInstance(AppTicketChecker.selectedOrganizationMembership!!.organizationId, FILTER_SEARCH, currentTicketsQuery as String)
+        membersFragment = if(currentMembersQuery == null) OrganizationMembersFragment.newInstance(AppTicketChecker.selectedOrganizationMembership!!.organizationId, membersFilterType, membersFilterValue)
+                                else OrganizationMembersFragment.newInstance(AppTicketChecker.selectedOrganizationMembership!!.organizationId, FILTER_SEARCH, currentMembersQuery as String)
 
         switchFragment(currentFragmentId)
     }
@@ -124,6 +124,13 @@ class ActivityControlPanel : AppCompatActivity() {
                     checkMenuItem(item.itemId)
                     updateFilter(membersFilterType, membersFilterValue)
                     currentMembersMenuItemId = R.id.action_members_all
+                }
+                R.id.action_owner -> {
+                    membersFilterType = FILTER_ROLE
+                    membersFilterValue = OrganizationRole.OWNER.role
+                    checkMenuItem(item.itemId)
+                    updateFilter(membersFilterType, membersFilterValue)
+                    currentMembersMenuItemId = R.id.action_owner
                 }
                 R.id.action_admins -> {
                     membersFilterType = FILTER_ROLE

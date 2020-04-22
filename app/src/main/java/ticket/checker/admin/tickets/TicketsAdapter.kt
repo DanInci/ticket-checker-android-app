@@ -55,30 +55,20 @@ class TicketsAdapter(val context: Context) : AItemsAdapterWithHeader<TicketList,
 //    }
 
     override fun itemAdded(addedItem: TicketList) {
-        var newItemStats = headerItem?: 0
+        super.itemAdded(addedItem)
+        var newItemStats = headerItem ?: 0
         newItemStats++
-        items.add(0, addedItem)
-        notifyItemInserted(1)
         updateHeaderInfo(filterType, filterValue, newItemStats)
     }
 
-    override fun itemEdited(editedItem: TicketList, position: Int) {
-        if(isItemPosition(position)) {
-            items.removeAt(position -1)
-            items.add(position - 1, editedItem)
-            notifyItemChanged(position)
-        }
-    }
-
     override fun itemRemoved(position: Int) {
+        super.itemRemoved(position)
         if(isItemPosition(position)) {
             var newItemStats = headerItem ?: 0
             newItemStats--
             if (items[position - 1].validatedAt != null) {
                 newItemStats--
             }
-            items.removeAt(position - 1)
-            notifyItemRemoved(position)
             updateHeaderInfo(filterType, filterValue, newItemStats)
         }
     }

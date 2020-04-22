@@ -52,27 +52,17 @@ class OrganizationMembersAdapter(val context : Context) : AItemsAdapterWithHeade
 //    }
 
     override fun itemAdded(addedItem: OrganizationMemberList) {
+        super.itemAdded(addedItem)
         var newItemStats = headerItem?: 0
-        items.add(0,addedItem)
-        notifyItemInserted(1)
         newItemStats++
         updateHeaderInfo(filterType, filterValue, newItemStats)
     }
 
-    override fun itemEdited(editedItem: OrganizationMemberList, position: Int) {
-        if(isItemPosition(position)) {
-            items.removeAt(position - 1)
-            items.add(position - 1, editedItem)
-            notifyItemChanged(position)
-        }
-    }
-
     override fun itemRemoved(position: Int) {
+        super.itemRemoved(position)
         if(isItemPosition(position)) {
             var newItemStats = headerItem ?: 0
             newItemStats--
-            items.removeAt(position - 1)
-            notifyItemRemoved(position)
             updateHeaderInfo(filterType, filterValue, newItemStats)
         }
     }

@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 enum class OrganizationRole(val role : String, val colorResource : Int ) : Serializable {
 
-    @SerializedName("OrganizationOwner")
+    @SerializedName("OrganizationOwner") //TODO This does not convert ok to query param
     OWNER("Owner", R.color.noRed),
 
     @SerializedName("Admin")
@@ -24,7 +24,7 @@ enum class OrganizationRole(val role : String, val colorResource : Int ) : Seria
 
     companion object {
         fun from(role : String) : OrganizationRole? = when(role) {
-            "OrganizationOwner" -> OWNER
+            "Owner" -> OWNER
             "Admin" -> ADMIN
             "Publisher" -> PUBLISHER
             "Validator" -> VALIDATOR
@@ -33,7 +33,7 @@ enum class OrganizationRole(val role : String, val colorResource : Int ) : Seria
         }
 
         fun to(role : OrganizationRole) : String = when(role) {
-            OWNER -> "OrganizationOwner"
+            OWNER -> "Owner"
             ADMIN -> "Admin"
             PUBLISHER -> "Publisher"
             VALIDATOR -> "Validator"

@@ -57,7 +57,7 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
         object : EndlessScrollListener(layoutManager) {
             override fun onLoadMore(page: Int, totalItemsCount: Int, recyclerView: RecyclerView) {
                 itemsAdapter.setLoading(true)
-                loadMyOrganizations(page+1, PAGE_SIZE)
+                loadMyOrganizations(page, PAGE_SIZE)
             }
         }
     }
@@ -201,7 +201,7 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
 
     private fun reloadAll() {
         onResetFirstLoad()
-        loadMyOrganizations(1, PAGE_SIZE)
+        loadMyOrganizations(0, PAGE_SIZE)
     }
 
     private fun onResetFirstLoad() {

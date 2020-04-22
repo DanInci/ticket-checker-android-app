@@ -63,7 +63,7 @@ class DialogInvitations internal constructor() : DialogFragment(), View.OnClickL
         object : EndlessScrollListener(layoutManager) {
             override fun onLoadMore(page: Int, totalItemsCount: Int, recyclerView: RecyclerView) {
                 itemsAdapter.setLoading(true)
-                loadPendingInvitations(page+1, PAGE_SIZE)
+                loadPendingInvitations(page, PAGE_SIZE)
             }
         }
     }
@@ -192,7 +192,7 @@ class DialogInvitations internal constructor() : DialogFragment(), View.OnClickL
 
     private fun reloadAll() {
         onResetFirstLoad()
-        loadPendingInvitations(1, PAGE_SIZE)
+        loadPendingInvitations(0, PAGE_SIZE)
     }
 
     private fun onResetFirstLoad() {

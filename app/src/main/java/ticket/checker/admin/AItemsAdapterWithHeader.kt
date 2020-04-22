@@ -13,7 +13,7 @@ abstract class AItemsAdapterWithHeader<T, Y>(context : Context) : AItemsAdapter<
     }
 
     protected var headerItem : Y? = null
-    protected var headerHolder : RecyclerView.ViewHolder? = null
+    private var headerHolder : RecyclerView.ViewHolder? = null
 
     protected var filterType : String? = null
     protected var filterValue : String = ""
@@ -52,7 +52,7 @@ abstract class AItemsAdapterWithHeader<T, Y>(context : Context) : AItemsAdapter<
     }
 
     override fun getItemCount(): Int {
-        return super.getItemCount() + ADAPTER_COUNT_HEADER
+        return items.size + ADAPTER_COUNT_HEADER + ADAPTER_COUNT_FOOTER
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -72,16 +72,39 @@ abstract class AItemsAdapterWithHeader<T, Y>(context : Context) : AItemsAdapter<
         if(isItemPosition(position)) {
             items.removeAt(position-1)
             items.add(position-1, editedItem)
-            notifyItemChanged(position-1)
+            notifyItemChanged(position)
         }
     }
 
     override fun itemRemoved(position : Int) {
         if(isItemPosition(position)) {
             items.removeAt(position-1)
-            notifyItemRemoved(position-1)
+            notifyItemRemoved(position)
         }
     }
+
+    override fun getItemId(position: Int): Long {
+        return when(position) {
+            0, items.size + 1 -> RecyclerView.NO_ID
+            else -> getItemId(items[position - 1])
+        }
+    }
+
+    override fun updateItemsList(updatedItems: List<T>) {
+        val startItemsIndex = items.size + ADAPTER_COUNT_HEADER
+        val endItemsIndex = startItemsIndex + updatedItems.size - ADAPTER_COUNT_HEADER
+        items.addAll(updatedItems)
+        notifyItemRemoved(startItemsIndex) // footer is removed
+        notifyItemRangeInserted(startItemsIndex, endItemsIndex)
+    }
+
+    override fun resetItemsList() {
+        val endItemsIndex = items.size + ADAPTER_COUNT_HEADER + ADAPTER_COUNT_FOOTER
+        items = mutableListOf()
+        setHeaderVisibility(headerHolder as RecyclerView.ViewHolder, false)
+        notifyItemRangeRemoved(ADAPTER_COUNT_HEADER, endItemsIndex)
+    }
+
 
     fun updateHeaderInfo(filterT: String?, filterV : String, headerItem: Y) {
         this.filterType = filterT

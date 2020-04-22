@@ -13,10 +13,10 @@ import java.util.*
 
 interface StatisticsService {
 
-    @GET("organizations/{organizationId}/users")
+    @GET("statistics/organizations/{organizationId}/users")
     fun getOrganizationMembersNumber(@Path("organizationId") id: UUID, @Query("role") role: OrganizationRole?, @Query("search") searchValue: String?): Call<Int>
 
-    @GET("organizations/{organizationId}/tickets")
+    @GET("statistics/organizations/{organizationId}/tickets")
     fun getTicketsNumbers(@Path("organizationId") id: UUID, @Query("category") ticketCategory: TicketCategory?, @Query("search") searchValue: String?): Call<Int>
 
     @GET("statistics/organizations/{organizationId}/tickets")

@@ -3,15 +3,15 @@ package ticket.checker.admin.tickets
 import android.os.Bundle
 import ticket.checker.ActivityControlPanel.Companion.FILTER_SEARCH
 import ticket.checker.ActivityControlPanel.Companion.FILTER_VALIDATED
+import ticket.checker.ActivityMenu.Companion.ORGANIZATION_ID
 import ticket.checker.admin.AAdminFragment
 import ticket.checker.admin.AItemsAdapterWithHeader
 import ticket.checker.beans.TicketList
+import ticket.checker.extras.TicketCategory
 import ticket.checker.services.ServiceManager
 import java.util.*
 
 class TicketsFragment : AAdminFragment<TicketList, Int>() {
-
-    private lateinit var organizationId: UUID
 
     override val loadLimit: Int
         get() = 20
@@ -21,12 +21,30 @@ class TicketsFragment : AAdminFragment<TicketList, Int>() {
     }
 
     override fun loadHeader(filterType : String?, filterValue : String) {
-        val call = ServiceManager.getStatisticsService().getTicketsNumbers(organizationId, null, null) // TODO include filterType and filterValue
+        val call = when(filterType) {
+            FILTER_VALIDATED ->
+                when(filterValue) {
+                    "true" -> ServiceManager.getStatisticsService().getTicketsNumbers(organizationId, TicketCategory.VALIDATED, null)
+                    "false" -> ServiceManager.getStatisticsService().getTicketsNumbers(organizationId, TicketCategory.SOLD, null)
+                    else -> ServiceManager.getStatisticsService().getTicketsNumbers(organizationId, null, null)
+                }
+            FILTER_SEARCH -> ServiceManager.getStatisticsService().getTicketsNumbers(organizationId, null, filterValue)
+            else -> ServiceManager.getStatisticsService().getTicketsNumbers(organizationId, null, null)
+        }
         call.enqueue(headerCallback)
     }
 
     override fun loadItems(page: Int, filterType: String?, filterValue : String?) {
-        val call = ServiceManager.getTicketService().getTicketsForOrganization(organizationId, page, loadLimit, null, null, null) // TODO include filterType and filterValue
+        val call = when(filterType) {
+            FILTER_VALIDATED ->
+                when(filterValue) {
+                    "true" -> ServiceManager.getTicketService().getTicketsForOrganization(organizationId, page, loadLimit, TicketCategory.VALIDATED, null, null)
+                    "false" -> ServiceManager.getTicketService().getTicketsForOrganization(organizationId, page, loadLimit, TicketCategory.SOLD, null, null)
+                    else -> ServiceManager.getTicketService().getTicketsForOrganization(organizationId, page, loadLimit, null, null, null)
+                }
+            FILTER_SEARCH -> ServiceManager.getTicketService().getTicketsForOrganization(organizationId, page, loadLimit, null,null, filterValue)
+            else -> ServiceManager.getTicketService().getTicketsForOrganization(organizationId, page, loadLimit, null, null, null)
+        }
         call.enqueue(itemsCallback)
     }
 
@@ -73,9 +91,10 @@ class TicketsFragment : AAdminFragment<TicketList, Int>() {
     }
 
     companion object {
-        fun newInstance(filterType : String?, filterValue : String): TicketsFragment {
+        fun newInstance(organizationId: UUID, filterType : String?, filterValue : String): TicketsFragment {
             val fragment = TicketsFragment()
             val args = Bundle()
+            args.putSerializable(ORGANIZATION_ID, organizationId)
             args.putString(FILTER_TYPE, filterType)
             args.putString(FILTER_VALUE, filterValue)
             fragment.arguments = args

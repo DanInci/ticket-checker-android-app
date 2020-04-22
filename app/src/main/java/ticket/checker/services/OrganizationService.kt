@@ -4,6 +4,7 @@ import retrofit2.Call
 import retrofit2.http.*
 import ticket.checker.beans.*
 import ticket.checker.extras.InviteStatus
+import ticket.checker.extras.OrganizationRole
 import java.util.*
 
 interface OrganizationService {
@@ -47,14 +48,11 @@ interface OrganizationService {
 
     // organization members routes
 
-    @GET("organizations/{organizationId}/users/me")
-    fun getMyOrganizationMembership(@Path("organizationId") id: UUID): Call<OrganizationMember>
-
-    @GET("organizations/{organizationId}/users/me")
-    fun getOrganizationMemberById(@Path("organizationId") id: UUID, userId: UUID): Call<OrganizationMember>
+    @GET("organizations/{organizationId}/users/{userId}")
+    fun getOrganizationMemberById(@Path("organizationId") id: UUID, @Path("userId") userId: UUID): Call<OrganizationMember>
 
     @GET("organizations/{organizationId}/users")
-    fun getOrganizationMembers(@Path("organizationId") id: UUID, @Query("page") pageNumber: Int?, @Query("pageSize") pageSize: Int?): Call<List<OrganizationMemberList>>
+    fun getOrganizationMembers(@Path("organizationId") id: UUID, @Query("page") pageNumber: Int?, @Query("pageSize") pageSize: Int?, @Query("role") role: OrganizationRole?, @Query("search") searchValue: String?): Call<List<OrganizationMemberList>>
 
     @PUT("organizations/{organizationId}/users/{userId}")
     fun updateOrganizationMemberById(@Path("organizationId") id: UUID, @Path("userId") userId: UUID, @Body definition: OrganizationMemberDefinition): Call<OrganizationMember>
