@@ -12,7 +12,7 @@
         android:title="Search"
         app:showAsAction="always" />
     <item
-        android:id="@+id/action_users_all"
+        android:id="@+id/action_members_all"
         android:checkable="true"
         android:title="All" />
     <item

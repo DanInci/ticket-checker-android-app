@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="ticket.checker.admin.tickets.DialogAddTicket"
+    tools:context="ticket.checker.admin.members.DialogEditOrganizationMember"
     android:background="@drawable/bg_dialog_content"
     android:orientation="vertical">
 
@@ -53,24 +53,6 @@
             android:layout_marginBottom="10dp"
             android:layout_centerInParent="true">
 
-            <EditText
-                android:id="@+id/etName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/et_dialog_style"
-                android:textColor="@color/text_style"
-                android:hint="NAME"
-                android:textColorHint="@color/darkerGrey"
-                android:drawablePadding="15dp"
-                android:drawableLeft="@drawable/ic_name"
-                android:textSize="20sp"
-                android:inputType="textVisiblePassword"
-                android:maxLength="100"
-                android:padding="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:enabled="false"/>
-
             <Spinner
                 android:id="@+id/spinnerRole"
                 android:layout_width="match_parent"
@@ -99,7 +81,7 @@
                     android:drawableEnd="@drawable/ic_edit"
                     android:paddingEnd="10dp"
                     android:paddingStart="10dp"
-                    android:text="Edit User"
+                    android:text="Change member role"
                     android:textAllCaps="false"
                     android:layout_gravity="center"
                     android:textColor="@drawable/btn_text_color"

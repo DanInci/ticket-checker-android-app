@@ -1,60 +1,62 @@
-package ticket.checker.admin.tickets
+package ticket.checker.admin.members
 
 import android.os.Bundle
+import ticket.checker.ActivityControlPanel.Companion.FILTER_ROLE
 import ticket.checker.ActivityControlPanel.Companion.FILTER_SEARCH
-import ticket.checker.ActivityControlPanel.Companion.FILTER_VALIDATED
 import ticket.checker.admin.AAdminFragment
 import ticket.checker.admin.AItemsAdapterWithHeader
-import ticket.checker.beans.TicketList
+import ticket.checker.beans.OrganizationMemberList
 import ticket.checker.services.ServiceManager
 import java.util.*
 
-class TicketsFragment : AAdminFragment<TicketList, Int>() {
+class OrganizationMembersFragment : AAdminFragment<OrganizationMemberList, Int>() {
 
     private lateinit var organizationId: UUID
 
     override val loadLimit: Int
         get() = 20
 
-    override fun setupItemsAdapter(): AItemsAdapterWithHeader<TicketList, Int> {
-       return TicketsAdapter(context!!)
+    override fun setupItemsAdapter(): AItemsAdapterWithHeader<OrganizationMemberList, Int> {
+        val usersAdapter = OrganizationMembersAdapter(context!!)
+        usersAdapter.setHasStableIds(true)
+        return usersAdapter
     }
 
-    override fun loadHeader(filterType : String?, filterValue : String) {
-        val call = ServiceManager.getStatisticsService().getTicketsNumbers(organizationId, null, null) // TODO include filterType and filterValue
+    override fun loadHeader(filterType: String?, filterValue : String) {
+        val call = ServiceManager.getStatisticsService().getOrganizationMembersNumber(organizationId, null, null) // TODO include filterType and filterValue
         call.enqueue(headerCallback)
     }
 
     override fun loadItems(page: Int, filterType: String?, filterValue : String?) {
-        val call = ServiceManager.getTicketService().getTicketsForOrganization(organizationId, page, loadLimit, null, null, null) // TODO include filterType and filterValue
+        val call = ServiceManager.getOrganizationService().getOrganizationMembers(organizationId, page, loadLimit) // TODO include filterType and filterValue
         call.enqueue(itemsCallback)
     }
 
-    override fun onAdd(addedObject: TicketList) {
+    override fun onAdd(addedObject: OrganizationMemberList) {
         when(filterType) {
             null -> {
                 itemsAdapter.itemAdded(addedObject)
             }
-            FILTER_VALIDATED -> {
-                if(filterValue != "true") {
+            FILTER_ROLE -> {
+                if(addedObject.role.role == filterValue) {
                     itemsAdapter.itemAdded(addedObject)
                 }
             }
             FILTER_SEARCH -> {
-                if(addedObject.id.startsWith(filterValue, true) || (addedObject.soldTo != null && addedObject.soldTo.startsWith(filterValue, true))) {
+                if(addedObject.name.startsWith(filterValue, true)) {
                     itemsAdapter.itemAdded(addedObject)
                 }
             }
         }
     }
 
-    override fun onEdit(editedObject: TicketList, editedObjectPosition: Int) {
+    override fun onEdit(editedObject: OrganizationMemberList, editedObjectPosition: Int) {
         when(filterType) {
             null -> {
                 itemsAdapter.itemEdited(editedObject, editedObjectPosition)
             }
-            FILTER_VALIDATED -> {
-                if((editedObject.validatedAt == null && filterValue == "false") || (editedObject.validatedAt != null && filterValue == "true")) {
+            FILTER_ROLE -> {
+                if(editedObject.role.role == filterValue) {
                     itemsAdapter.itemEdited(editedObject, editedObjectPosition)
                 }
                 else {
@@ -62,7 +64,7 @@ class TicketsFragment : AAdminFragment<TicketList, Int>() {
                 }
             }
             FILTER_SEARCH -> {
-                if((editedObject.soldTo != null && editedObject.soldTo.startsWith(filterValue, true)) || editedObject.id.startsWith(filterValue, true)) {
+                if(editedObject.name.startsWith(filterValue, true)) {
                     itemsAdapter.itemEdited(editedObject, editedObjectPosition)
                 }
                 else {
@@ -73,8 +75,8 @@ class TicketsFragment : AAdminFragment<TicketList, Int>() {
     }
 
     companion object {
-        fun newInstance(filterType : String?, filterValue : String): TicketsFragment {
-            val fragment = TicketsFragment()
+        fun newInstance(filterType : String?, filterValue : String): OrganizationMembersFragment {
+            val fragment = OrganizationMembersFragment()
             val args = Bundle()
             args.putString(FILTER_TYPE, filterType)
             args.putString(FILTER_VALUE, filterValue)

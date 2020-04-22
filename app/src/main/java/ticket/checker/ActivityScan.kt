@@ -166,7 +166,7 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener, BarcodeTypeChang
                 return torchMode
             }
             else {
-                Toast.makeText(baseContext, "Your device does not support back camera flash!", Toast.LENGTH_LONG).show()
+                Toast.makeText(baseContext, "Your device does not support back camera flash", Toast.LENGTH_LONG).show()
             }
         }
         else {
@@ -176,7 +176,7 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener, BarcodeTypeChang
                 return torchMode
             }
             else {
-                Toast.makeText(baseContext, "Your device does not support back camera flash!", Toast.LENGTH_LONG).show()
+                Toast.makeText(baseContext, "Your device does not support back camera flash", Toast.LENGTH_LONG).show()
             }
         }
         return !torchMode
@@ -186,7 +186,7 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener, BarcodeTypeChang
         val detector =  BarcodeDetector.Builder(this@ActivityScan).setBarcodeFormats(barcodeType.id).build()
         detector.setProcessor(barcodeProcessor)
         if(!detector.isOperational) {
-            Toast.makeText(applicationContext, "Detector is not operational! Wait a little for dependencies to download!", Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, "Detector is not operational! Wait a little for dependencies to download", Toast.LENGTH_LONG).show()
         }
         return detector
     }

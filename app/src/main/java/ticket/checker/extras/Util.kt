@@ -7,7 +7,6 @@ import retrofit2.Response
 import ticket.checker.AppTicketChecker
 import ticket.checker.beans.ErrorResponse
 import ticket.checker.dialogs.DialogInfo
-import ticket.checker.dialogs.DialogType
 import ticket.checker.services.ServiceManager
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,10 +22,6 @@ object Util {
 
     const val ERROR_TICKET_VALIDATION = "TicketValidationException"
     const val ERROR_TICKET_EXISTS = "TicketExistsException"
-    const val ERROR_USERNAME_EXISTS = "UsernameExistsException"
-
-    const val CURRENT_USER = "currentUser"
-    const val CURRENT_TICKET = "currentTicket"
     const val POSITION = "adapterPosition"
 
     private const val PAGE_SIZE = 20

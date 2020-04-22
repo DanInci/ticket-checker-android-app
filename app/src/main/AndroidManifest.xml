@@ -51,6 +51,9 @@
         <!-- <activity android:name=".admin.tickets.ActivityTicketDetails"/> -->
         <!-- <activity android:name=".admin.users.ActivityUserDetails"/> -->
         <activity android:name=".ActivityStatistics" />
+        <activity android:name=".ActivityControlPanel" />
+        <activity android:name=".admin.tickets.ActivityTicketDetails" />
+        <activity android:name=".admin.members.ActivityOrganizationMemberDetails" />
     </application>
 
 </manifest>

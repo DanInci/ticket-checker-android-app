@@ -7,9 +7,9 @@
         android:title="Tickets" />
 
     <item
-        android:id="@+id/navigation_users"
+        android:id="@+id/navigation_members"
         android:icon="@drawable/ic_people"
-        android:title="Users" />
+        android:title="Members" />
 
 
 </menu>

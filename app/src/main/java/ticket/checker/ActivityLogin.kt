@@ -14,7 +14,7 @@ import retrofit2.Response
 import ticket.checker.beans.LoginData
 import ticket.checker.beans.LoginResponse
 import ticket.checker.dialogs.DialogInfo
-import ticket.checker.dialogs.DialogType
+import ticket.checker.extras.DialogType
 import ticket.checker.extras.Util
 import ticket.checker.extras.safeLet
 import ticket.checker.services.ServiceManager

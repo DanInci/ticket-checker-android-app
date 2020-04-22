@@ -20,7 +20,7 @@ import ticket.checker.admin.listeners.EditListener
 import ticket.checker.beans.OrganizationProfile
 import ticket.checker.dialogs.DialogEditOrganization
 import ticket.checker.dialogs.DialogInfo
-import ticket.checker.dialogs.DialogType
+import ticket.checker.extras.DialogType
 import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util
 import ticket.checker.listeners.DialogExitListener

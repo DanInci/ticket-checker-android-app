@@ -101,7 +101,7 @@ class ActivityStatistics : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         btnBack.setOnClickListener { finish() }
         currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM) ?: R.id.action_hourly
-        currentInterval = savedInstanceState?.getSerializable(CURRENT_INTERVAL) as IntervalType
+        currentInterval = savedInstanceState?.getSerializable(CURRENT_INTERVAL) as IntervalType? ?: IntervalType.HOURLY
         refreshLayout.setOnRefreshListener { onRefresh() }
         refreshLayout.setColorSchemeColors(ContextCompat.getColor(applicationContext, R.color.colorPrimary))
         customizeChartStyle(validatedChart)
@@ -182,7 +182,11 @@ class ActivityStatistics : AppCompatActivity() {
             entries.add(BarEntry(index.toFloat(), stats.count.toFloat()))
         }
         val barDataSet = BarDataSet(entries,"${category.category} Tickets")
-        barDataSet.color = ContextCompat.getColor(applicationContext, R.color.materialYellow)
+        if(category == TicketCategory.SOLD) {
+            barDataSet.color = ContextCompat.getColor(applicationContext, R.color.noRed)
+        } else if (category == TicketCategory.VALIDATED) {
+            barDataSet.color = ContextCompat.getColor(applicationContext, R.color.materialYellow)
+        }
         barDataSet.valueTextColor = ContextCompat.getColor(applicationContext, R.color.darkerGrey)
         barDataSet.valueTextSize = 12f
         barDataSet.valueFormatter = CustomValueFormatter()
@@ -285,9 +289,9 @@ class ActivityStatistics : AppCompatActivity() {
     }
 
     companion object {
-        private val HOUR_FORMAT = SimpleDateFormat("HH:mm")
-        private val DAY_FORMAT = SimpleDateFormat("dd")
-        private val DAY_MONTH_FORMAT = SimpleDateFormat("dd MMM")
+        private val HOUR_FORMAT: SimpleDateFormat = SimpleDateFormat("HH:mm")
+        private val DAY_FORMAT: SimpleDateFormat = SimpleDateFormat("dd")
+        private val DAY_MONTH_FORMAT: SimpleDateFormat = SimpleDateFormat("dd MMM")
 
         const val CURRENT_MENU_ITEM = "currentMenuItem"
         const val CURRENT_INTERVAL = "currentInterval"

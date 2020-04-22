@@ -10,7 +10,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import ticket.checker.beans.UserProfile
 import ticket.checker.dialogs.DialogInfo
-import ticket.checker.dialogs.DialogType
+import ticket.checker.extras.DialogType
 import ticket.checker.extras.Util
 import androidx.appcompat.widget.Toolbar
 import ticket.checker.beans.UserDefinition

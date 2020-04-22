@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="ticket.checker.admin.users.DialogAddUser"
+    tools:context="ticket.checker.admin.members.DialogAddUser"
     android:background="@drawable/bg_dialog_content"
     android:orientation="vertical">
 

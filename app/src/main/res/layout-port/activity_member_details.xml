@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/backgroundGrey"
-    tools:context="ticket.checker.admin.users.ActivityUserDetails">
+    tools:context="ticket.checker.admin.members.ActivityOrganizationMemberDetails">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -59,9 +59,9 @@
                     android:clickable="true"
                     android:focusable="true"
                     app:srcCompat="@drawable/ic_edit"
-                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginEnd="15dp"/>
+                    android:layout_marginRight="15dp"/>
             </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>
 
@@ -75,7 +75,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/userDetails"
                 android:layout_width="0dp"
-                android:layout_weight="80"
+                android:layout_weight="95"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:clickable="true"
@@ -118,7 +118,7 @@
                     </RelativeLayout>
 
                     <RelativeLayout
-                        android:id="@+id/createdAtRow"
+                        android:id="@+id/joinedAtRow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
@@ -126,15 +126,15 @@
                         android:paddingStart="20dp">
 
                         <TextView
-                            android:id="@+id/createdAtLabel"
+                            android:id="@+id/joinedAtLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Created at:"
+                            android:text="Joined at:"
                             android:textSize="20dp"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/createdAt"
+                            android:id="@+id/joinedAt"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
@@ -144,7 +144,7 @@
                             android:textStyle="normal" />
 
                         <ProgressBar
-                            android:id="@+id/lsCreatedAt"
+                            android:id="@+id/lsJoinedAt"
                             android:layout_width="28dp"
                             android:layout_height="28dp"
                             android:layout_alignParentEnd="true"

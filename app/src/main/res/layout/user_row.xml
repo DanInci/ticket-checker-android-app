@@ -48,7 +48,7 @@
                 android:layout_marginEnd="10dp"/>
 
             <TextView
-                android:id="@+id/tvRole"
+                android:id="@+id/tvOrganizationRole"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginStart="10dp"
@@ -57,7 +57,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/createdAtRow"
+            android:id="@+id/joinedAtRow"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="50"
@@ -66,25 +66,16 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="Created at "
+                android:text="Joined at "
                 android:textColor="@color/darkerGrey" />
 
             <TextView
-                android:id="@+id/tvCreatedAt"
+                android:id="@+id/tvJoinedAt"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="12 Jan 2018"
                 android:textStyle="italic|bold"
                 android:textColor="@color/darkerGrey" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvCreated"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="50"
-            android:text="Created at"
-            android:textColor="@color/darkerGrey" />
-
     </LinearLayout>
 </LinearLayout>

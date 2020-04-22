@@ -22,5 +22,6 @@ data class OrganizationMemberDefinition(val role: OrganizationRole): Serializabl
 data class OrganizationMemberList(val userId: UUID, val name: String, val role: OrganizationRole, val joinedAt: Date): Serializable
 data class OrganizationMember(val organizationId: UUID, val organizationName: String, val userId: UUID, val name: String, val role: OrganizationRole, val joinedAt: Date, val soldTicketsNo: Int, val validatedTicketsNo: Int): Serializable {
     fun withPretendedRole(pretendedRole: OrganizationRole) = OrganizationMemberWithPretendedRole(organizationId, organizationName, userId, name, role, pretendedRole, joinedAt, soldTicketsNo, validatedTicketsNo)
+    fun toOrganizationMemberList(): OrganizationMemberList = OrganizationMemberList(userId, name, role, joinedAt)
 }
 data class OrganizationMemberWithPretendedRole(val organizationId: UUID, val organizationName: String, val userId: UUID, val name: String, val role: OrganizationRole, val pretendedRole: OrganizationRole, val joinedAt: Date, val soldTicketsNo: Int, val validatedTicketsNo: Int)

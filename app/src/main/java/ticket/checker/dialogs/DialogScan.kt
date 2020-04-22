@@ -190,7 +190,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
             call.enqueue(ticketCallback)
         }
         else {
-            errorResult("Ticket id format is invalid!")
+            errorResult("Ticket id format is invalid")
         }
     }
 
@@ -201,10 +201,10 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         if(ticket != null) {
             viewSellTicket.visibility = View.GONE
             tvOwnerName.visibility = if (ticket.soldTo.isNullOrEmpty()) View.GONE else View.VISIBLE
-            tvOwnerBirthDate.visibility = if (ticket.soldToBirthDay == null) View.GONE else View.VISIBLE
+            tvOwnerBirthDate.visibility = if (ticket.soldToBirthday == null) View.GONE else View.VISIBLE
             tvOwnerTelephone.visibility = if (ticket.soldToTelephone == null) View.GONE else View.VISIBLE
             tvOwnerName.text = if (ticket.soldTo.isNullOrEmpty()) "~not specified~" else ticket.soldTo
-            tvOwnerBirthDate.text = if (ticket.soldToBirthDay == null) "~not specified~" else DATE_FORMAT_MONTH_NAME.format(ticket.soldToBirthDay)
+            tvOwnerBirthDate.text = if (ticket.soldToBirthday == null) "~not specified~" else DATE_FORMAT_MONTH_NAME.format(ticket.soldToBirthday)
             tvOwnerTelephone.text = if (ticket.soldToTelephone.isNullOrEmpty()) "~not specified~" else ticket.soldToTelephone
 
             when(organizationRole) {
@@ -212,7 +212,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                     viewDeleteTicket.visibility = View.VISIBLE
                     viewValidateTicket.visibility = View.VISIBLE
                     if(ticket.validatedAt != null) {
-                        errorResult("This ticket is validated!")
+                        errorResult("This ticket is already validated")
                         btnValidate.text = "Invalidate Ticket"
                         btnValidate.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_clear_white, 0)
                         isTicketValidated = true
@@ -227,17 +227,17 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                     viewDeleteTicket.visibility = View.GONE
                     viewValidateTicket.visibility = View.GONE
                     if(ticket.validatedAt != null) {
-                        errorResult("This ticket is validated!")
+                        errorResult("This ticket is already validated")
                     }
                     else {
-                        errorResult("This ticket hasn't been validated!")
+                        errorResult("This ticket hasn't been validated")
                     }
                 }
                 OrganizationRole.VALIDATOR -> {
                     viewDeleteTicket.visibility = View.GONE
                     viewValidateTicket.visibility = View.VISIBLE
                     if(ticket.validatedAt != null) {
-                        errorResult("This ticket is validated!")
+                        errorResult("This ticket is already validated")
                         btnValidate.text = "Invalidate Ticket"
                         btnValidate.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_clear_white, 0)
                         isTicketValidated = true
@@ -252,10 +252,10 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                     viewDeleteTicket.visibility = View.GONE
                     viewValidateTicket.visibility = View.GONE
                     if(ticket.validatedAt != null) {
-                        errorResult("This ticket is validated!")
+                        errorResult("This ticket is already validated")
                     }
                     else {
-                        errorResult("This ticket hasn't been validated!")
+                        errorResult("This ticket hasn't been validated")
                     }
                 }
             }
@@ -276,11 +276,11 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                 }
                 OrganizationRole.VALIDATOR -> {
                     viewSellTicket.visibility = View.GONE
-                    errorResult("A ticket with this id was not found!")
+                    errorResult("A ticket with this id was not found")
                 }
                 OrganizationRole.USER -> {
                     viewSellTicket.visibility = View.GONE
-                    errorResult("A ticket with this id was not found!")
+                    errorResult("A ticket with this id was not found")
                 }
             }
         }
@@ -295,13 +295,13 @@ class DialogScan : DialogFragment(), View.OnClickListener {
             isValid = false
         }
 
-        val birthDayString = etSoldToBirthDate.text.toString()
-        if(birthDayString.isNotEmpty()) {
+        val birthDateString = etSoldToBirthDate.text.toString()
+        if(birthDateString.isNotEmpty()) {
             try {
-                this.soldToBirthday = DATE_FORMAT.parse(birthDayString)
+                this.soldToBirthday = DATE_FORMAT.parse(birthDateString)!!
             }
             catch(e : ParseException) {
-                etSoldToBirthDate.error =  "Not valid date format. (dd.mm.yyyy)"
+                etSoldToBirthDate.error =  "Not valid date format. Required (dd.mm.yyyy)"
                 isValid = false
             }
         }
@@ -330,19 +330,19 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                     val error = Util.convertError(response.errorBody())
                     when (error.message) {
                         ERROR_TICKET_EXISTS -> {
-                            errorResult("This ticket has already been added!")
+                            errorResult("This ticket has already been added")
                         }
                         ERROR_TICKET_VALIDATION -> {
                             val validated = if(isTicketValidated) "invalidated" else "validated"
-                            errorResult("This ticket has already been $validated!")
+                            errorResult("This ticket has already been $validated")
                         }
                         else -> {
-                            errorResult("Unexpected ticket id format!")
+                            errorResult("Unexpected ticket id format")
                         }
                     }
                 }
                 404 -> {
-                    errorResult("It looks like the ticket doesn't exist anymore!")
+                    errorResult("It looks like the ticket doesn't exist anymore")
                 }
             }
         } else {

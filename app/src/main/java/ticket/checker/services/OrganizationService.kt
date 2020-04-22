@@ -50,6 +50,9 @@ interface OrganizationService {
     @GET("organizations/{organizationId}/users/me")
     fun getMyOrganizationMembership(@Path("organizationId") id: UUID): Call<OrganizationMember>
 
+    @GET("organizations/{organizationId}/users/me")
+    fun getOrganizationMemberById(@Path("organizationId") id: UUID, userId: UUID): Call<OrganizationMember>
+
     @GET("organizations/{organizationId}/users")
     fun getOrganizationMembers(@Path("organizationId") id: UUID, @Query("page") pageNumber: Int?, @Query("pageSize") pageSize: Int?): Call<List<OrganizationMemberList>>
 
@@ -57,6 +60,6 @@ interface OrganizationService {
     fun updateOrganizationMemberById(@Path("organizationId") id: UUID, @Path("userId") userId: UUID, @Body definition: OrganizationMemberDefinition): Call<OrganizationMember>
 
     @DELETE("organizations/{organizationId}/users/{userId}")
-    fun deleteOrganizationMemberById(@Path("organizationId") id: UUID, @Path("userId") userId: UUID)
+    fun deleteOrganizationMemberById(@Path("organizationId") id: UUID, @Path("userId") userId: UUID): Call<Void>
 
 }
