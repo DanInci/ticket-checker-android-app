@@ -71,7 +71,7 @@ class ActivityRegister : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
-        loadBgnImage()
+        loadLogoImage()
         this.onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 backToLogin()
@@ -100,12 +100,13 @@ class ActivityRegister : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun loadBgnImage() {
-        val bgnImg = R.drawable.bg_gradient
-        val imgView = findViewById<ImageView>(R.id.imgBgn)
-        Glide.with(this)
-                .load(bgnImg)
-                .apply(RequestOptions().centerCrop())
+    private fun loadLogoImage() {
+        val imgView = findViewById<ImageView>(R.id.imgLogo)
+        val baseUrl = ServiceManager.API_BASE_URL
+        Glide.with(applicationContext)
+                .asBitmap()
+                .load("${baseUrl}images/logo.png")
+                .centerCrop()
                 .into(imgView)
     }
 

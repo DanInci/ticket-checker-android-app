@@ -71,9 +71,10 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        loadBgnImage()
+        loadLogoImage()
         safeLet(AppTicketChecker.savedSessionEmail, AppTicketChecker.savedSessionPassword) { e, p ->
             this.etEmail.setText(e)
             this.etPassword.setText(p)
@@ -139,12 +140,13 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
         return isValid
     }
 
-    private fun loadBgnImage() {
-        val bgnImg = R.drawable.bg_gradient
-        val imgView = findViewById<ImageView>(R.id.imgBgn)
-        Glide.with(this)
-                .load(bgnImg)
-                .apply(RequestOptions().centerCrop())
+    private fun loadLogoImage() {
+        val imgView = findViewById<ImageView>(R.id.imgLogo)
+        val baseUrl = ServiceManager.API_BASE_URL
+        Glide.with(applicationContext)
+                .asBitmap()
+                .load("${baseUrl}images/logo.png")
+                .centerCrop()
                 .into(imgView)
     }
 
