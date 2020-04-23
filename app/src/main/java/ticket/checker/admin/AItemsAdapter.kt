@@ -50,6 +50,10 @@ abstract class AItemsAdapter<T>(context : Context) : RecyclerView.Adapter<Recycl
         return items.size + ADAPTER_COUNT_FOOTER
     }
 
+    open fun getRealItemsCount(): Int {
+        return items.size
+    }
+
     override fun getItemViewType(position: Int): Int {
         return when {
             position < items.size -> ADAPTER_ITEM_ID

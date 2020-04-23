@@ -9,7 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -51,6 +53,12 @@ class DialogInvitations internal constructor() : DialogFragment(), View.OnClickL
     private val rvLoadingSpinner by lazy {
         dialogView.findViewById<ProgressBar>(R.id.rvLoadingSpinner)
     }
+    private val emptyContainer by lazy {
+        dialogView.findViewById<LinearLayout>(R.id.emptyContainer)
+    }
+    private val tvEmptyText by lazy {
+        dialogView.findViewById<TextView>(R.id.tvEmptyText)
+    }
     private val itemsAdapter: InvitesAdapter by lazy {
         InvitesAdapter(dialogView.context, this)
     }
@@ -74,6 +82,10 @@ class DialogInvitations internal constructor() : DialogFragment(), View.OnClickL
                 val items: List<OrganizationInviteList> = response.body() as List<OrganizationInviteList>
                 itemsAdapter.setLoading(false)
                 itemsAdapter.updateItemsList(items)
+                if(itemsAdapter.getRealItemsCount() == 0) {
+                    emptyContainer.visibility = View.VISIBLE
+                    tvEmptyText.text = "No invitations"
+                }
             } else {
                 onErrorResponse(call, response)
             }
@@ -91,6 +103,10 @@ class DialogInvitations internal constructor() : DialogFragment(), View.OnClickL
                 val position = itemsAdapter.getItemPosition(organizationId, inviteId)
                 if(position != null) {
                     itemsAdapter.itemRemoved(position)
+                    if(itemsAdapter.getRealItemsCount() == 0) {
+                        emptyContainer.visibility = View.VISIBLE
+                        tvEmptyText.text = "No invitations"
+                    }
                     listChangeListener.onAdd(response.body() as Organization)
                 }
             } else {
@@ -110,6 +126,10 @@ class DialogInvitations internal constructor() : DialogFragment(), View.OnClickL
                 val position = itemsAdapter.getItemPosition(organizationId, inviteId)
                 if(position != null) {
                     itemsAdapter.itemRemoved(position)
+                    if(itemsAdapter.getRealItemsCount() == 0) {
+                        emptyContainer.visibility = View.VISIBLE
+                        tvEmptyText.text = "No invitations"
+                    }
                 }
             } else {
                 onInviteErrorResponse(call, response)
@@ -194,6 +214,7 @@ class DialogInvitations internal constructor() : DialogFragment(), View.OnClickL
 
     private fun onResetFirstLoad() {
         firstLoad = true
+        emptyContainer.visibility = View.GONE
         rvLoadingSpinner.visibility = View.VISIBLE
         scrollListener.enabled = false
         refreshLayout.isEnabled = false

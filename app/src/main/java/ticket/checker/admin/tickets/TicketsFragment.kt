@@ -66,6 +66,7 @@ class TicketsFragment : AAdminFragment<Ticket, TicketList, Int>() {
     }
 
     override fun onAdd(addedObject: Ticket) {
+        super.onAdd(addedObject)
         when(filterType) {
             null, "" -> {
                 itemsAdapter.itemAdded(addedObject.toTicketList())
@@ -103,6 +104,21 @@ class TicketsFragment : AAdminFragment<Ticket, TicketList, Int>() {
                 else {
                     itemsAdapter.itemRemoved(editedObjectPosition)
                 }
+            }
+        }
+    }
+
+    override fun getEmptyText(): String {
+        return when (filterType) {
+            FILTER_VALIDATED -> {
+                if (filterValue == "true") {
+                    "No validated tickets"
+                } else {
+                    "No not validated tickets"
+                }
+            }
+            else -> {
+                "No tickets"
             }
         }
     }

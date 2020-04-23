@@ -7,7 +7,9 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,7 +48,12 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
     private val rvLoadingSpinner by lazy {
         findViewById<ProgressBar>(R.id.rvLoadingSpinner)
     }
-
+    private val emptyContainer by lazy {
+        findViewById<LinearLayout>(R.id.emptyContainer)
+    }
+    private val tvEmptyText by lazy {
+        findViewById<TextView>(R.id.tvEmptyText)
+    }
     private val itemsAdapter: OrganizationsAdapter by lazy {
         OrganizationsAdapter(this@ActivityOrganizations)
     }
@@ -70,6 +77,10 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
                 val items: List<OrganizationList> = response.body() as List<OrganizationList>
                 itemsAdapter.setLoading(false)
                 itemsAdapter.updateItemsList(items)
+                if(itemsAdapter.getRealItemsCount() == 0) {
+                    emptyContainer.visibility = View.VISIBLE
+                    tvEmptyText.text = "No organizations"
+                }
             } else {
                 onErrorResponse(call, response)
             }
@@ -155,6 +166,7 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
 
     override fun onAdd(addedObject: Organization) {
         itemsAdapter.itemAdded(addedObject.toOrganizationList())
+        emptyContainer.visibility = View.GONE
     }
 
     override fun onEdit(editedObject: Organization, editedObjectPosition: Int) {
@@ -163,6 +175,10 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
 
     override fun onRemove(removedItemPosition: Int) {
         itemsAdapter.itemRemoved(removedItemPosition)
+        if(itemsAdapter.getRealItemsCount() == 0) {
+            emptyContainer.visibility = View.VISIBLE
+            tvEmptyText.text = "No organizations"
+        }
     }
 
     override fun onItemClick(view: View, position: Int) {
@@ -206,6 +222,7 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
 
     private fun onResetFirstLoad() {
         firstLoad = true
+        emptyContainer.visibility = View.GONE
         rvLoadingSpinner.visibility = View.VISIBLE
         scrollListener.enabled = false
         refreshLayout.isEnabled = false

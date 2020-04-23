@@ -116,15 +116,11 @@ class OrganizationMembersAdapter(val context : Context) : AItemsAdapterWithHeade
                 return
 
             if(totalMembers == 0) {
-                tvMembersNumber.visibility = View.VISIBLE
-                tvMembersNumber.text = "No members found"
+                tvMembersNumber.visibility = View.GONE
             }
             else {
                 tvMembersNumber.visibility = View.VISIBLE
                 val users = when(filterType) {
-                    null -> {
-                        if (totalMembers == 1)  "member" else "members"
-                    }
                     FILTER_ROLE -> {
                         if (totalMembers == 1)  filterValue else filterValue + "s"
                     }

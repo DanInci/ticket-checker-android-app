@@ -139,15 +139,11 @@ class TicketsAdapter(val context: Context) : AItemsAdapterWithHeader<TicketList,
                 return
 
             if(ticketNumbers == 0) {
-                tvTotalTickets?.visibility = View.VISIBLE
-                tvTotalTickets.text = "No tickets found"
+                tvTotalTickets?.visibility = View.GONE
             }
             else {
                 tvTotalTickets?.visibility = View.VISIBLE
                 val tickets = when(filterType) {
-                    null -> {
-                        if (ticketNumbers == 1) "ticket" else "tickets"
-                    }
                     FILTER_VALIDATED -> {
                         if (ticketNumbers == 1) {
                             if (filterValue == "true") {

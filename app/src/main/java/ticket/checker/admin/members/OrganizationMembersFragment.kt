@@ -57,6 +57,7 @@ class OrganizationMembersFragment : AAdminFragment<OrganizationMember, Organizat
     }
 
     override fun onAdd(addedObject: OrganizationMember) {
+        super.onAdd(addedObject)
         when(filterType) {
             null, "" -> {
                 itemsAdapter.itemAdded(addedObject.toOrganizationMemberList())
@@ -94,6 +95,17 @@ class OrganizationMembersFragment : AAdminFragment<OrganizationMember, Organizat
                 else {
                     itemsAdapter.itemRemoved(editedObjectPosition)
                 }
+            }
+        }
+    }
+
+    override fun getEmptyText(): String {
+        return when(filterType) {
+            FILTER_ROLE -> {
+               "No ${filterValue}s"
+            }
+            else -> {
+                "No members"
             }
         }
     }

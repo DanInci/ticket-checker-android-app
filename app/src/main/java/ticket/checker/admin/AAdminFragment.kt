@@ -9,7 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.TextView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,21 +29,43 @@ import java.util.*
  */
 abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, ListChangeListener<T>, RecyclerItemClickListener.OnItemClickListener {
 
-    protected var filterType: String? = null
-    protected lateinit var filterValue: String
+    private var firstLoad = true
     protected lateinit var organizationId: UUID
 
-    private var firstLoad = true
+    protected var filterType: String? = null
+    protected lateinit var filterValue: String
 
-    private var refreshLayout: SwipeRefreshLayout? = null
-    private var loadingSpinner: ProgressBar? = null
-    private var recyclerView: RecyclerView? = null
-    protected var layoutManager: LinearLayoutManager? = null
+    private lateinit var fragmentView: View
 
+    private val refreshLayout by lazy {
+        fragmentView.findViewById<SwipeRefreshLayout>(R.id.refreshLayout)
+    }
+    private val recyclerView by lazy {
+        fragmentView.findViewById<RecyclerView>(R.id.rvItems)
+    }
+    private val loadingSpinner by lazy {
+        fragmentView.findViewById<ProgressBar>(R.id.rvLoadingSpinner)
+    }
+    private val scrollListener by lazy {
+        object : EndlessScrollListener(layoutManager) {
+            override fun onLoadMore(page: Int, totalItemsCount: Int, recyclerView: RecyclerView) {
+                itemsAdapter.setLoading(true)
+                loadItems(page, filterType, filterValue)
+            }
+        }
+    }
+    private val emptyContainer by lazy {
+        fragmentView.findViewById<LinearLayout>(R.id.emptyContainer)
+    }
+    private val tvEmptyText by lazy {
+        fragmentView.findViewById<TextView>(R.id.tvEmptyText)
+    }
+    protected val layoutManager by lazy {
+        LinearLayoutManager(activity)
+    }
     protected val itemsAdapter: AItemsAdapterWithHeader<TList, Y> by lazy {
         setupItemsAdapter()
     }
-    private var scrollListener: EndlessScrollListener? = null
 
     protected val headerCallback = object : Callback<Y> {
         override fun onResponse(call: Call<Y>, response: Response<Y>) {
@@ -66,6 +90,10 @@ abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, L
                 val items: List<TList> = response.body() as List<TList>
                 itemsAdapter.setLoading(false)
                 itemsAdapter.updateItemsList(items)
+                if(itemsAdapter.getRealItemsCount() == 0) {
+                    emptyContainer.visibility = View.VISIBLE
+                    tvEmptyText.text = getEmptyText()
+                }
             } else {
                 onErrorResponse(call, response)
             }
@@ -85,40 +113,34 @@ abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, L
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.recycle_view, container, false)
-        refreshLayout = view?.findViewById(R.id.refreshLayout)
-        refreshLayout?.setOnRefreshListener { onRefresh() }
-        refreshLayout?.setColorSchemeColors(ContextCompat.getColor(context!!, R.color.colorPrimary))
-        loadingSpinner = view?.findViewById(R.id.rvLoadingSpinner)
-        recyclerView = view?.findViewById(R.id.rvItems)
-        layoutManager = LinearLayoutManager(activity)
-        scrollListener = object : EndlessScrollListener(layoutManager as LinearLayoutManager) {
-            override fun onLoadMore(page: Int, totalItemsCount: Int, recyclerView: RecyclerView) {
-                itemsAdapter.setLoading(true)
-                loadItems(page, filterType, filterValue)
-            }
-        }
-        recyclerView?.layoutManager = layoutManager
-        recyclerView?.adapter = itemsAdapter
-        recyclerView?.addOnScrollListener(scrollListener!!)
-        recyclerView?.addOnItemTouchListener(RecyclerItemClickListener(context!!, recyclerView!!, this))
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        fragmentView = inflater.inflate(R.layout.recycle_view, container, false)
+        return fragmentView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        refreshLayout.setOnRefreshListener { onRefresh() }
+        refreshLayout.setColorSchemeColors(ContextCompat.getColor(context!!, R.color.colorPrimary))
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = itemsAdapter
+        recyclerView.addOnScrollListener(scrollListener)
+        recyclerView.addOnItemTouchListener(RecyclerItemClickListener(context!!, recyclerView, this))
 
         if (firstLoad) {
             reloadAll()
         } else {
-            scrollListener?.currentPage = arguments?.getInt(LOAD_CURRENT_PAGE) ?: 0
-            scrollListener?.previousTotalItemCount = arguments?.getInt(LOAD_PREVIOUS_ITEM_COUNT) ?: 0
-            scrollListener?.loading = arguments?.getBoolean(LOAD_LOADING) ?: false
+            scrollListener.currentPage = arguments?.getInt(LOAD_CURRENT_PAGE) ?: 0
+            scrollListener.previousTotalItemCount = arguments?.getInt(LOAD_PREVIOUS_ITEM_COUNT) ?: 0
+            scrollListener.loading = arguments?.getBoolean(LOAD_LOADING) ?: false
         }
-        return view
     }
 
     private fun onRefresh() {
-        refreshLayout?.isRefreshing = false
+        refreshLayout.isRefreshing = false
         itemsAdapter.resetItemsList()
-        scrollListener?.resetState()
+        scrollListener.resetState()
         reloadAll()
     }
 
@@ -126,15 +148,15 @@ abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, L
         this.filterType = filterType
         this.filterValue = filterValue
         itemsAdapter.resetItemsList()
-        scrollListener?.resetState()
+        scrollListener.resetState()
         reloadAll()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        arguments?.putInt(LOAD_CURRENT_PAGE, scrollListener?.currentPage ?: 0)
-        arguments?.putInt(LOAD_PREVIOUS_ITEM_COUNT, scrollListener?.previousTotalItemCount ?: 0)
-        arguments?.putBoolean(LOAD_LOADING, scrollListener?.loading ?: true)
+        arguments?.putInt(LOAD_CURRENT_PAGE, scrollListener.currentPage)
+        arguments?.putInt(LOAD_PREVIOUS_ITEM_COUNT, scrollListener.previousTotalItemCount)
+        arguments?.putBoolean(LOAD_LOADING, scrollListener.loading)
     }
 
     private fun reloadAll() {
@@ -145,24 +167,33 @@ abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, L
 
     private fun onResetFirstLoad() {
         firstLoad = true
-        loadingSpinner?.visibility = View.VISIBLE
-        scrollListener?.enabled = false
-        refreshLayout?.isEnabled = false
+        emptyContainer.visibility = View.GONE
+        loadingSpinner.visibility = View.VISIBLE
+        scrollListener.enabled = false
+        refreshLayout.isEnabled = false
     }
 
     private fun onFirstLoad() {
         firstLoad = false
-        loadingSpinner?.visibility = View.GONE
-        scrollListener?.enabled = true
-        refreshLayout?.isEnabled = true
+        loadingSpinner.visibility = View.GONE
+        scrollListener.enabled = true
+        refreshLayout.isEnabled = true
     }
 
     override fun onItemClick(view: View, position: Int) {}
 
     override fun onLongItemClick(view: View?, position: Int) {}
 
+    override fun onAdd(addedObject: T) {
+        emptyContainer.visibility = View.GONE
+    }
+
     override fun onRemove(removedItemPosition: Int) {
         itemsAdapter.itemRemoved(removedItemPosition)
+        if(itemsAdapter.getRealItemsCount() == 0) {
+            emptyContainer.visibility = View.VISIBLE
+            tvEmptyText.text = getEmptyText()
+        }
     }
 
     private fun <K> onErrorResponse(call: Call<K>, response: Response<K>?) {
@@ -178,6 +209,8 @@ abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, L
     abstract fun loadHeader(filterType: String?, filterValue: String)
 
     abstract fun loadItems(page: Int, filterType: String?, filterValue: String?)
+
+    abstract fun getEmptyText(): String
 
     companion object {
         const val FILTER_TYPE = "filterType"
