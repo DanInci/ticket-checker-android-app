@@ -2,7 +2,6 @@ package ticket.checker.admin.tickets
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.media.Image
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.core.content.ContextCompat
@@ -18,16 +17,17 @@ import ticket.checker.R
 import ticket.checker.admin.listeners.ListChangeListener
 import ticket.checker.beans.Ticket
 import ticket.checker.beans.TicketDefinition
+import ticket.checker.beans.TicketList
 import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
 import java.text.ParseException
 import java.util.*
 
-class DialogAddTicket : DialogFragment(), View.OnClickListener {
+class DialogAddTicket internal constructor() : DialogFragment(), View.OnClickListener {
     lateinit var listChangeListener: ListChangeListener<Ticket>
 
     private lateinit var organizationId: UUID
-    private lateinit var soldToBirthDate: Date
+    private var soldToBirthDate: Date? = null
 
     private lateinit var dialogView: View
 
@@ -141,16 +141,16 @@ class DialogAddTicket : DialogFragment(), View.OnClickListener {
         if(birthDateString.isNotEmpty()) {
             try {
                 this.soldToBirthDate = Util.DATE_FORMAT.parse(birthDateString)!!
+                val now = Date()
+                if(this.soldToBirthDate!!.after(now)) {
+                    etSoldToBirthDate.error = "The birth date cannot be in the future"
+                    isValid = false
+                }
             }
             catch(e : ParseException) {
                 etSoldToBirthDate.error =  "Not valid date format. Required (dd.mm.yyyy)"
                 isValid = false
             }
-        }
-        val now = Date()
-        if(this.soldToBirthDate.after(now)) {
-            etSoldToBirthDate.error = "The birth date cannot be in the future"
-            isValid = false
         }
         return isValid
     }
@@ -168,8 +168,20 @@ class DialogAddTicket : DialogFragment(), View.OnClickListener {
     private fun onErrorResponse(call: Call<Ticket>, response: Response<Ticket>?) {
         val wasHandled = Util.treatBasicError(call, response, fragmentManager!!)
         if (!wasHandled) {
-            if (response?.code() == 400) {
-                etTicketNumber?.error = "This ticket id already exists"
+            when(response?.code()) {
+                404 -> {
+                    tvResult.visibility = View.VISIBLE
+                    tvResult.setTextColor(ContextCompat.getColor(context!!, R.color.noRed))
+                    tvResult.text = "Organization does not exist"
+                }
+                409 -> {
+                    etTicketNumber?.error = "This ticket id already exists"
+                }
+                else -> {
+                    tvResult.visibility = View.VISIBLE
+                    tvResult.setTextColor(ContextCompat.getColor(context!!, R.color.noRed))
+                    tvResult.text = "Unknown error has happened"
+                }
             }
         }
     }

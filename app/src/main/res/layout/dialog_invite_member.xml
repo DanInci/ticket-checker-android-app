@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="ticket.checker.admin.members.DialogAddUser"
+    tools:context="ticket.checker.admin.members.DialogInviteOrganizationMember"
     android:background="@drawable/bg_dialog_content"
     android:orientation="vertical">
 
@@ -20,7 +20,8 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add New User"
+            android:textAlignment="center"
+            android:text="Invite Member"
             android:textColor="@android:color/white"
             android:textSize="25sp"
             android:layout_centerVertical="true"/>
@@ -53,81 +54,20 @@
             android:layout_centerInParent="true">
 
             <EditText
-                android:id="@+id/etUsername"
+                android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/et_dialog_style"
                 android:textColor="@color/text_style"
                 android:textColorHint="@color/darkerGrey"
                 android:textSize="20sp"
-                android:inputType="textVisiblePassword"
+                android:inputType="textEmailAddress"
                 android:maxLength="100"
                 android:padding="10dp"
-                android:hint="USERNAME *"
-                android:drawableLeft="@drawable/ic_person_outline"
+                android:hint="EMAIL *"
+                android:drawableStart="@drawable/ic_person_outline"
                 android:drawablePadding="15dp"
-                android:layout_marginBottom="5dp"/>
-
-            <EditText
-                android:id="@+id/etPassword"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/et_dialog_style"
-                android:textColor="@color/text_style"
-                android:hint="PASSWORD *"
-                android:textColorHint="@color/darkerGrey"
-                android:drawablePadding="15dp"
-                android:drawableLeft="@drawable/ic_lock_outline"
-                android:textSize="20sp"
-                android:inputType="textPassword"
-                android:maxLength="100"
-                android:padding="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp" />
-
-            <EditText
-                android:id="@+id/etPasswordRepeat"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/et_dialog_style"
-                android:textColor="@color/text_style"
-                android:hint="REPEAT PASS *"
-                android:textColorHint="@color/darkerGrey"
-                android:drawablePadding="15dp"
-                android:drawableLeft="@drawable/ic_lock_outline"
-                android:textSize="20sp"
-                android:inputType="textPassword"
-                android:maxLength="100"
-                android:padding="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp" />
-
-            <EditText
-                android:id="@+id/etName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/et_dialog_style"
-                android:textColor="@color/text_style"
-                android:hint="NAME *"
-                android:textColorHint="@color/darkerGrey"
-                android:drawablePadding="15dp"
-                android:drawableLeft="@drawable/ic_name"
-                android:textSize="20sp"
-                android:inputType="textVisiblePassword"
-                android:maxLength="100"
-                android:padding="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp" />
-
-            <Spinner
-                android:id="@+id/spinnerRole"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/spinner_dialog_style"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:dropDownWidth="match_parent"
-                android:popupBackground="@drawable/spinner_background"/>
+                android:layout_marginBottom="15dp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -137,14 +77,14 @@
 
                 <Button
                     android:id="@+id/btnSubmit"
-                    android:layout_width="150dp"
+                    android:layout_width="200dp"
                     android:layout_height="35dp"
                     android:layout_marginTop="5dp"
                     android:background="@drawable/btn_style"
                     android:drawableEnd="@drawable/ic_add"
                     android:paddingEnd="10dp"
                     android:paddingStart="10dp"
-                    android:text="Add User"
+                    android:text="Invite member"
                     android:textAllCaps="false"
                     android:layout_gravity="center"
                     android:textColor="@drawable/btn_text_color"

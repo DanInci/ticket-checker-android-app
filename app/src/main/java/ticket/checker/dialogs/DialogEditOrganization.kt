@@ -16,16 +16,17 @@ import retrofit2.Response
 import ticket.checker.R
 import ticket.checker.admin.listeners.EditListener
 import ticket.checker.beans.OrganizationDefinition
-import ticket.checker.beans.OrganizationProfile
+import ticket.checker.beans.Organization
 import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
 import java.util.*
 
 class DialogEditOrganization internal constructor(): DialogFragment(), View.OnClickListener {
 
-    lateinit var editListener: EditListener<OrganizationProfile>
-    lateinit var organizationId: UUID
-    lateinit var organizationName: String
+    lateinit var editListener: EditListener<Organization>
+
+    private lateinit var organizationId: UUID
+    private lateinit var organizationName: String
 
     private lateinit var dialogView: View
 
@@ -48,17 +49,17 @@ class DialogEditOrganization internal constructor(): DialogFragment(), View.OnCl
         dialogView.findViewById<TextView>(R.id.tvResult)
     }
 
-    private val callback : Callback<OrganizationProfile> = object : Callback<OrganizationProfile> {
-        override fun onResponse(call: Call<OrganizationProfile>, response: Response<OrganizationProfile>) {
+    private val callback : Callback<Organization> = object : Callback<Organization> {
+        override fun onResponse(call: Call<Organization>, response: Response<Organization>) {
             if (response.isSuccessful) {
                 when(call.request().method()){
                     "GET" -> {
                         loadingSpinner.visibility = View.GONE
                         btnEdit.visibility = View.VISIBLE
-                        updateOrganizationInfo(response.body() as OrganizationProfile)
+                        updateOrganizationInfo(response.body() as Organization)
                     }
                     "PUT" -> {
-                        editListener.onEdit(response.body() as OrganizationProfile)
+                        editListener.onEdit(response.body() as Organization)
                         dismiss()
                     }
                 }
@@ -66,7 +67,7 @@ class DialogEditOrganization internal constructor(): DialogFragment(), View.OnCl
                 onErrorResponse(call, response)
             }
         }
-        override fun onFailure(call: Call<OrganizationProfile>, t: Throwable) {
+        override fun onFailure(call: Call<Organization>, t: Throwable) {
             when(call.request().method()) {
                 "GET" -> {
                     loadingSpinner.visibility = View.GONE
@@ -125,7 +126,7 @@ class DialogEditOrganization internal constructor(): DialogFragment(), View.OnCl
         }
     }
 
-    private fun updateOrganizationInfo(organization: OrganizationProfile) {
+    private fun updateOrganizationInfo(organization: Organization) {
         updateOrganizationInfo(organization.name)
     }
 
@@ -159,7 +160,7 @@ class DialogEditOrganization internal constructor(): DialogFragment(), View.OnCl
         call.enqueue(callback)
     }
 
-    private fun onErrorResponse(call: Call<OrganizationProfile>, response: Response<OrganizationProfile>?) {
+    private fun onErrorResponse(call: Call<Organization>, response: Response<Organization>?) {
         val wasHandled = Util.treatBasicError(call, response, fragmentManager!!)
         if (!wasHandled) {
             bottomContainer?.visibility = View.GONE

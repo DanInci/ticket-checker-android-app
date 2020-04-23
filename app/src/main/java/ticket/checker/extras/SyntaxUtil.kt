@@ -20,4 +20,4 @@ inline fun <T1: Any, T2: Any, T3: Any, T4: Any, T5: Any, R: Any> safeLet(p1: T1?
     return if (p1 != null && p2 != null && p3 != null && p4 != null && p5 != null) block(p1, p2, p3, p4, p5) else null
 }
 
-inline fun notImplemented(): Nothing = throw Error("Code not yet implemented")
+fun notImplemented(): Nothing = throw Error("Code not yet implemented")

@@ -20,6 +20,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textAlignment="center"
             android:text="Configure barcode"
             android:textColor="@android:color/white"
             android:textSize="25sp"

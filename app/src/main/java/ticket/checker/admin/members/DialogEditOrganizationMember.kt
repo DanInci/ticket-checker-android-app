@@ -22,7 +22,7 @@ import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
 import java.util.*
 
-class DialogEditOrganizationMember : DialogFragment(), View.OnClickListener {
+class DialogEditOrganizationMember internal constructor() : DialogFragment(), View.OnClickListener {
 
     lateinit var editListener: EditListener<OrganizationMember>
 
@@ -116,7 +116,7 @@ class DialogEditOrganizationMember : DialogFragment(), View.OnClickListener {
 
         btnClose.setOnClickListener(this)
         btnEdit.setOnClickListener(this)
-        tvTitle.text = "Change role of '$name'"
+        tvTitle.text = "Edit '$name'"
     }
 
     override fun onClick(v: View) {
@@ -133,7 +133,7 @@ class DialogEditOrganizationMember : DialogFragment(), View.OnClickListener {
     private fun updateWithUserInfo(member : OrganizationMember) {
         spinnerRole.isClickable = true
         spinnerRole.isFocusable = true
-        spinnerRole.adapter = ArrayAdapter(context!!, R.layout.spinner_item, OrganizationRole.values())
+        spinnerRole.adapter = ArrayAdapter(context!!, R.layout.spinner_item, OrganizationRole.values().filter{ r -> r != OrganizationRole.OWNER })
         spinnerRole.setSelection(member.role.ordinal)
     }
 

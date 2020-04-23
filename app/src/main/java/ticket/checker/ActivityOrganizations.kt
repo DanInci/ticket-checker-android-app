@@ -23,14 +23,14 @@ import ticket.checker.admin.listeners.ListChangeListener
 import ticket.checker.admin.listeners.RecyclerItemClickListener
 import ticket.checker.admin.organizations.OrganizationsAdapter
 import ticket.checker.beans.OrganizationList
-import ticket.checker.beans.OrganizationProfile
+import ticket.checker.beans.Organization
 import ticket.checker.dialogs.DialogCreateOrganization
 import ticket.checker.dialogs.DialogInvitations
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.POSITION
 import ticket.checker.services.ServiceManager
 
-class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnItemClickListener, ListChangeListener<OrganizationList> {
+class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnItemClickListener, ListChangeListener<Organization> {
 
     private var firstLoad = true
 
@@ -57,7 +57,7 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
         object : EndlessScrollListener(layoutManager) {
             override fun onLoadMore(page: Int, totalItemsCount: Int, recyclerView: RecyclerView) {
                 itemsAdapter.setLoading(true)
-                loadMyOrganizations(page, PAGE_SIZE)
+                loadMyOrganizations(page, Util.PAGE_SIZE)
             }
         }
     }
@@ -144,8 +144,8 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
                         onRemove(position)
                     }
                     ITEM_EDITED -> {
-                        val editedOrganization = data.getSerializableExtra(EDITED_ORGANIZATION) as OrganizationProfile
-                        onEdit(editedOrganization.toOrganizationList(), position)
+                        val editedOrganization = data.getSerializableExtra(EDITED_ORGANIZATION) as Organization
+                        onEdit(editedOrganization, position)
                     }
                 }
             }
@@ -153,12 +153,12 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
     }
 
 
-    override fun onAdd(addedObject: OrganizationList) {
-        itemsAdapter.itemAdded(addedObject)
+    override fun onAdd(addedObject: Organization) {
+        itemsAdapter.itemAdded(addedObject.toOrganizationList())
     }
 
-    override fun onEdit(editedObject: OrganizationList, editedObjectPosition: Int) {
-        itemsAdapter.itemEdited(editedObject, editedObjectPosition)
+    override fun onEdit(editedObject: Organization, editedObjectPosition: Int) {
+        itemsAdapter.itemEdited(editedObject.toOrganizationList(), editedObjectPosition)
     }
 
     override fun onRemove(removedItemPosition: Int) {
@@ -181,7 +181,7 @@ class ActivityOrganizations : AppCompatActivity(), RecyclerItemClickListener.OnI
         if(item != null ) {
             val intent  = Intent(this@ActivityOrganizations, ActivityOrganizationDetails::class.java)
             intent.putExtra(POSITION, position)
-            intent.putExtra(CURRENT_ORGANIZATION, item.toOrganizationProfile())
+            intent.putExtra(CURRENT_ORGANIZATION, item.toOrganization())
             startActivityForResult(intent, CHANGES_TO_ORGANIZATION_ITEM)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }

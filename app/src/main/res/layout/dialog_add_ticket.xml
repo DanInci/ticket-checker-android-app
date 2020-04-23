@@ -20,7 +20,8 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add New Ticket"
+            android:textAlignment="center"
+            android:text="Add Ticket"
             android:textColor="@android:color/white"
             android:textSize="25sp"
             android:layout_centerVertical="true"/>

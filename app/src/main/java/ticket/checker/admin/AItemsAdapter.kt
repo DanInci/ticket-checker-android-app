@@ -65,7 +65,7 @@ abstract class AItemsAdapter<T>(context : Context) : RecyclerView.Adapter<Recycl
         return null
     }
 
-    fun getItemByPosition(position: Int): T? {
+    open fun getItemByPosition(position: Int): T? {
         if(isItemPosition(position)) {
             return items[position]
         }

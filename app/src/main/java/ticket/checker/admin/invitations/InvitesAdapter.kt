@@ -75,7 +75,7 @@ class InvitesAdapter(context : Context, private val inviteResponseListener: Invi
 
             this.item = item
 
-            tvOrganizationName.text = "Organization Name"
+            tvOrganizationName.text = item.organizationName
             tvInvitedAt.text = Util.DATE_FORMAT_MONTH_NAME.format(item.invitedAt)
         }
     }

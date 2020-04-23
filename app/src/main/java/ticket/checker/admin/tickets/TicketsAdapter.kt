@@ -43,26 +43,14 @@ class TicketsAdapter(val context: Context) : AItemsAdapterWithHeader<TicketList,
         (holder as HeaderHolder).updateTicketHeaderInfo(filterType, filterValue, itemStats)
     }
 
-//    override fun launchInfoActivity(view: View, position : Int) {
-//        if(isItemPosition(position)) {
-//            val activity = context as Activity
-//            val intent = Intent(activity, ActivityTicketDetails::class.java)
-//            intent.putExtra(POSITION, position)
-//            intent.putExtra(CURRENT_TICKET, items[position - 1])
-//            activity.startActivityForResult(intent, CHANGES_TO_ADAPTER_ITEM)
-//            activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-//        }
-//    }
-
     override fun itemAdded(addedItem: TicketList) {
-        super.itemAdded(addedItem)
         var newItemStats = headerItem ?: 0
         newItemStats++
         updateHeaderInfo(filterType, filterValue, newItemStats)
+        super.itemAdded(addedItem)
     }
 
     override fun itemRemoved(position: Int) {
-        super.itemRemoved(position)
         if(isItemPosition(position)) {
             var newItemStats = headerItem ?: 0
             newItemStats--
@@ -71,8 +59,8 @@ class TicketsAdapter(val context: Context) : AItemsAdapterWithHeader<TicketList,
             }
             updateHeaderInfo(filterType, filterValue, newItemStats)
         }
+        super.itemRemoved(position)
     }
-
 
     override fun getItemId(item: TicketList): Long {
         return item.id.hashCode().toLong()

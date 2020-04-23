@@ -168,6 +168,7 @@ class DialogInfo : DialogFragment(), View.OnClickListener {
             args.putString(DIALOG_MSG, msg)
             args.putString(DIALOG_TYPE, dialogType.name)
             fragment.arguments = args
+
             return fragment
         }
     }

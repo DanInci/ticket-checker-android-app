@@ -17,7 +17,6 @@ import ticket.checker.AppTicketChecker
 import ticket.checker.R
 import ticket.checker.admin.listeners.EditListener
 import ticket.checker.beans.Ticket
-import ticket.checker.beans.TicketList
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.extras.DialogType
 import ticket.checker.extras.OrganizationRole
@@ -35,7 +34,8 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
     private var itemWasEdited: Boolean = false
     private var isFirstLoad: Boolean = true
 
-    private lateinit var currentTicket: Ticket
+    private lateinit var ticketId: String
+    private var currentTicket: Ticket? = null
 
     private val ticketPosition: Int by lazy {
         intent.getIntExtra(POSITION, -1)
@@ -103,7 +103,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
                         updateTicketInfo(response.body() as Ticket)
                         if(isFirstLoad) {
                             isFirstLoad = false
-                            if(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole == OrganizationRole.ADMIN) {
+                            if(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole == OrganizationRole.OWNER || AppTicketChecker.selectedOrganizationMembership!!.pretendedRole == OrganizationRole.ADMIN) {
                                 btnRemove.visibility = View.VISIBLE
                             }
                             btnValidate.visibility =  View.VISIBLE
@@ -116,7 +116,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
                     }
                     "DELETE" -> {
                         loadingSpinner.visibility = View.GONE
-                        val dialogRemoveSuccessful = DialogInfo.newInstance("Remove successful", "Ticket #${currentTicket.id} was successfully removed", DialogType.SUCCESS)
+                        val dialogRemoveSuccessful = DialogInfo.newInstance("Remove successful", "Ticket #$ticketId was successfully removed", DialogType.SUCCESS)
                         dialogRemoveSuccessful.dialogExitListener = this@ActivityTicketDetails
                         dialogRemoveSuccessful.show(supportFragmentManager, "DIALOG_REMOVE_SUCCESSFUL")
                     }
@@ -137,8 +137,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ticket_details)
 
-        val ticket = savedInstanceState?.getSerializable(CURRENT_TICKET) ?: intent.getSerializableExtra(CURRENT_TICKET)
-        updateTicketInfo(ticket as Ticket)
+        ticketId = intent.getStringExtra(TICKET_ID)!!
 
         setSupportActionBar(toolbar)
         btnEdit.setOnClickListener(this)
@@ -146,7 +145,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
         btnRemove.setOnClickListener(this)
         btnBack.setOnClickListener(this)
 
-        if(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole != OrganizationRole.ADMIN) {
+        if(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole != OrganizationRole.OWNER && AppTicketChecker.selectedOrganizationMembership!!.pretendedRole != OrganizationRole.ADMIN) {
             btnEdit.visibility = View.GONE
             btnRemove.visibility = View.GONE
         }
@@ -157,7 +156,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
 
     override fun onStart() {
         super.onStart()
-        val call = ServiceManager.getTicketService().getTicketById(AppTicketChecker.selectedOrganizationMembership!!.organizationId, currentTicket.id)
+        val call = ServiceManager.getTicketService().getTicketById(AppTicketChecker.selectedOrganizationMembership!!.organizationId, ticketId)
         call.enqueue(ticketCallback as Callback<Ticket>)
     }
 
@@ -178,6 +177,12 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
     }
 
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        val ticket = savedInstanceState.getSerializable(CURRENT_TICKET) as Ticket
+        updateTicketInfo(ticket)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putSerializable(CURRENT_TICKET, currentTicket)
@@ -189,7 +194,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
                 onBackPressed()
             }
             R.id.btnEdit -> {
-                val dialogEditTicket = DialogEditTicket.newInstance(AppTicketChecker.selectedOrganizationMembership!!.organizationId, currentTicket.id)
+                val dialogEditTicket = DialogEditTicket.newInstance(AppTicketChecker.selectedOrganizationMembership!!.organizationId, ticketId)
                 dialogEditTicket.editListener = editListener
                 dialogEditTicket.show(supportFragmentManager, "DIALOG_EDIT_TICKET")
             }
@@ -197,14 +202,14 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
                 switchToLoadingView(true)
                 val isValidated = currentTicket?.validatedAt != null
                 val call = if(isValidated) {
-                    ServiceManager.getTicketService().validateTicketById(AppTicketChecker.selectedOrganizationMembership!!.organizationId, currentTicket.id)
+                    ServiceManager.getTicketService().invalidateTicketById(AppTicketChecker.selectedOrganizationMembership!!.organizationId, ticketId)
                 } else {
-                    ServiceManager.getTicketService().invalidateTicketById(AppTicketChecker.selectedOrganizationMembership!!.organizationId, currentTicket.id)
+                    ServiceManager.getTicketService().validateTicketById(AppTicketChecker.selectedOrganizationMembership!!.organizationId, ticketId)
                 }
                 call.enqueue(ticketCallback as Callback<Ticket>)
             }
             R.id.btnRemove -> {
-                val dialogConfirm = DialogInfo.newInstance("Confirm remove", "Are you sure you want to remove ticket #${currentTicket.id} ?", DialogType.YES_NO)
+                val dialogConfirm = DialogInfo.newInstance("Confirm remove", "Are you sure you want to remove ticket #$ticketId ?", DialogType.YES_NO)
                 dialogConfirm.dialogResponseListener = this
                 dialogConfirm.show(supportFragmentManager, "DIALOG_CONFIRM_REMOVAL")
             }
@@ -214,7 +219,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
     override fun onResponse(response: Boolean) {
         if (response) {
             switchToLoadingView(true)
-            val call = ServiceManager.getTicketService().deleteTicketById(AppTicketChecker.selectedOrganizationMembership!!.organizationId, currentTicket.id)
+            val call = ServiceManager.getTicketService().deleteTicketById(AppTicketChecker.selectedOrganizationMembership!!.organizationId, ticketId)
             call.enqueue(ticketCallback as Callback<Void>)
         }
     }
@@ -222,7 +227,7 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
     private fun switchToLoadingView(isLoading: Boolean) {
         loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
         btnValidate.visibility = if (isLoading) View.GONE else View.VISIBLE
-        if(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole == OrganizationRole.ADMIN) {
+        if(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole == OrganizationRole.OWNER || AppTicketChecker.selectedOrganizationMembership!!.pretendedRole == OrganizationRole.ADMIN) {
             btnRemove.visibility = if (isLoading) View.GONE else View.VISIBLE
         }
     }
@@ -280,15 +285,18 @@ class ActivityTicketDetails : AppCompatActivity(), View.OnClickListener, DialogE
     private fun <T> onErrorResponse(call: Call<T>, response: Response<T>?) {
         val wasHandled = Util.treatBasicError(call, response, supportFragmentManager)
         if (!wasHandled) {
-            if (response?.code() == 404) {
-                val dialogNoTicket = DialogInfo.newInstance("Ticket not found", "The ticket you are trying to access no longer exists", DialogType.ERROR)
-                dialogNoTicket.dialogExitListener = this@ActivityTicketDetails
-                dialogNoTicket.show(supportFragmentManager, "DIALOG_ERROR")
+            when(response?.code()) {
+                404 -> {
+                    val dialogNoTicket = DialogInfo.newInstance("Ticket not found", "The ticket you are trying to access no longer exists", DialogType.ERROR)
+                    dialogNoTicket.dialogExitListener = this@ActivityTicketDetails
+                    dialogNoTicket.show(supportFragmentManager, "DIALOG_ERROR")
+                }
             }
         }
     }
 
     companion object {
+        const val TICKET_ID = "ticketId"
         const val CURRENT_TICKET = "currentTicket"
     }
 }

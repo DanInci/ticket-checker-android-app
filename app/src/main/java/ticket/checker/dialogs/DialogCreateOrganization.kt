@@ -20,8 +20,8 @@ import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
 
 class DialogCreateOrganization : DialogFragment(), View.OnClickListener {
+    lateinit var listChangeListener: ListChangeListener<Organization>
 
-    lateinit var listChangeListener: ListChangeListener<OrganizationList>
     private lateinit var dialogView: View
 
     private val etOrganizationName by lazy {
@@ -40,13 +40,12 @@ class DialogCreateOrganization : DialogFragment(), View.OnClickListener {
         dialogView.findViewById<TextView>(R.id.tvResult)
     }
 
-    private val submitCallback = object : Callback<OrganizationProfile> {
-        override fun onResponse(call: Call<OrganizationProfile>, response: Response<OrganizationProfile>) {
+    private val submitCallback = object : Callback<Organization> {
+        override fun onResponse(call: Call<Organization>, response: Response<Organization>) {
             loadingSpinner.visibility = View.GONE
             btnSubmit.visibility = View.VISIBLE
             if(response.isSuccessful) {
-                val organization = response.body() as OrganizationProfile
-                listChangeListener.onAdd(organization.toOrganizationList())
+                listChangeListener.onAdd(response.body() as Organization)
                 dismiss()
             }
             else {
@@ -54,7 +53,7 @@ class DialogCreateOrganization : DialogFragment(), View.OnClickListener {
             }
         }
 
-        override fun onFailure(call: Call<OrganizationProfile>, t: Throwable?) {
+        override fun onFailure(call: Call<Organization>, t: Throwable?) {
             loadingSpinner.visibility = View.GONE
             btnSubmit.visibility = View.VISIBLE
             onErrorResponse(call, null)
@@ -112,7 +111,7 @@ class DialogCreateOrganization : DialogFragment(), View.OnClickListener {
         call.enqueue(submitCallback)
     }
 
-    private fun onErrorResponse(call : Call<OrganizationProfile>, response : Response<OrganizationProfile>?) {
+    private fun onErrorResponse(call : Call<Organization>, response : Response<Organization>?) {
         val wasHandled = Util.treatBasicError(call, response, fragmentManager!!)
         tvResult?.visibility = View.VISIBLE
         if(!wasHandled){

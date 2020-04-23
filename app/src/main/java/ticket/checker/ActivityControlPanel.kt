@@ -12,9 +12,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import kotlinx.android.synthetic.main.activity_control.*
+import ticket.checker.admin.members.DialogInviteOrganizationMember
 import ticket.checker.admin.tickets.TicketsFragment
 import ticket.checker.admin.members.OrganizationMembersFragment
+import ticket.checker.admin.tickets.DialogAddTicket
+import ticket.checker.beans.OrganizationMember
 import ticket.checker.beans.OrganizationMemberList
+import ticket.checker.beans.Ticket
 import ticket.checker.beans.TicketList
 import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util.POSITION
@@ -90,14 +94,13 @@ class ActivityControlPanel : AppCompatActivity() {
         if(validSelection) {
             when (itemId) {
                 R.id.action_ticket_add -> {
-//                    val dialogAddTicket = DialogAddTicket()
-//                    dialogAddTicket.listChangeListener = ticketsFragment
-//                    dialogAddTicket.show(supportFragmentManager, "DIALOG_ADD")
+                    val dialogAddTicket = DialogAddTicket.newInstance(AppTicketChecker.selectedOrganizationMembership!!.organizationId)
+                    dialogAddTicket.listChangeListener = ticketsFragment
+                    dialogAddTicket.show(supportFragmentManager, "DIALOG_ADD")
                 }
-                R.id.action_users_add -> {
-//                    val dialogAddUser = DialogAddUser()
-//                    dialogAddUser.listChangeListener = usersFragment
-//                    dialogAddUser.show(supportFragmentManager, "DIALOG_ADD")
+                R.id.action_members_add -> {
+                    val dialogInviteMember = DialogInviteOrganizationMember.newInstance(AppTicketChecker.selectedOrganizationMembership!!.organizationId)
+                    dialogInviteMember.show(supportFragmentManager, "DIALOG_INVITE")
                 }
                 R.id.action_ticket_all -> {
                     ticketsFilterType = null
@@ -190,7 +193,7 @@ class ActivityControlPanel : AppCompatActivity() {
             else -> {
                 menuInflater.inflate(R.menu.control_panel_menu_tickets, menu)
                 checkMenuItem(currentTicketsMenuItemId)
-                if(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole != OrganizationRole.ADMIN && AppTicketChecker.selectedOrganizationMembership!!.pretendedRole != OrganizationRole.PUBLISHER) {
+                if(AppTicketChecker.selectedOrganizationMembership!!.pretendedRole != OrganizationRole.OWNER && AppTicketChecker.selectedOrganizationMembership!!.pretendedRole != OrganizationRole.ADMIN && AppTicketChecker.selectedOrganizationMembership!!.pretendedRole != OrganizationRole.PUBLISHER) {
                     menu?.getItem(0)?.isVisible = false
                     toolbarTitle.setPadding(0,0,0,0)
                 }
@@ -277,10 +280,10 @@ class ActivityControlPanel : AppCompatActivity() {
                         val editedObject = data.getSerializableExtra(EDITED_OBJECT)
                         when (currentFragmentId) {
                             R.id.navigation_tickets -> {
-                                ticketsFragment.onEdit(editedObject as TicketList, position)
+                                ticketsFragment.onEdit(editedObject as Ticket, position)
                             }
                             R.id.navigation_members -> {
-                                membersFragment.onEdit(editedObject as OrganizationMemberList, position)
+                                membersFragment.onEdit(editedObject as OrganizationMember, position)
                             }
                         }
                     }

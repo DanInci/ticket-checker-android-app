@@ -23,12 +23,13 @@ import ticket.checker.services.ServiceManager
 import java.text.ParseException
 import java.util.*
 
-class DialogEditTicket : DialogFragment(), View.OnClickListener {
+class DialogEditTicket internal constructor() : DialogFragment(), View.OnClickListener {
     lateinit var editListener: EditListener<Ticket>
 
     private lateinit var organizationId: UUID
     private lateinit var ticketId : String
-    private lateinit var soldToBirthday : Date
+
+    private var soldToBirthday : Date? = null
 
     private lateinit var dialogView: View
 
@@ -166,16 +167,16 @@ class DialogEditTicket : DialogFragment(), View.OnClickListener {
         if(birthDateString.isNotEmpty()) {
             try {
                 this.soldToBirthday = Util.DATE_FORMAT.parse(birthDateString)!!
+                val now = Date()
+                if(this.soldToBirthday!!.after(now)) {
+                    etSoldToBirthDate.error = "The birth date cannot be in the future"
+                    isValid = false
+                }
             }
             catch(e : ParseException) {
                 etSoldToBirthDate.error =  "Not valid date format. Required (dd.mm.yyyy)"
                 isValid = false
             }
-        }
-        val now = Date()
-        if(this.soldToBirthday.after(now)) {
-            etSoldToBirthDate.error = "The birth date cannot be in the future"
-            isValid = false
         }
         return isValid
     }
@@ -193,11 +194,17 @@ class DialogEditTicket : DialogFragment(), View.OnClickListener {
     private fun onErrorResponse(call: Call<Ticket>, response: Response<Ticket>?) {
         val wasHandled = Util.treatBasicError(call, response, fragmentManager!!)
         if (!wasHandled) {
-            if (response?.code() == 404) {
-                bottomContainer.visibility = View.GONE
-                tvResult.visibility = View.VISIBLE
-                tvResult.setTextColor(ContextCompat.getColor(context!!, R.color.noRed))
-                tvResult.text = "A ticket with this id was not found"
+            when(response?.code()) {
+                404 -> {
+                    bottomContainer.visibility = View.GONE
+                    tvResult.visibility = View.VISIBLE
+                    tvResult.setTextColor(ContextCompat.getColor(context!!, R.color.noRed))
+                    tvResult.text = "The ticket was not found"
+                }
+                else -> {
+                    tvResult.setTextColor(ContextCompat.getColor(context!!, R.color.noRed))
+                    tvResult.text = "Unknown error has happened"
+                }
             }
         }
     }

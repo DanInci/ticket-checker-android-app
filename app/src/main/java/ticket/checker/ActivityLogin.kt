@@ -75,8 +75,8 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_login)
         loadBgnImage()
         safeLet(AppTicketChecker.savedSessionEmail, AppTicketChecker.savedSessionPassword) { e, p ->
-            this.etEmail.setText(AppTicketChecker.savedSessionEmail)
-            this.etPassword.setText(AppTicketChecker.savedSessionPassword)
+            this.etEmail.setText(e)
+            this.etPassword.setText(p)
             this.autoLoginCheckBox.isChecked = true
             loggingInDialog.show(supportFragmentManager, "DIALOG_LOGGING_IN")
             doLogin(etEmail.text.toString(), etPassword.text.toString())
@@ -111,7 +111,7 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
         when(requestCode) {
             REGISTER_ACTIVITY -> {
                 if(resultCode == Activity.RESULT_OK && data != null) {
-                    savedEmail = data.getStringExtra("result")
+                    savedEmail = data.getStringExtra("result")!!
                 }
             }
         }

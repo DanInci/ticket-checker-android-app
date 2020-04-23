@@ -58,7 +58,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
     private lateinit var btnDelete: Button
 
     private var isTicketValidated : Boolean = false
-    private lateinit var soldToBirthday : Date
+    private var soldToBirthday : Date? = null
 
     private val ticketCallback = object : Callback<Ticket> {
         override fun onResponse(call: Call<Ticket>, response: Response<Ticket>) {
@@ -299,16 +299,16 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         if(birthDateString.isNotEmpty()) {
             try {
                 this.soldToBirthday = DATE_FORMAT.parse(birthDateString)!!
+                val now = Date()
+                if(this.soldToBirthday!!.after(now)) {
+                    etSoldToBirthDate.error = "The birth date cannot be in the future"
+                    isValid = false
+                }
             }
             catch(e : ParseException) {
                 etSoldToBirthDate.error =  "Not valid date format. Required (dd.mm.yyyy)"
                 isValid = false
             }
-        }
-        val now = Date()
-        if(this.soldToBirthday.after(now)) {
-            etSoldToBirthDate.error = "The birth date cannot be in the future"
-            isValid = false
         }
         return isValid
     }

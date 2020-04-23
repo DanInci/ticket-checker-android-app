@@ -17,7 +17,7 @@ import ticket.checker.ActivityOrganizations.Companion.EDITED_ORGANIZATION
 import ticket.checker.ActivityOrganizations.Companion.ITEM_EDITED
 import ticket.checker.ActivityOrganizations.Companion.ITEM_REMOVED
 import ticket.checker.admin.listeners.EditListener
-import ticket.checker.beans.OrganizationProfile
+import ticket.checker.beans.Organization
 import ticket.checker.dialogs.DialogEditOrganization
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.extras.DialogType
@@ -27,9 +27,9 @@ import ticket.checker.listeners.DialogExitListener
 import ticket.checker.listeners.DialogResponseListener
 import ticket.checker.services.ServiceManager
 
-class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, DialogExitListener, DialogResponseListener, EditListener<OrganizationProfile> {
+class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, DialogExitListener, DialogResponseListener, EditListener<Organization> {
 
-    private lateinit var currentOrganization : OrganizationProfile
+    private lateinit var currentOrganization : Organization
     private var itemsWasEdited = false
     private var itemWasRemoved = false
 
@@ -54,6 +54,9 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
     private val btnEdit by lazy {
         findViewById<ImageButton>(R.id.btnEdit)
     }
+    private val btnLeave by lazy {
+        findViewById<Button>(R.id.btnLeave)
+    }
     private val btnDelete by lazy {
         findViewById<Button>(R.id.btnDelete)
     }
@@ -67,20 +70,29 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
             if (response.isSuccessful) {
                 when(method) {
                     "GET" -> {
-                        val organization = response.body() as OrganizationProfile
+                        val organization = response.body() as Organization
                         updateOrganizationInfo(organization)
                         if(organization.membership.role == OrganizationRole.OWNER) {
+                            btnLeave.visibility = View.GONE
                             btnDelete.visibility = View.VISIBLE
                             btnEdit.visibility = View.VISIBLE
                         } else {
                             btnDelete.visibility = View.GONE
                             btnEdit.visibility = View.GONE
+                            btnLeave.visibility = View.VISIBLE
                         }
                     }
                     "DELETE" -> {
-                        val dialogDeleteSuccessful = DialogInfo.newInstance("Deletion successful", "Organization '${currentOrganization.name}' was successfully deleted", DialogType.SUCCESS)
-                        dialogDeleteSuccessful.dialogExitListener = this@ActivityOrganizationDetails
-                        dialogDeleteSuccessful.show(supportFragmentManager, "DIALOG_DELETE_SUCCESSFUL")
+                        if(currentOrganization.membership.role == OrganizationRole.OWNER) {
+                            val dialogDeleteSuccessful = DialogInfo.newInstance("Deletion successful", "Organization '${currentOrganization.name}' was successfully deleted", DialogType.SUCCESS)
+                            dialogDeleteSuccessful.dialogExitListener = this@ActivityOrganizationDetails
+                            dialogDeleteSuccessful.show(supportFragmentManager, "DIALOG_DELETE_SUCCESSFUL")
+                        } else {
+                            val dialogLeaveSuccessful = DialogInfo.newInstance("Leave successful", "You left organization '${currentOrganization.name}'", DialogType.SUCCESS)
+                            dialogLeaveSuccessful.dialogExitListener = this@ActivityOrganizationDetails
+                            dialogLeaveSuccessful.show(supportFragmentManager, "DIALOG_LEAVE_SUCCESSFUL")
+                        }
+
                     }
                 }
             }
@@ -102,10 +114,11 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_organization_details)
 
-        val org = savedInstanceState?.getString(CURRENT_ORGANIZATION) as OrganizationProfile? ?: intent.getSerializableExtra(CURRENT_ORGANIZATION) as OrganizationProfile
+        val org = savedInstanceState?.getString(CURRENT_ORGANIZATION) as Organization? ?: intent.getSerializableExtra(CURRENT_ORGANIZATION) as Organization
         updateOrganizationInfo(org)
 
         setSupportActionBar(toolbar)
+        btnLeave.setOnClickListener(this)
         btnDelete.setOnClickListener(this)
         btnBack.setOnClickListener(this)
         btnEdit.setOnClickListener(this)
@@ -114,7 +127,7 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
     override fun onStart() {
         super.onStart()
         val call = ServiceManager.getOrganizationService().getOrganizationById(currentOrganization.id)
-        call.enqueue(callback as Callback<OrganizationProfile>)
+        call.enqueue(callback as Callback<Organization>)
     }
 
     override fun onClick(v: View?) {
@@ -130,6 +143,12 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
             R.id.btnDelete -> {
                 val dialog = DialogInfo.newInstance("Confirm deletion", "Are you sure you want to delete organization '${currentOrganization.name}' ?", DialogType.YES_NO)
                 dialog.dialogResponseListener = this
+                dialog.show(supportFragmentManager, "DIALOG_CONFIRM_DELETE_ORGANIZATION")
+            }
+            R.id.btnLeave -> {
+                val dialog = DialogInfo.newInstance("Confirm leave", "Are you sure you want to leave organization '${currentOrganization.name}' ?", DialogType.YES_NO)
+                dialog.dialogResponseListener = this
+                dialog.targetRequestCode
                 dialog.show(supportFragmentManager, "DIALOG_CONFIRM_DELETE_ORGANIZATION")
             }
         }
@@ -155,14 +174,22 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
 
     override fun onResponse(response: Boolean) {
         if (response) {
+            btnLeave.visibility = View.GONE
             btnDelete.visibility = View.GONE
             btnEdit.visibility = View.GONE
-            val call = ServiceManager.getOrganizationService().deleteOrganizationById(currentOrganization.id)
-            call.enqueue(callback as Callback<Void>)
+
+            if(currentOrganization.membership.role == OrganizationRole.OWNER) {
+                val call = ServiceManager.getOrganizationService().deleteOrganizationById(currentOrganization.id)
+                call.enqueue(callback as Callback<Void>)
+            }
+            else {
+                val call = ServiceManager.getOrganizationService().deleteOrganizationMemberById(currentOrganization.id, AppTicketChecker.loggedInUser!!.id)
+                call.enqueue(callback as Callback<Void>)
+            }
         }
     }
 
-    override fun onEdit(editedObject: OrganizationProfile) {
+    override fun onEdit(editedObject: Organization) {
         itemsWasEdited = true
         updateOrganizationInfo(editedObject)
     }
@@ -172,12 +199,7 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
         onBackPressed()
     }
 
-    private fun switchToLoadingView(isLoading: Boolean, role: OrganizationRole) {
-        btnDelete.visibility = if (isLoading || role != OrganizationRole.OWNER) View.GONE else View.VISIBLE
-        btnEdit.visibility = if (isLoading || role != OrganizationRole.OWNER) View.GONE else View.VISIBLE
-    }
-
-    private fun updateOrganizationInfo(organization: OrganizationProfile) {
+    private fun updateOrganizationInfo(organization: Organization) {
         findViewById<ProgressBar>(R.id.lsOrganizationName).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsOrganizationRole).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsJoinedAt).visibility = View.INVISIBLE
@@ -216,6 +238,8 @@ class ActivityOrganizationDetails : AppCompatActivity(), View.OnClickListener, D
     }
 
     companion object {
+        const val DIALOG_DELETE = 0
+        const val DIALOG_LEAVE = 1
         const val CURRENT_ORGANIZATION = "currentOrganization"
     }
 }

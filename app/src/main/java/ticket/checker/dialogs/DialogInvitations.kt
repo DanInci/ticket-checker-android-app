@@ -1,6 +1,5 @@
 package ticket.checker.dialogs
 
-import android.app.Service
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.nfc.tech.MifareUltralight.PAGE_SIZE
@@ -26,18 +25,17 @@ import ticket.checker.admin.listeners.InviteResponseListener
 import ticket.checker.admin.listeners.ListChangeListener
 import ticket.checker.beans.OrganizationInviteList
 import ticket.checker.beans.OrganizationList
-import ticket.checker.beans.OrganizationProfile
+import ticket.checker.beans.Organization
 import ticket.checker.extras.InviteStatus
 import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
 import java.util.*
 
 class DialogInvitations internal constructor() : DialogFragment(), View.OnClickListener, InviteResponseListener {
+    lateinit var listChangeListener: ListChangeListener<Organization>
 
     private lateinit var userId: UUID
     private var firstLoad = true
-
-    lateinit var listChangeListener: ListChangeListener<OrganizationList>
 
     private lateinit var dialogView: View
 
@@ -85,22 +83,21 @@ class DialogInvitations internal constructor() : DialogFragment(), View.OnClickL
         }
     }
 
-    private val inviteAcceptCallback = object : Callback<OrganizationProfile> {
-        override fun onResponse(call: Call<OrganizationProfile>, response: Response<OrganizationProfile>) {
+    private val inviteAcceptCallback = object : Callback<Organization> {
+        override fun onResponse(call: Call<Organization>, response: Response<Organization>) {
             if(response.isSuccessful) {
                 val organizationId = UUID.fromString(call.request().url().pathSegments()[2])
                 val inviteId = UUID.fromString(call.request().url().pathSegments()[4])
                 val position = itemsAdapter.getItemPosition(organizationId, inviteId)
                 if(position != null) {
                     itemsAdapter.itemRemoved(position)
-                    val organization = response.body() as OrganizationProfile
-                    listChangeListener.onAdd(organization.toOrganizationList())
+                    listChangeListener.onAdd(response.body() as Organization)
                 }
             } else {
                 onInviteErrorResponse(call, response)
             }
         }
-        override fun onFailure(call: Call<OrganizationProfile>, t: Throwable) {
+        override fun onFailure(call: Call<Organization>, t: Throwable) {
             onInviteErrorResponse(call, null)
         }
     }

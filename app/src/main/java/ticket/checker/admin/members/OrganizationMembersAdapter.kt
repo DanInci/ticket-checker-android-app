@@ -40,31 +40,20 @@ class OrganizationMembersAdapter(val context : Context) : AItemsAdapterWithHeade
         (holder as HeaderHolder).updateMembersHeaderInfo(filterType, filterValue, itemStats)
     }
 
-//    override fun launchInfoActivity(view: View, position : Int) {
-//        if(isItemPosition(position)) {
-//            val activity = context as Activity
-//            val intent  = Intent(activity, ActivityUserDetails::class.java)
-//            intent.putExtra(POSITION, position)
-//            intent.putExtra(CURRENT_USER, items[position-1])
-//            activity.startActivityForResult(intent, ActivityControlPanel.CHANGES_TO_ADAPTER_ITEM)
-//            activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-//        }
-//    }
-
     override fun itemAdded(addedItem: OrganizationMemberList) {
-        super.itemAdded(addedItem)
         var newItemStats = headerItem?: 0
         newItemStats++
         updateHeaderInfo(filterType, filterValue, newItemStats)
+        super.itemAdded(addedItem)
     }
 
     override fun itemRemoved(position: Int) {
-        super.itemRemoved(position)
         if(isItemPosition(position)) {
             var newItemStats = headerItem ?: 0
             newItemStats--
             updateHeaderInfo(filterType, filterValue, newItemStats)
         }
+        super.itemRemoved(position)
     }
 
     override fun getItemId(item: OrganizationMemberList): Long {
@@ -92,19 +81,15 @@ class OrganizationMembersAdapter(val context : Context) : AItemsAdapterWithHeade
 
         private fun setRole(role : OrganizationRole) {
             tvOrganizationRole.text = role.name
-            if(role == OrganizationRole.USER) {
-                tvOrganizationRole.visibility = View.GONE
-            }
-            else {
-                tvOrganizationRole.visibility = View.VISIBLE
-                tvOrganizationRole.setTextColor(ContextCompat.getColor(itemView.context, role.colorResource))
-            }
+            tvOrganizationRole.setTextColor(ContextCompat.getColor(itemView.context, role.colorResource))
 
-            if(role ==  OrganizationRole.ADMIN) {
-                icPerson.background = ContextCompat.getDrawable(itemView.context, R.drawable.ic_admin)
-            }
-            else {
-                icPerson.background = ContextCompat.getDrawable(itemView.context, R.drawable.ic_user)
+            when(role) {
+                OrganizationRole.OWNER ->
+                    icPerson.background = ContextCompat.getDrawable(itemView.context, R.drawable.ic_owner)
+                OrganizationRole.ADMIN ->
+                    icPerson.background = ContextCompat.getDrawable(itemView.context, R.drawable.ic_admin)
+                else ->
+                    icPerson.background = ContextCompat.getDrawable(itemView.context, R.drawable.ic_user)
             }
         }
 

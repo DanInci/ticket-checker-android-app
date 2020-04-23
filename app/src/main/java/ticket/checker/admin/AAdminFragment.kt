@@ -25,13 +25,12 @@ import java.util.*
 /**
  * Created by Dani on 09.02.2018.
  */
-abstract class AAdminFragment<T, Y> : Fragment(), FilterChangeListener, ListChangeListener<T>, RecyclerItemClickListener.OnItemClickListener {
+abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, ListChangeListener<T>, RecyclerItemClickListener.OnItemClickListener {
 
     protected var filterType: String? = null
     protected lateinit var filterValue: String
     protected lateinit var organizationId: UUID
 
-    abstract val loadLimit: Int
     private var firstLoad = true
 
     private var refreshLayout: SwipeRefreshLayout? = null
@@ -39,7 +38,7 @@ abstract class AAdminFragment<T, Y> : Fragment(), FilterChangeListener, ListChan
     private var recyclerView: RecyclerView? = null
     protected var layoutManager: LinearLayoutManager? = null
 
-    protected val itemsAdapter: AItemsAdapterWithHeader<T, Y> by lazy {
+    protected val itemsAdapter: AItemsAdapterWithHeader<TList, Y> by lazy {
         setupItemsAdapter()
     }
     private var scrollListener: EndlessScrollListener? = null
@@ -58,13 +57,13 @@ abstract class AAdminFragment<T, Y> : Fragment(), FilterChangeListener, ListChan
         }
     }
 
-    protected val itemsCallback = object : Callback<List<T>> {
-        override fun onResponse(call: Call<List<T>>, response: Response<List<T>>) {
+    protected val itemsCallback = object : Callback<List<TList>> {
+        override fun onResponse(call: Call<List<TList>>, response: Response<List<TList>>) {
             if (firstLoad) {
                 onFirstLoad()
             }
             if (response.isSuccessful) {
-                val items: List<T> = response.body() as List<T>
+                val items: List<TList> = response.body() as List<TList>
                 itemsAdapter.setLoading(false)
                 itemsAdapter.updateItemsList(items)
             } else {
@@ -72,7 +71,7 @@ abstract class AAdminFragment<T, Y> : Fragment(), FilterChangeListener, ListChan
             }
         }
 
-        override fun onFailure(call: Call<List<T>>, t: Throwable?) {
+        override fun onFailure(call: Call<List<TList>>, t: Throwable?) {
             onErrorResponse(call, null)
         }
     }
@@ -158,9 +157,7 @@ abstract class AAdminFragment<T, Y> : Fragment(), FilterChangeListener, ListChan
         refreshLayout?.isEnabled = true
     }
 
-    override fun onItemClick(view: View, position: Int) {
-//        itemsAdapter.launchInfoActivity(view, position)
-    }
+    override fun onItemClick(view: View, position: Int) {}
 
     override fun onLongItemClick(view: View?, position: Int) {}
 
@@ -176,7 +173,7 @@ abstract class AAdminFragment<T, Y> : Fragment(), FilterChangeListener, ListChan
         Util.treatBasicError(call, response, fragmentManager!!)
     }
 
-    abstract fun setupItemsAdapter(): AItemsAdapterWithHeader<T, Y>
+    abstract fun setupItemsAdapter(): AItemsAdapterWithHeader<TList, Y>
 
     abstract fun loadHeader(filterType: String?, filterValue: String)
 

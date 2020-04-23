@@ -24,7 +24,7 @@ object Util {
     const val ERROR_TICKET_EXISTS = "TicketExistsException"
     const val POSITION = "adapterPosition"
 
-    private const val PAGE_SIZE = 20
+    const val PAGE_SIZE = 20
 
     fun formatDate(then : Date, shortFormat : Boolean) : String {
         val now = Date()

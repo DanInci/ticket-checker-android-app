@@ -90,6 +90,13 @@ abstract class AItemsAdapterWithHeader<T, Y>(context : Context) : AItemsAdapter<
         }
     }
 
+    override fun getItemByPosition(position: Int): T? {
+        if(isItemPosition(position)) {
+            return items[position-1]
+        }
+        return null
+    }
+
     override fun updateItemsList(updatedItems: List<T>) {
         val startItemsIndex = items.size + ADAPTER_COUNT_HEADER
         val endItemsIndex = startItemsIndex + updatedItems.size - ADAPTER_COUNT_HEADER

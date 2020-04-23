@@ -28,6 +28,7 @@ import ticket.checker.extras.Util.treatBasicError
 import ticket.checker.listeners.DialogExitListener
 import ticket.checker.listeners.DialogResponseListener
 import ticket.checker.services.ServiceManager
+import java.util.*
 
 class ActivityOrganizationMemberDetails : AppCompatActivity(), View.OnClickListener, DialogExitListener, DialogResponseListener {
 
@@ -35,7 +36,10 @@ class ActivityOrganizationMemberDetails : AppCompatActivity(), View.OnClickListe
     private var itemsWasEdited: Boolean = false
     private var itemWasRemoved: Boolean = false
 
-    private lateinit var currentMember : OrganizationMember
+    private lateinit var organizationId: UUID
+    private lateinit var userId: UUID
+
+    private var currentMember : OrganizationMember? = null
 
     private val memberPosition : Int by lazy {
         intent.getIntExtra(POSITION, -1)
@@ -93,7 +97,7 @@ class ActivityOrganizationMemberDetails : AppCompatActivity(), View.OnClickListe
                     }
                     "DELETE" -> {
                         loadingSpinner.visibility = View.GONE
-                        val dialogDeleteSuccessful = DialogInfo.newInstance("Deletion successful", "User '${currentMember.name}' was successfully deleted", DialogType.SUCCESS)
+                        val dialogDeleteSuccessful = DialogInfo.newInstance("Deletion successful", "User '${currentMember!!.name}' was successfully deleted", DialogType.SUCCESS)
                         dialogDeleteSuccessful.dialogExitListener = this@ActivityOrganizationMemberDetails
                         dialogDeleteSuccessful.show(supportFragmentManager, "DIALOG_DELETE_SUCCESSFUL")
                     }
@@ -114,8 +118,8 @@ class ActivityOrganizationMemberDetails : AppCompatActivity(), View.OnClickListe
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_member_details)
 
-        val member = savedInstanceState?.getString(CURRENT_MEMBER) as OrganizationMember? ?: intent.getSerializableExtra(CURRENT_MEMBER) as OrganizationMember
-        updateMemberInfo(member)
+        organizationId = intent.getSerializableExtra(ORGANIZATION_ID) as UUID
+        userId = intent.getSerializableExtra(USER_ID) as UUID
 
         setSupportActionBar(toolbar)
         btnRemove.setOnClickListener(this)
@@ -125,7 +129,7 @@ class ActivityOrganizationMemberDetails : AppCompatActivity(), View.OnClickListe
 
     override fun onStart() {
         super.onStart()
-        val call = ServiceManager.getOrganizationService().getOrganizationMemberById(currentMember.organizationId, currentMember.userId)
+        val call = ServiceManager.getOrganizationService().getOrganizationMemberById(organizationId, userId)
         call.enqueue(memberCallback as Callback<OrganizationMember>)
     }
 
@@ -147,6 +151,12 @@ class ActivityOrganizationMemberDetails : AppCompatActivity(), View.OnClickListe
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
     }
 
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        val member = savedInstanceState.getSerializable(CURRENT_MEMBER) as OrganizationMember
+        updateMemberInfo(member)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putSerializable(CURRENT_MEMBER, currentMember)
@@ -158,37 +168,41 @@ class ActivityOrganizationMemberDetails : AppCompatActivity(), View.OnClickListe
                 onBackPressed()
             }
             R.id.btnEdit -> {
-                when {
-                    currentMember.userId == AppTicketChecker.loggedInUser!!.id -> {
-                        val dialog = DialogInfo.newInstance("Edit failed", "You can not edit yourself", DialogType.ERROR)
-                        dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
-                    }
-                    currentMember.role == OrganizationRole.ADMIN && AppTicketChecker.selectedOrganizationMembership!!.role != OrganizationRole.OWNER -> {
-                        val dialog = DialogInfo.newInstance("Edit failed", "You are not allowed to edit another admin", DialogType.ERROR)
-                        dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
-                    }
-                    else -> {
-                        val dialog = DialogEditOrganizationMember.newInstance(currentMember.organizationId, currentMember.userId, currentMember.name)
-                        dialog.editListener = editListener
-                        dialog.show(supportFragmentManager, "DIALOG_EDIT_MEMBER")
+                if(currentMember != null) {
+                    when {
+                        currentMember!!.userId == AppTicketChecker.loggedInUser!!.id -> {
+                            val dialog = DialogInfo.newInstance("Edit failed", "You can not edit yourself", DialogType.ERROR)
+                            dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
+                        }
+                        currentMember!!.role == OrganizationRole.ADMIN && AppTicketChecker.selectedOrganizationMembership!!.role != OrganizationRole.OWNER -> {
+                            val dialog = DialogInfo.newInstance("Edit failed", "You are not allowed to edit another admin", DialogType.ERROR)
+                            dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
+                        }
+                        else -> {
+                            val dialog = DialogEditOrganizationMember.newInstance(organizationId, userId, currentMember!!.name)
+                            dialog.editListener = editListener
+                            dialog.show(supportFragmentManager, "DIALOG_EDIT_MEMBER")
+                        }
                     }
                 }
             }
             R.id.btnRemove -> {
-                val dialog: DialogInfo?
-                when {
-                    currentMember.userId == AppTicketChecker.loggedInUser!!.id -> {
-                        dialog = DialogInfo.newInstance("Delete failed", "You can not remove yourself", DialogType.ERROR)
-                        dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
-                    }
-                    currentMember.role == OrganizationRole.ADMIN && AppTicketChecker.selectedOrganizationMembership!!.role != OrganizationRole.OWNER -> {
-                        dialog = DialogInfo.newInstance("Delete failed", "You are not allowed to remove another admin", DialogType.ERROR)
-                        dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
-                    }
-                    else -> {
-                        dialog = DialogInfo.newInstance("Confirm deletion", "Are you sure you want to remove member ${currentMember.name} from organization?", DialogType.YES_NO)
-                        dialog.dialogResponseListener = this
-                        dialog.show(supportFragmentManager, "DIALOG_CONFIRM_DELETE")
+                if(currentMember != null) {
+                    val dialog: DialogInfo?
+                    when {
+                        currentMember!!.userId == AppTicketChecker.loggedInUser!!.id -> {
+                            dialog = DialogInfo.newInstance("Delete failed", "You can not remove yourself", DialogType.ERROR)
+                            dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
+                        }
+                        currentMember!!.role == OrganizationRole.ADMIN && AppTicketChecker.selectedOrganizationMembership!!.role != OrganizationRole.OWNER -> {
+                            dialog = DialogInfo.newInstance("Delete failed", "You are not allowed to remove another admin", DialogType.ERROR)
+                            dialog.show(supportFragmentManager, "DIALOG_NOT_ALLOWED")
+                        }
+                        else -> {
+                            dialog = DialogInfo.newInstance("Confirm deletion", "Are you sure you want to remove member ${currentMember!!.name} from organization?", DialogType.YES_NO)
+                            dialog.dialogResponseListener = this
+                            dialog.show(supportFragmentManager, "DIALOG_CONFIRM_DELETE")
+                        }
                     }
                 }
             }
@@ -198,7 +212,7 @@ class ActivityOrganizationMemberDetails : AppCompatActivity(), View.OnClickListe
     override fun onResponse(response: Boolean) {
         if (response) {
             switchToLoadingView(true)
-            val call = ServiceManager.getOrganizationService().deleteOrganizationMemberById(currentMember.organizationId, currentMember.userId)
+            val call = ServiceManager.getOrganizationService().deleteOrganizationMemberById(organizationId, userId)
             call.enqueue(memberCallback as Callback<Void>)
         }
     }
@@ -214,19 +228,19 @@ class ActivityOrganizationMemberDetails : AppCompatActivity(), View.OnClickListe
     }
 
     private fun updateMemberInfo(member: OrganizationMember) {
-        findViewById<ProgressBar>(R.id.lsCreatedAt).visibility = View.INVISIBLE
+        findViewById<ProgressBar>(R.id.lsJoinedAt).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsTicketsCreated).visibility = View.INVISIBLE
         findViewById<ProgressBar>(R.id.lsTicketsValidated).visibility = View.INVISIBLE
 
         currentMember = member
 
-        tvTitle.text = currentMember.name
-        tvRole.text = currentMember.role.role
-        tvRole.setTextColor(ContextCompat.getColor(applicationContext, currentMember.role.colorResource))
+        tvTitle.text = member.name
+        tvRole.text = member.role.role
+        tvRole.setTextColor(ContextCompat.getColor(applicationContext, member.role.colorResource))
 
-        tvJoinedAt.text = DATE_TIME_FORMAT.format(currentMember.joinedAt)
-        tvTicketsCreated.text = "${currentMember.soldTicketsNo}"
-        tvTicketsValidated.text = "${currentMember.validatedTicketsNo}"
+        tvJoinedAt.text = DATE_TIME_FORMAT.format(member.joinedAt)
+        tvTicketsCreated.text = "${member.soldTicketsNo}"
+        tvTicketsValidated.text = "${member.validatedTicketsNo}"
     }
 
     private fun <T> onErrorResponse(call: Call<T>, response: Response<T>?) {
@@ -241,6 +255,8 @@ class ActivityOrganizationMemberDetails : AppCompatActivity(), View.OnClickListe
     }
 
     companion object {
+        const val ORGANIZATION_ID = "organizationId"
+        const val USER_ID = "userId"
         const val CURRENT_MEMBER = "currentMember"
     }
 }
