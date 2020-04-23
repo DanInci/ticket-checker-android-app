@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.google.android.gms.vision.text.Line
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -37,35 +38,17 @@ abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, L
 
     private lateinit var fragmentView: View
 
-    private val refreshLayout by lazy {
-        fragmentView.findViewById<SwipeRefreshLayout>(R.id.refreshLayout)
-    }
-    private val recyclerView by lazy {
-        fragmentView.findViewById<RecyclerView>(R.id.rvItems)
-    }
-    private val loadingSpinner by lazy {
-        fragmentView.findViewById<ProgressBar>(R.id.rvLoadingSpinner)
-    }
-    private val scrollListener by lazy {
-        object : EndlessScrollListener(layoutManager) {
-            override fun onLoadMore(page: Int, totalItemsCount: Int, recyclerView: RecyclerView) {
-                itemsAdapter.setLoading(true)
-                loadItems(page, filterType, filterValue)
-            }
-        }
-    }
-    private val emptyContainer by lazy {
-        fragmentView.findViewById<LinearLayout>(R.id.emptyContainer)
-    }
-    private val tvEmptyText by lazy {
-        fragmentView.findViewById<TextView>(R.id.tvEmptyText)
-    }
-    protected val layoutManager by lazy {
-        LinearLayoutManager(activity)
-    }
+    private var refreshLayout: SwipeRefreshLayout? = null
+    private var loadingSpinner: ProgressBar? = null
+    private var recyclerView: RecyclerView? = null
+
+    protected var layoutManager: LinearLayoutManager? = null
+    private var scrollListener: EndlessScrollListener? = null
     protected val itemsAdapter: AItemsAdapterWithHeader<TList, Y> by lazy {
         setupItemsAdapter()
     }
+    private var emptyContainer: LinearLayout? = null
+    private var tvEmptyText: TextView? = null
 
     protected val headerCallback = object : Callback<Y> {
         override fun onResponse(call: Call<Y>, response: Response<Y>) {
@@ -91,8 +74,8 @@ abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, L
                 itemsAdapter.setLoading(false)
                 itemsAdapter.updateItemsList(items)
                 if(itemsAdapter.getRealItemsCount() == 0) {
-                    emptyContainer.visibility = View.VISIBLE
-                    tvEmptyText.text = getEmptyText()
+                    emptyContainer?.visibility = View.VISIBLE
+                    tvEmptyText?.text = getEmptyText()
                 }
             } else {
                 onErrorResponse(call, response)
@@ -114,33 +97,47 @@ abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, L
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        fragmentView = inflater.inflate(R.layout.recycle_view, container, false)
-        return fragmentView
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        refreshLayout.setOnRefreshListener { onRefresh() }
-        refreshLayout.setColorSchemeColors(ContextCompat.getColor(context!!, R.color.colorPrimary))
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = itemsAdapter
-        recyclerView.addOnScrollListener(scrollListener)
-        recyclerView.addOnItemTouchListener(RecyclerItemClickListener(context!!, recyclerView, this))
+        val view = inflater.inflate(R.layout.recycle_view, container, false)
+        refreshLayout = view?.findViewById(R.id.refreshLayout)
+        refreshLayout?.setOnRefreshListener { onRefresh() }
+        refreshLayout?.setColorSchemeColors(ContextCompat.getColor(context!!, R.color.colorPrimary))
+        loadingSpinner = view?.findViewById(R.id.rvLoadingSpinner)
+        layoutManager = LinearLayoutManager(activity)
+        scrollListener = object : EndlessScrollListener(layoutManager!!) {
+            override fun onLoadMore(page: Int, totalItemsCount: Int, recyclerView: RecyclerView) {
+                itemsAdapter.setLoading(true)
+                loadItems(page, filterType, filterValue)
+            }
+        }
+        recyclerView = view?.findViewById(R.id.rvItems)
+        recyclerView?.layoutManager = layoutManager
+        recyclerView?.adapter = itemsAdapter
+        recyclerView?.addOnScrollListener(scrollListener!!)
+        recyclerView?.addOnItemTouchListener(RecyclerItemClickListener(context!!, recyclerView!!, this))
+        emptyContainer = view?.findViewById(R.id.emptyContainer)
+        tvEmptyText = view?.findViewById(R.id.tvEmptyText)
 
         if (firstLoad) {
             reloadAll()
         } else {
-            scrollListener.currentPage = arguments?.getInt(LOAD_CURRENT_PAGE) ?: 0
-            scrollListener.previousTotalItemCount = arguments?.getInt(LOAD_PREVIOUS_ITEM_COUNT) ?: 0
-            scrollListener.loading = arguments?.getBoolean(LOAD_LOADING) ?: false
+            scrollListener?.currentPage = arguments?.getInt(LOAD_CURRENT_PAGE) ?: 0
+            scrollListener?.previousTotalItemCount = arguments?.getInt(LOAD_PREVIOUS_ITEM_COUNT) ?: 0
+            scrollListener?.loading = arguments?.getBoolean(LOAD_LOADING) ?: false
+
+            if(itemsAdapter.getRealItemsCount() == 0) {
+                emptyContainer?.visibility = View.VISIBLE
+                tvEmptyText?.text = getEmptyText()
+            } else {
+                emptyContainer?.visibility = View.GONE
+            }
         }
+        return view
     }
 
     private fun onRefresh() {
-        refreshLayout.isRefreshing = false
+        refreshLayout?.isRefreshing = false
         itemsAdapter.resetItemsList()
-        scrollListener.resetState()
+        scrollListener?.resetState()
         reloadAll()
     }
 
@@ -148,15 +145,15 @@ abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, L
         this.filterType = filterType
         this.filterValue = filterValue
         itemsAdapter.resetItemsList()
-        scrollListener.resetState()
+        scrollListener?.resetState()
         reloadAll()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        arguments?.putInt(LOAD_CURRENT_PAGE, scrollListener.currentPage)
-        arguments?.putInt(LOAD_PREVIOUS_ITEM_COUNT, scrollListener.previousTotalItemCount)
-        arguments?.putBoolean(LOAD_LOADING, scrollListener.loading)
+        arguments?.putInt(LOAD_CURRENT_PAGE, scrollListener?.currentPage ?: 0)
+        arguments?.putInt(LOAD_PREVIOUS_ITEM_COUNT, scrollListener?.previousTotalItemCount ?: 0)
+        arguments?.putBoolean(LOAD_LOADING, scrollListener?.loading ?: true)
     }
 
     private fun reloadAll() {
@@ -167,17 +164,17 @@ abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, L
 
     private fun onResetFirstLoad() {
         firstLoad = true
-        emptyContainer.visibility = View.GONE
-        loadingSpinner.visibility = View.VISIBLE
-        scrollListener.enabled = false
-        refreshLayout.isEnabled = false
+        emptyContainer?.visibility = View.GONE
+        loadingSpinner?.visibility = View.VISIBLE
+        scrollListener?.enabled = false
+        refreshLayout?.isEnabled = false
     }
 
     private fun onFirstLoad() {
         firstLoad = false
-        loadingSpinner.visibility = View.GONE
-        scrollListener.enabled = true
-        refreshLayout.isEnabled = true
+        loadingSpinner?.visibility = View.GONE
+        scrollListener?.enabled = true
+        refreshLayout?.isEnabled = true
     }
 
     override fun onItemClick(view: View, position: Int) {}
@@ -185,14 +182,14 @@ abstract class AAdminFragment<T, TList, Y> : Fragment(), FilterChangeListener, L
     override fun onLongItemClick(view: View?, position: Int) {}
 
     override fun onAdd(addedObject: T) {
-        emptyContainer.visibility = View.GONE
+        emptyContainer?.visibility = View.GONE
     }
 
     override fun onRemove(removedItemPosition: Int) {
         itemsAdapter.itemRemoved(removedItemPosition)
         if(itemsAdapter.getRealItemsCount() == 0) {
-            emptyContainer.visibility = View.VISIBLE
-            tvEmptyText.text = getEmptyText()
+            emptyContainer?.visibility = View.VISIBLE
+            tvEmptyText?.text = getEmptyText()
         }
     }
 
