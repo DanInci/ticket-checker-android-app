@@ -1,6 +1,7 @@
 package ticket.checker
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -10,8 +11,12 @@ import androidx.appcompat.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.transition.Transition
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.SimpleTarget
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -122,7 +127,7 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         this.organizationRole = if(AppTicketChecker.selectedOrganizationMembership != null) AppTicketChecker.selectedOrganizationMembership!!.role else intent.getSerializableExtra(ORGANIZATION_ROLE) as OrganizationRole
         this.currentMenuItemId = savedInstanceState?.getInt(CURRENT_MENU_ITEM_ID) ?: -1
 
-//        loadCollapsingToolbarImg()
+        loadCollapsingToolbarImg()
         setSupportActionBar(toolbar)
         collapsingToolbar.title = organizationName
         appBarLayout.addOnOffsetChangedListener(appBarOffsetChangeListener)
@@ -144,21 +149,16 @@ class ActivityMenu : AppCompatActivity(), View.OnClickListener {
         call.enqueue(organizationMemberCallback)
     }
 
-//    private fun loadCollapsingToolbarImg() {
-//        val collapsingToolbarBackground = findViewById<ImageView>(R.id.bg_collapsingToolbar)
-//        val baseUrl = if(AppTicketChecker.port != "") "http://${AppTicketChecker.address}:${AppTicketChecker.port}" else "http://${AppTicketChecker.address}"
-//        Glide.with(applicationContext)
-//                .asBitmap()
-//                .load("$baseUrl/images/header.png")
-//                .into(object : SimpleTarget<Bitmap>() {
-//                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-//                        headerHasLoaded=true
-//                        collapsingToolbar.title = " "
-//                        collapsingToolbarBackground.setImageBitmap(resource)
-//                        collapsingToolbarBackground.scaleType = ImageView.ScaleType.CENTER_CROP
-//                    }
-//                })
-//    }
+    private fun loadCollapsingToolbarImg() {
+        val collapsingToolbarBackground = findViewById<ImageView>(R.id.bg_collapsingToolbar)
+        val baseUrl = ServiceManager.API_BASE_URL
+        Glide.with(applicationContext)
+                .asBitmap()
+                .load("${baseUrl}images/header.jpg")
+                .placeholder(R.drawable.header_placeholder)
+                .centerCrop()
+                .into(collapsingToolbarBackground)
+    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if(AppTicketChecker.selectedOrganizationMembership != null) {

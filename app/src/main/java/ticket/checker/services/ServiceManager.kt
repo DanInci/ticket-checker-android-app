@@ -13,7 +13,7 @@ import java.lang.reflect.Type
  * Created by Dani on 24.01.2018.
  */
 object ServiceManager {
-    private const val API_BASE_URL = "http://10.0.2.2:8080/api/"
+    const val API_BASE_URL = "http://10.0.2.2:8080/api/"
     private const val GSON_SERIALIZER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
 
     private var retrofit: Retrofit? = null
