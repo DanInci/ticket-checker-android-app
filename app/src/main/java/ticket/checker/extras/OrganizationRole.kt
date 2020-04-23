@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 enum class OrganizationRole(val role : String, val colorResource : Int ) : Serializable {
 
-    @SerializedName("OrganizationOwner") //TODO This does not convert ok to query param
+    @SerializedName("OrganizationOwner")
     OWNER("Owner", R.color.noRed),
 
     @SerializedName("Admin")

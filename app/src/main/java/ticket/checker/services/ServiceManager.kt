@@ -1,10 +1,13 @@
 package ticket.checker.services
 
 import com.google.gson.GsonBuilder
+import com.google.gson.annotations.SerializedName
 import okhttp3.OkHttpClient
+import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ticket.checker.beans.ErrorResponse
+import java.lang.reflect.Type
 
 /**
  * Created by Dani on 24.01.2018.
@@ -88,7 +91,25 @@ object ServiceManager {
         return Retrofit.Builder()
                 .baseUrl(API_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setDateFormat(GSON_SERIALIZER_DATE_FORMAT).create()))
+                .addConverterFactory(EnumConverterFactory())
                 .client(httpClient)
                 .build()
     }
+
+    private class EnumConverterFactory : Converter.Factory() {
+        override fun stringConverter(type: Type, annotations: Array<Annotation>, retrofit: Retrofit): Converter<Enum<*>, String>? =
+                if (type is Class<*> && type.isEnum) {
+                    Converter { enum ->
+                        try {
+                            enum.javaClass.getField(enum.name).getAnnotation(SerializedName::class.java)?.value
+                        } catch (exception: Exception) {
+                            null
+                        } ?: enum.toString()
+                    }
+                } else {
+                    null
+                }
+    }
+
+
 }
