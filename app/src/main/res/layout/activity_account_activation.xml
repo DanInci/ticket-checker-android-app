@@ -55,11 +55,13 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:layout_centerInParent="true"
+            android:weightSum="100"
             android:gravity="center">
 
             <EditText
                 android:id="@+id/etVerificationCode"
-                android:layout_width="250dp"
+                android:layout_width="0dp"
+                android:layout_weight="75"
                 android:layout_height="match_parent"
                 android:background="@drawable/et_dialog_style"
                 android:textColor="@color/text_style"
@@ -73,7 +75,8 @@
 
             <Button
                 android:id="@+id/btnSubmit"
-                android:layout_width="75dp"
+                android:layout_width="0dp"
+                android:layout_weight="25"
                 android:layout_height="match_parent"
                 android:background="@drawable/btn_style"
                 android:text="OK"

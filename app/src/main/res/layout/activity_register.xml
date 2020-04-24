@@ -138,7 +138,7 @@
                 android:text="REGISTER"
                 android:textAlignment="center"
                 android:textColor="@drawable/btn_text_color"
-                android:layout_marginBottom="20dp"/>
+                android:layout_marginBottom="10dp"/>
 
             <ProgressBar
                 android:id="@+id/loadingSpinner"

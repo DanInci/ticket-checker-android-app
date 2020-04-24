@@ -64,16 +64,11 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener, BarcodeTypeChang
         override fun receiveDetections(detections: Detector.Detections<Barcode>) {
             val qrCodes: SparseArray<Barcode> = detections.detectedItems
             if (qrCodes.size() != 0) {
-                cameraSource.setDetectionActive(false)
-                val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                vibrator.vibrate(300)
-                val code = qrCodes.get(qrCodes.keyAt(0))
-                val dialogScan = DialogScan.newInstance(code.rawValue, AppTicketChecker.selectedOrganizationMembership!!.organizationId, AppTicketChecker.selectedOrganizationMembership!!.pretendedRole)
-                dialogScan.scanDialogListener = scanDialogListener
-                dialogScan.show(supportFragmentManager, "DIALOG_SCAN")
+                onDetectionFound(qrCodes.get(qrCodes.keyAt(0)).rawValue)
             }
         }
     }
+
     private val surfaceHolderCallback = object : SurfaceHolder.Callback {
         override fun surfaceCreated(holder: SurfaceHolder?) {
             if (ActivityCompat.checkSelfPermission(this@ActivityScan, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -156,6 +151,15 @@ class ActivityScan : AppCompatActivity(), View.OnClickListener, BarcodeTypeChang
                 barcodeTypeConfigDialog.show(supportFragmentManager, "DIALOG_BARCODE_CONFIG")
             }
         }
+    }
+
+    private fun onDetectionFound(code: String) {
+        cameraSource.setDetectionActive(false)
+        val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        vibrator.vibrate(300)
+        val dialogScan = DialogScan.newInstance(code, AppTicketChecker.selectedOrganizationMembership!!.organizationId, AppTicketChecker.selectedOrganizationMembership!!.pretendedRole)
+        dialogScan.scanDialogListener = scanDialogListener
+        dialogScan.show(supportFragmentManager, "DIALOG_SCAN")
     }
 
     private fun toggleFlash(torchMode: Boolean) : Boolean {

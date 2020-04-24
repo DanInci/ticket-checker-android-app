@@ -17,8 +17,8 @@ import retrofit2.Response
 import ticket.checker.R
 import ticket.checker.beans.Ticket
 import ticket.checker.beans.TicketDefinition
-import ticket.checker.extras.ErrorCodes.ERROR_TICKET_EXISTS
-import ticket.checker.extras.ErrorCodes.ERROR_TICKET_VALIDATION
+import ticket.checker.extras.ErrorCodes.TICKET_EXISTS
+import ticket.checker.extras.ErrorCodes.TICKET_IS_VALIDATED
 import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.DATE_FORMAT
@@ -150,9 +150,9 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                 showLoading()
 
                 val call = if(isTicketValidated) {
-                     ServiceManager.getTicketService().validateTicketById(organizationId, ticketNumber)
-                } else {
                      ServiceManager.getTicketService().invalidateTicketById(organizationId, ticketNumber)
+                } else {
+                     ServiceManager.getTicketService().validateTicketById(organizationId, ticketNumber)
                 }
                 call.enqueue(ticketCallback)
             }
@@ -216,6 +216,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                         isTicketValidated = true
                     }
                     else {
+                        errorResult("This ticket hasn't been validated")
                         btnValidate.text = "Validate Ticket"
                         btnValidate.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_white, 0)
                         isTicketValidated = false
@@ -241,6 +242,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
                         isTicketValidated = true
                     }
                     else {
+                        errorResult("This ticket hasn't been validated")
                         btnValidate.text = "Validate Ticket"
                         btnValidate.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_white, 0)
                         isTicketValidated = false
@@ -324,23 +326,24 @@ class DialogScan : DialogFragment(), View.OnClickListener {
         val wasHandled = Util.treatBasicError(call, response, fragmentManager!!)
         if (!wasHandled) {
             when (response?.code()) {
-                400 -> {
-                    val error = Util.convertError(response.errorBody())
-                    when (error?.message) {
-                        ERROR_TICKET_EXISTS -> {
+                404 -> {
+                    errorResult("It looks like the ticket doesn't exist anymore")
+                }
+                409 -> {
+                    when (Util.convertError(response.errorBody())?.id) {
+                        TICKET_EXISTS -> {
                             errorResult("This ticket has already been added")
                         }
-                        ERROR_TICKET_VALIDATION -> {
-                            val validated = if(isTicketValidated) "invalidated" else "validated"
-                            errorResult("This ticket has already been $validated")
+                        TICKET_IS_VALIDATED -> {
+                            errorResult("This ticket is already validated")
                         }
-                        else -> {
-                            errorResult("Unexpected ticket id format")
+                        TICKET_IS_VALIDATED -> {
+                            errorResult("This ticket is already not validated")
                         }
                     }
                 }
-                404 -> {
-                    errorResult("It looks like the ticket doesn't exist anymore")
+                else -> {
+                    errorResult("Unexpected error")
                 }
             }
         } else {
