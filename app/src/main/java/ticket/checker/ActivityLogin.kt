@@ -183,7 +183,22 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     private fun loggedIn(response : LoginResponse) {
         AppTicketChecker.loggedInUser = response.profile
         ServiceManager.createSession(response.token)
-        toOrganizationsActivity()
+        val inviteCode = intent.getStringExtra(ActivityJoinOrganization.INVITE_CODE)
+        if (inviteCode != null) {
+            toJoinOrganizationActivity(inviteCode)
+        } else {
+            toOrganizationsActivity()
+        }
+    }
+
+    private fun toJoinOrganizationActivity(inviteCode: String) {
+        val intent = Intent(this, ActivityJoinOrganization::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        intent.putExtra(ActivityJoinOrganization.STARTED_FROM_APP, true)
+        intent.putExtra(ActivityJoinOrganization.INVITE_CODE, inviteCode)
+        startActivity(intent)
+        finish()
     }
 
     private fun toOrganizationsActivity() {

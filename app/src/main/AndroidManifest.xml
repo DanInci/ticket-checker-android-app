@@ -17,6 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -42,7 +43,9 @@
             android:windowSoftInputMode="adjustPan"
             tools:ignore="LockedOrientationActivity" />
         <activity android:name=".ActivityStatistics" />
-        <activity android:name=".ActivityControlPanel" android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".ActivityControlPanel"
+            android:windowSoftInputMode="adjustPan" />
         <activity android:name=".admin.tickets.ActivityTicketDetails" />
         <activity android:name=".admin.members.ActivityOrganizationMemberDetails" />
         <activity android:name=".dialogs.DialogInvitations" />
@@ -54,9 +57,25 @@
         <activity android:name=".ActivityAccountActivation">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="ticheck" android:host="account-activation"/>
+
+                <data
+                    android:host="account-activation"
+                    android:scheme="ticheck" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ActivityJoinOrganization">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="join-organization"
+                    android:scheme="ticheck" />
             </intent-filter>
         </activity>
     </application>
