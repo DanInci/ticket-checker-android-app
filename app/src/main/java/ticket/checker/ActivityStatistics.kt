@@ -24,7 +24,8 @@ import retrofit2.Response
 import ticket.checker.extras.Util
 import ticket.checker.services.ServiceManager
 import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.formatter.IAxisValueFormatter
+import com.github.mikephil.charting.formatter.IValueFormatter
 import com.github.mikephil.charting.utils.ViewPortHandler
 import ticket.checker.beans.TicketsStatistic
 import ticket.checker.extras.IntervalType
@@ -257,7 +258,7 @@ class ActivityStatistics : AppCompatActivity() {
                 .forEach { it.isChecked = it.itemId == menuItemId }
     }
 
-    private class CustomXAxisFormat(private val dates : List<Pair<Date, Date>>, private val type : IntervalType) : ValueFormatter() {
+    private class CustomXAxisFormat(private val dates : List<Pair<Date, Date>>, private val type : IntervalType) : IAxisValueFormatter {
         override fun getFormattedValue(value: Float, axis: AxisBase): String {
             val intFormat = value.toInt()
             return when(type) {
@@ -282,7 +283,7 @@ class ActivityStatistics : AppCompatActivity() {
 
         }
     }
-    private class CustomValueFormatter : ValueFormatter() {
+    private class CustomValueFormatter : IValueFormatter {
         override fun getFormattedValue(value: Float, entry: Entry?, dataSetIndex: Int, viewPortHandler: ViewPortHandler?): String {
             return value.toInt().toString()
         }
