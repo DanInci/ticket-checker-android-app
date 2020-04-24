@@ -82,7 +82,7 @@ class ActivityAccountActivation : AppCompatActivity(), View.OnClickListener {
         val code: String? = if(scheme != null && scheme == "ticheck") {
             data?.pathSegments?.get(0)
         } else {
-            data?.pathSegments?.get(1) ?: ""
+            data?.pathSegments?.get(1)
         }
 
         initializeFields(code == null)
