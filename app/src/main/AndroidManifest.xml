@@ -65,6 +65,28 @@
                     android:host="account-activation"
                     android:scheme="ticheck" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="ticheck.elementum.ro"
+                    android:scheme="http"
+                    android:pathPrefix="/account-activation/"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="ticheck.elementum.ro"
+                    android:scheme="https"
+                    android:pathPrefix="/account-activation/"/>
+            </intent-filter>
         </activity>
         <activity android:name=".ActivityJoinOrganization">
             <intent-filter>
@@ -76,6 +98,28 @@
                 <data
                     android:host="join-organization"
                     android:scheme="ticheck" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="ticheck.elementum.ro"
+                    android:scheme="http"
+                    android:pathPrefix="/join-organization/"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="ticheck.elementum.ro"
+                    android:scheme="https"
+                    android:pathPrefix="/join-organization/"/>
             </intent-filter>
         </activity>
     </application>

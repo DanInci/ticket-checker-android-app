@@ -70,8 +70,13 @@ class ActivityJoinOrganization : AppCompatActivity(), View.OnClickListener {
         btnBack.setOnClickListener(this)
 
         if(!isStartedFromApp) {
+            val scheme = intent?.scheme
             val data = intent?.data
-            inviteCode = data!!.pathSegments!![0]
+            inviteCode = if(scheme != null && scheme == "ticheck") {
+                data!!.pathSegments!![0]
+            } else {
+                data!!.pathSegments?.get(1) ?: ""
+            }
         }
 
         if(AppTicketChecker.isLoggedIn()) {

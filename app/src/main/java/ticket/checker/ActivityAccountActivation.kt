@@ -77,8 +77,13 @@ class ActivityAccountActivation : AppCompatActivity(), View.OnClickListener {
         btnBack.setOnClickListener(this)
         btnSubmit.setOnClickListener(this)
 
+        val scheme = intent?.scheme
         val data = intent?.data
-        val code: String? = data?.pathSegments?.get(0)
+        val code: String? = if(scheme != null && scheme == "ticheck") {
+            data?.pathSegments?.get(0)
+        } else {
+            data?.pathSegments?.get(1) ?: ""
+        }
 
         initializeFields(code == null)
         if(code != null) {
