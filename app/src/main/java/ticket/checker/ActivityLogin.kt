@@ -11,10 +11,12 @@ import com.bumptech.glide.request.RequestOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import ticket.checker.beans.ErrorResponse
 import ticket.checker.beans.LoginData
 import ticket.checker.beans.LoginResponse
 import ticket.checker.dialogs.DialogInfo
 import ticket.checker.extras.DialogType
+import ticket.checker.extras.ErrorCodes.ACCOUNT_NOT_VERIFIED
 import ticket.checker.extras.Util
 import ticket.checker.extras.safeLet
 import ticket.checker.services.ServiceManager
@@ -52,8 +54,15 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
                 ServiceManager.invalidateSession()
                 when(response.code()) {
                     401,403 -> {
-                        val loginFailedDialog = DialogInfo.newInstance("Login failed","The email or password you entered was incorrect!", DialogType.ERROR)
-                        loginFailedDialog.show(supportFragmentManager,"DIALOG_LOGIN_FAILED")
+                        when(Util.convertError(response.errorBody())?.id) {
+                            ACCOUNT_NOT_VERIFIED -> {
+                                toAccountActivationActivity()
+                            }
+                            else -> {
+                                val loginFailedDialog = DialogInfo.newInstance("Login failed","The email or password you entered was incorrect!", DialogType.ERROR)
+                                loginFailedDialog.show(supportFragmentManager,"DIALOG_LOGIN_FAILED")
+                            }
+                        }
                     }
                     else -> {
                         Util.treatBasicError(call, response, supportFragmentManager)
@@ -188,6 +197,12 @@ class ActivityLogin : AppCompatActivity(), View.OnClickListener {
     private fun toRegisterActivity() {
         val intent = Intent(this, ActivityRegister::class.java)
         startActivityForResult(intent, REGISTER_ACTIVITY)
+    }
+
+    private fun toAccountActivationActivity() {
+        val intent = Intent(this, ActivityAccountActivation::class.java)
+        intent.putExtra(ActivityAccountActivation.STARTED_FROM_LOGIN, true)
+        startActivity(intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

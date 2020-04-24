@@ -24,10 +24,6 @@ object ServiceManager {
     private var organizationService: OrganizationService? = null
     private var statisticsService: StatisticsService? = null
 
-    val errorConverter by lazy {
-        retrofit?.responseBodyConverter<ErrorResponse>(ErrorResponse::class.java, emptyArray())
-    }
-
     fun createSession(token: String) {
         invalidateSession()
         val interceptor = AuthInterceptor(token)

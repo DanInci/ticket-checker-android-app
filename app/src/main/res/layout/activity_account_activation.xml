@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundGrey"
+    tools:context="ticket.checker.ActivityControlPanel">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:theme="@style/AppTheme.ToolbarStyle"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:titleTextColor="@android:color/white">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            app:srcCompat="@drawable/ic_navigate_before"
+            android:layout_centerVertical="true"/>
+
+        <TextView
+            android:id="@+id/toolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Account Activation"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_gravity="center"/>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
+        <LinearLayout
+            android:id="@+id/submitContainer"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_centerInParent="true"
+            android:gravity="center">
+
+            <EditText
+                android:id="@+id/etVerificationCode"
+                android:layout_width="250dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/et_dialog_style"
+                android:textColor="@color/text_style"
+                android:hint="VERIFICATION CODE *"
+                android:textColorHint="@color/darkerGrey"
+                android:textSize="20sp"
+                android:inputType="textVisiblePassword"
+                android:maxLength="10"
+                android:padding="10dp"
+                android:layout_marginEnd="10dp"/>
+
+            <Button
+                android:id="@+id/btnSubmit"
+                android:layout_width="75dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/btn_style"
+                android:text="OK"
+                android:layout_gravity="center"
+                android:textColor="@drawable/btn_text_color"
+                android:textSize="20sp"/>
+
+            <ProgressBar
+                android:id="@+id/submitLoadingSpinner"
+                android:layout_width="75dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/loadingSpinner"
+            android:layout_width="75dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_centerInParent="true"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/tvResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Your account has been confirmed"
+            android:textColor="@color/yesGreen"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:visibility="gone"/>
+    </RelativeLayout>
+
+</RelativeLayout>

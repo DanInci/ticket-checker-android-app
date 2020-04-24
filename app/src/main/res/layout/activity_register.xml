@@ -9,7 +9,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@drawable/barcode_toolbar_style"
+        android:background="@color/colorPrimary"
         android:theme="@style/AppTheme.ToolbarStyle"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:titleTextColor="@android:color/white">
@@ -21,18 +21,20 @@
             android:background="?selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
-            app:srcCompat="@drawable/ic_navigate_before" />
+            app:srcCompat="@drawable/ic_navigate_before"
+            android:layout_centerVertical="true"/>
 
         <TextView
             android:id="@+id/toolbarTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:text="Register"
             android:textAlignment="center"
             android:textColor="@color/white"
             android:textSize="22sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:layout_gravity="center"/>
+
     </androidx.appcompat.widget.Toolbar>
 
     <LinearLayout

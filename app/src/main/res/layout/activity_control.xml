@@ -30,19 +30,19 @@
                 android:focusable="true"
                 app:srcCompat="@drawable/ic_navigate_before"
                 android:layout_centerVertical="true"/>
+
+            <TextView
+                android:id="@+id/toolbarTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tickets"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_gravity="center"/>
+
         </androidx.appcompat.widget.Toolbar>
-
-        <TextView
-            android:id="@+id/toolbarTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tickets"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:layout_gravity="center"/>
-
 
         <com.miguelcatalan.materialsearchview.MaterialSearchView
             android:id="@+id/search_view"

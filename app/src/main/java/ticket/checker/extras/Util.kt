@@ -2,15 +2,16 @@ package ticket.checker.extras
 
 import androidx.fragment.app.FragmentManager
 import okhttp3.ResponseBody
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
 import ticket.checker.AppTicketChecker
 import ticket.checker.beans.ErrorResponse
 import ticket.checker.dialogs.DialogInfo
-import ticket.checker.services.ServiceManager
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
+
 
 /**
  * Created by Dani on 25.01.2018.
@@ -20,10 +21,7 @@ object Util {
     val DATE_FORMAT = SimpleDateFormat("dd.MM.yyyy")
     val DATE_TIME_FORMAT = SimpleDateFormat("dd MMM yyyy HH:mm")
 
-    const val ERROR_TICKET_VALIDATION = "TicketValidationException"
-    const val ERROR_TICKET_EXISTS = "TicketExistsException"
     const val POSITION = "adapterPosition"
-
     const val PAGE_SIZE = 20
 
     fun formatDate(then : Date, shortFormat : Boolean) : String {
@@ -74,13 +72,19 @@ object Util {
         ).matcher(email).matches()
     }
 
-    fun convertError(errorBody : ResponseBody?) : ErrorResponse {
-        return try {
-            ServiceManager.errorConverter?.convert(errorBody!!)!!
+    fun convertError(errorBody : ResponseBody?) : ErrorResponse? {
+        return if (errorBody != null){
+            try {
+                val jsonError = JSONObject(errorBody.string())
+                ErrorResponse(jsonError.getString("id"),jsonError.getString("message"))
             }
-        catch (e : Exception) {
-            ErrorResponse("","")
+            catch (e : Exception) {
+                null
+            }
+        } else {
+            null
         }
+
     }
 
     fun <T> treatBasicError(call : Call<T>, response : Response<T>?, fragmentManager : FragmentManager) : Boolean {

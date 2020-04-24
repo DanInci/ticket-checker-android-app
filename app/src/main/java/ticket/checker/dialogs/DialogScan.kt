@@ -17,17 +17,15 @@ import retrofit2.Response
 import ticket.checker.R
 import ticket.checker.beans.Ticket
 import ticket.checker.beans.TicketDefinition
+import ticket.checker.extras.ErrorCodes.ERROR_TICKET_EXISTS
+import ticket.checker.extras.ErrorCodes.ERROR_TICKET_VALIDATION
 import ticket.checker.extras.OrganizationRole
 import ticket.checker.extras.Util
 import ticket.checker.extras.Util.DATE_FORMAT
 import ticket.checker.extras.Util.DATE_FORMAT_MONTH_NAME
-import ticket.checker.extras.Util.ERROR_TICKET_EXISTS
-import ticket.checker.extras.Util.ERROR_TICKET_VALIDATION
 import ticket.checker.listeners.IScanDialogListener
 import ticket.checker.services.ServiceManager
 import java.text.ParseException
-import java.time.LocalDate
-import java.time.format.DateTimeParseException
 import java.util.*
 
 /**
@@ -328,7 +326,7 @@ class DialogScan : DialogFragment(), View.OnClickListener {
             when (response?.code()) {
                 400 -> {
                     val error = Util.convertError(response.errorBody())
-                    when (error.message) {
+                    when (error?.message) {
                         ERROR_TICKET_EXISTS -> {
                             errorResult("This ticket has already been added")
                         }

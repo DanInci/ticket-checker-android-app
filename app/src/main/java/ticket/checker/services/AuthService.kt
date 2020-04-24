@@ -12,4 +12,7 @@ interface AuthService {
     @POST("register")
     fun register(@Body data: RegistrationData): Call<Void>
 
+    @POST("verify")
+    fun verifyAccount(@Query("code") verificationCode: String): Call<Void>
+
 }
