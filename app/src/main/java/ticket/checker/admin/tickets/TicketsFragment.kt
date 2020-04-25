@@ -30,7 +30,7 @@ class TicketsFragment : AAdminFragment<Ticket, TicketList, Int>() {
             FILTER_VALIDATED ->
                 when(filterValue) {
                     "true" -> ServiceManager.getStatisticsService().getTicketsNumbers(organizationId, TicketCategory.VALIDATED, null)
-                    "false" -> ServiceManager.getStatisticsService().getTicketsNumbers(organizationId, TicketCategory.SOLD, null)
+                    "false" -> ServiceManager.getStatisticsService().getTicketsNumbers(organizationId, TicketCategory.NOT_VALIDATED, null)
                     else -> ServiceManager.getStatisticsService().getTicketsNumbers(organizationId, null, null)
                 }
             FILTER_SEARCH -> ServiceManager.getStatisticsService().getTicketsNumbers(organizationId, null, filterValue)
@@ -44,7 +44,7 @@ class TicketsFragment : AAdminFragment<Ticket, TicketList, Int>() {
             FILTER_VALIDATED ->
                 when(filterValue) {
                     "true" -> ServiceManager.getTicketService().getTicketsForOrganization(organizationId, page, Util.PAGE_SIZE, TicketCategory.VALIDATED, null, null)
-                    "false" -> ServiceManager.getTicketService().getTicketsForOrganization(organizationId, page, Util.PAGE_SIZE, TicketCategory.SOLD, null, null)
+                    "false" -> ServiceManager.getTicketService().getTicketsForOrganization(organizationId, page, Util.PAGE_SIZE, TicketCategory.NOT_VALIDATED, null, null)
                     else -> ServiceManager.getTicketService().getTicketsForOrganization(organizationId, page, Util.PAGE_SIZE, null, null, null)
                 }
             FILTER_SEARCH -> ServiceManager.getTicketService().getTicketsForOrganization(organizationId, page, Util.PAGE_SIZE, null,null, filterValue)
