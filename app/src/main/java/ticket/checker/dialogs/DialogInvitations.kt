@@ -73,6 +73,7 @@ class DialogInvitations internal constructor() : DialogFragment(), View.OnClickL
             }
         }
     }
+
     private val listCallback: Callback<List<OrganizationInviteList>> = object : Callback<List<OrganizationInviteList>> {
         override fun onResponse(call: Call<List<OrganizationInviteList>>, response: Response<List<OrganizationInviteList>>) {
             if (firstLoad) {

@@ -134,7 +134,7 @@ class DialogEditOrganizationMember internal constructor() : DialogFragment(), Vi
         spinnerRole.isClickable = true
         spinnerRole.isFocusable = true
         spinnerRole.adapter = ArrayAdapter(context!!, R.layout.spinner_item, OrganizationRole.values().filter{ r -> r != OrganizationRole.OWNER })
-        spinnerRole.setSelection(member.role.ordinal)
+        spinnerRole.setSelection(member.role.ordinal - 1)
     }
 
     private fun editOrganizationMember(organizationId: UUID, userId: UUID, role : OrganizationRole) {
